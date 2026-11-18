@@ -35,6 +35,7 @@ window.KATALOG = {
     {
       id: "amazon",
       durum: "yakinda",
+      cikis: "20 Kasım'da",
       seri: "Kendi Maceranı Seç",
       kitapNo: 2,
       baslik: "Amazon",

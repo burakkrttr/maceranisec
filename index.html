@@ -401,19 +401,19 @@ footer .big em { color: var(--lamp); }
     el.dataset.tags = (b.tur || []).join("|");
     el.dataset.text = [b.baslik, b.altBaslik, b.yazar, ...(b.tur || [])].join(" ").toLocaleLowerCase("tr");
     el.style.width = T + "px"; el.style.height = H + "px";
-    el.setAttribute("aria-label", b.durum === "yakinda" ? `${b.baslik}: yakında` : `${b.baslik} kitabını aç`);
+    el.setAttribute("aria-label", b.durum === "yakinda" ? `${b.baslik}: ${b.cikis ? b.cikis + " rafta" : "yakında"}` : `${b.baslik} kitabını aç`);
     const coverBg = b.kapak ? `background-image:url('${esc(b.kapak)}')` : `background:${s.renk}`;
     el.innerHTML = `
       <span class="face spine" style="background:${s.renk};color:${s.yazi}">
         <span class="sn">${b.kitapNo}</span><span class="st">${esc(b.baslik)}</span><span class="sa">${esc(b.yazar.split(" ").pop())}</span></span>
-      <span class="face cover" style="${coverBg};width:${D}px;height:${H}px;left:${T}px;transform-origin:left center;transform:rotateY(90deg)">${b.durum === "yakinda" ? "<span>Yakında</span>" : `<span class="ct">${esc(b.baslik.toLocaleUpperCase("tr"))}</span>`}</span>
+      <span class="face cover" style="${coverBg};width:${D}px;height:${H}px;left:${T}px;transform-origin:left center;transform:rotateY(90deg)">${b.durum === "yakinda" ? `<span>${esc(b.cikis || "Yakında")}</span>` : `<span class="ct">${esc(b.baslik.toLocaleUpperCase("tr"))}</span>`}</span>
       <span class="face pages" style="width:${T - 4}px;height:${D - 4}px;left:2px;top:${-D + 4}px;transform-origin:bottom center;transform:rotateX(90deg)"></span>`;
     el.addEventListener("click", () => {
-      if (b.durum === "yakinda") { el.classList.remove("wiggle"); void el.offsetWidth; el.classList.add("wiggle"); $("#shelf-note").textContent = `${b.baslik} yakında rafta: “${b.slogan}”`; return; }
+      if (b.durum === "yakinda") { el.classList.remove("wiggle"); void el.offsetWidth; el.classList.add("wiggle"); $("#shelf-note").textContent = `${b.baslik} ${b.cikis || "yakında"} rafta: “${b.slogan}”`; return; }
       if (matchMedia("(hover: none)").matches && !el.classList.contains("peek")) { row.querySelectorAll(".peek").forEach((x) => x.classList.remove("peek")); el.classList.add("peek"); $("#shelf-note").textContent = "Açmak için bir kez daha dokun."; return; }
       openBook(b, el.querySelector(".cover"));
     });
-    slot.innerHTML = `<span class="tag">${b.durum === "yakinda" ? "Yakında" : `${found(b)} / ${b.sonSayisi} son buldun`}</span>`;
+    slot.innerHTML = `<span class="tag">${b.durum === "yakinda" ? esc(b.cikis || "Yakında") : `${found(b)} / ${b.sonSayisi} son buldun`}</span>`;
     if (b.durum !== "yakinda" && window.Begeni) {
       const plate = document.createElement("span"); plate.className = "plate"; slot.appendChild(plate);
       Begeni.mount(plate, b.id, { onCount: (n) => setTagLikes(b.id, n) });
