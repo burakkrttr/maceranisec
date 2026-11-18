@@ -341,7 +341,9 @@ body, .sect, .cover .band, .top .series, .choice .seal, h1, h2 { font-variant-nu
 
 
 </style>
-
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
 </head>
 <body>
 <canvas id="sea" aria-hidden="true"></canvas>
@@ -1274,7 +1276,7 @@ function renderPage(turn) {
 
   // sağ sayfa
   let right = `<div class="runhead">${ACTS[act][1]}</div><div class="sect">§ ${num}</div>`;
-  if (sec.end) right += `<div class="kind">${esc(sec.end.kind)}</div>`;
+  if (sec.end) right += `<div class="kind">${esc(val(sec.end.kind))}</div>`;
   if (sec.actEnd) right += `<div class="kind">${ACTS[act][0]}nin sonu</div>`;
   right += `<h2>${esc(sec.title)}</h2><div class="text">`;
   let leadDone = false;

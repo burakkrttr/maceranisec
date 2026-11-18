@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#16110c"/>
+  <!-- iki yola ayrılan patika -->
+  <path d="M32 33 V24 M32 24 L22 13 M32 24 L42 13" fill="none" stroke="#e9b34f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="22" cy="13" r="3.6" fill="#e9b34f"/>
+  <circle cx="42" cy="13" r="3.6" fill="#e9b34f"/>
+  <!-- açık kitap -->
+  <path d="M7 36 Q19 31 32 37 Q45 31 57 36 V54 Q45 49 32 55 Q19 49 7 54 Z" fill="#efe6d1"/>
+  <path d="M32 37 V55" stroke="#16110c" stroke-width="2.4"/>
+  <path d="M7 54 Q19 49 32 55 Q45 49 57 54" fill="none" stroke="#c99a3a" stroke-width="2.6"/>
+</svg>
