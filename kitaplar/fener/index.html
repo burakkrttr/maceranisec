@@ -339,7 +339,9 @@ main { position: relative; z-index: 2; height: 100%; overflow-y: auto; padding: 
 /* Cormorant'ın eski stil "1" rakamı "ı" gibi görünüyor: başlıklarda düz rakam */
 body, .sect, .cover .band, .top .series, .choice .seal, h1, h2 { font-variant-numeric: lining-nums; }
 
+
 </style>
+
 </head>
 <body>
 <canvas id="sea" aria-hidden="true"></canvas>
@@ -386,7 +388,9 @@ const ENDINGS = [
 
 const IMG = {
   acilis: "img/acilis.jpg", halil: "img/halil.jpg", kapi: "img/kapi.jpg",
-  oda: "img/oda.jpg", mektup: "img/mektup.jpg", sevket: "img/sevket.jpg"
+  oda: "img/oda.jpg", mektup: "img/mektup.jpg", sevket: "img/sevket.jpg",
+  lojman: "img/lojman.jpg", mercek: "img/mercek.jpg", cizim: "img/cizim.jpg",
+  telsiz: "img/telsiz.jpg", lamba: "img/lamba.jpg", safak: "img/safak.jpg"
 };
 
 function rel(s, who, n, msg) {
@@ -670,7 +674,7 @@ function outcomeText(s) {
 
 const ACT2 = {
   b1: {
-    act: 2, time: "22:05", wind: 10, baro: 733,
+    act: 2, time: "22:05", wind: 10, baro: 733, img: (s) => s.via === "verdi" ? "lojman" : null, imgLabel: "Lojmanda gece yarısına doğru",
     title: "Kurma ağırlığı",
     text: (s) => {
       const p = [];
@@ -687,7 +691,7 @@ const ACT2 = {
     ]
   },
   b2: {
-    act: 2, time: "22:15", wind: 10, baro: 733,
+    act: 2, time: "22:15", wind: 10, baro: 733, img: "mercek", imgLabel: "Lamba odasında Rıza'nın mektubu",
     title: "Işık konuşur",
     enter: (s) => {
       flag(s, "KOD"); flag(s, "KANAL6"); flag(s, "UYARILDI");
@@ -829,7 +833,7 @@ const ACT2 = {
     yil: "Şevket başçavuş oldu. Her ay fenere uğruyor, senin kahveni içiyor ve gitmeden önce masaya bir zarf bırakıyor."
   },
   act2_end: {
-    act: 2, time: "00:00", wind: 11, baro: 729,
+    act: 2, time: "00:00", wind: 11, baro: 729, img: (s) => s.talked.includes("nermin") ? null : "cizim", imgLabel: "Can'ın çizimi",
     actEnd: true, next: { t: "3. Perde'ye geç", to: "c1" },
     title: "Gece yarısı",
     enter: (s) => {
@@ -900,7 +904,7 @@ const ACT3 = {
     ]
   },
   c1g: {
-    act: 3, time: "00:10", wind: 11, baro: 728,
+    act: 3, time: "00:10", wind: 11, baro: 728, img: "telsiz", imgLabel: "Altıncı kanal",
     title: "Altıncı kanal",
     enter: (s) => { flag(s, "GUMRUK"); rel(s, "sevket", 1); note(s, "Yüzbaşı Nazmi: «Bir saat uzaktayız. Gemiyi adadan uzak tut. Kimse kahramanlık yapmasın.»"); },
     text: () => [
@@ -915,7 +919,7 @@ const ACT3 = {
     ]
   },
   c2: {
-    act: 3, time: "00:15", wind: 11, baro: 727,
+    act: 3, time: "00:15", wind: 11, baro: 727, img: "lamba", imgLabel: "Lamba odası",
     title: "Lamba odası",
     text: (s) => {
       const p = [ "Lamba odası, fırtınanın içinde asılı bir cam kafes gibi. Mercek ağır ağır dönüyor. Her dönüşte ışık köpüklü denizin üstünden geçip gidiyor." ];
@@ -986,7 +990,7 @@ const ACT3 = {
 
   /* ----------- SONLAR ----------- */
   e_safak: {
-    act: 3, time: "05:50", wind: 5, baro: 741,
+    act: 3, time: "05:50", wind: 5, baro: 741, img: "safak", imgLabel: "Şafak",
     end: { id: "safak", kind: "En iyi son" },
     title: "Şafak Işığı",
     text: (s) => [
@@ -1137,10 +1141,50 @@ const ACT3 = {
 Object.assign(S, ACT3);
 
 
+/* FENER: kitaba özel ayarlar (motor bunları kullanır) */
+const BOOK = {
+  start: "a1",
+  rel: { halil: 0, nermin: 0, can: 0, sevket: 0 },
+  acts: { 1: ["Birinci Perde", "Fırtına Gelirken"], 2: ["İkinci Perde", "Sırlar"], 3: ["Üçüncü Perde", "Fırtınanın Zirvesi"] },
+  coverText: [
+    "Ekim 1962. Akça Ada Feneri'nin yeni bekçisisin. Eski bekçi Rıza Usta iki ay önce bir fırtına gecesi kayboldu ve Ayvalık'ta herkes onun düşmediğini fısıldıyor.",
+    "Bu gece yine fırtına var. Gece yarısı bir gemi geçecek ve kapına üç yabancı gelecek. Her birinin bir sırrı var. Işığı yakmak da söndürmek de senin elinde.",
+    "Bu kitap baştan sona okunmaz. Her bölümün sonunda sen karar verirsin, hikaye senin kararlarınla yön değiştirir."
+  ],
+  rule: ["Rıza Usta'nın kuralı:", "Denizde ne görürsen, önce yaz."],
+  ledger: (sec, time) => ({ title: "Kayıt defteri", html: `Saat ${time.replace(":", ".")} · Rüzgâr ${sec.wind} bofor<br>Barometre ${sec.baro} mmHg` }),
+  atmos: (sec) => Math.min(1, (sec.wind - 4) / 6),
+  items: (s) => {
+    const list = [];
+    if (has(s, "MEKTUP")) list.push(has(s, "MEKTUP_SAKLI") ? "Rıza'nın mektubu (kulede saklı)" : has(s, "KOD") ? "Rıza'nın mektubu (okundu)" : has(s, "MEKTUP_YARIM") ? "Rıza'nın mektubu (ilk sayfası okundu)" : "Rıza'nın mektubu (kapalı)");
+    if (has(s, "DEFTER")) list.push("Ziya'nın hesap defteri");
+    if (has(s, "KORUNDU") && !has(s, "TELSIZ_BOZUK")) list.push("Telsizin çıkış lambası");
+    list.push("Çakı");
+    return list;
+  },
+  hints: (s, act) => {
+    const m = [];
+    if (act === 1) {
+      if (!has(s, "MEKTUP")) m.push("Rıza'nın odasındaki sandık, göründüğünden daha derindi.");
+      if (!has(s, "BOT_KURU")) m.push("Şevket'i kapıda yeterince dikkatli süzmedin.");
+      if ((s.r.can || 0) < 1) m.push("Can'ın anlatacakları vardı. Onu dinlemedin.");
+      if (has(s, "BILDIRDI")) m.push("Telsizdeki o ses liman değildi. Halil'in uyarısını dinlemedin.");
+    } else {
+      if (!has(s, "KOD")) m.push(has(s, "MEKTUP") ? "Rıza'nın mektubunun ikinci sayfasında ne yazdığını hiç öğrenmedin." : "Rıza'nın mektubu bu gece işine çok yarardı.");
+      if (!has(s, "RIZA_GERCEK")) m.push("Rıza'yı kimin öldürdüğünü duymadın.");
+      if (!has(s, "DEFTER")) m.push("Nermin'in çantasındaki defteri görmedin.");
+      if (has(s, "TELSIZ_BOZUK")) m.push("Şevket'i telsizle yalnız bıraktın.");
+    }
+    return m;
+  }
+};
+
+
 /* ---------------- Kitap motoru ---------------- */
 const META = JSON.parse(document.getElementById("book-meta").textContent);
-const ACTS = { 1: ["Birinci Perde", "Fırtına Gelirken"], 2: ["İkinci Perde", "Sırlar"], 3: ["Üçüncü Perde", "Fırtınanın Zirvesi"] };
-const fresh = () => ({ sec: "a1", f: {}, r: { halil: 0, nermin: 0, can: 0, sevket: 0 }, notes: [], talked: [], num: null, steps: 0 });
+const ACTS = BOOK.acts;
+const END_KEY = META.sonAnahtari || (META.id + "-sonlar");
+const fresh = () => ({ sec: BOOK.start, f: {}, r: Object.assign({}, BOOK.rel), notes: [], talked: [], num: null, steps: 0 });
 let state = Object.assign(fresh(), { sec: "cover" });
 const val = (v) => (typeof v === "function" ? v(state) : v);
 const $ = (id) => document.getElementById(id);
@@ -1169,27 +1213,13 @@ function toast(msg) {
   const t = $("toast"); t.textContent = msg; t.classList.add("show");
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
 }
-function loadEndings() { try { return JSON.parse(localStorage.getItem("fener-sonlar") || "[]"); } catch (e) { return []; } }
+function loadEndings() { try { return JSON.parse(localStorage.getItem(END_KEY) || "[]"); } catch (e) { return []; } }
 function saveEnding(id) {
   const list = loadEndings();
-  if (!list.includes(id)) { list.push(id); try { localStorage.setItem("fener-sonlar", JSON.stringify(list)); } catch (e) {} }
+  if (!list.includes(id)) { list.push(id); try { localStorage.setItem(END_KEY, JSON.stringify(list)); } catch (e) {} }
 }
 
-function missedHints(s, act) {
-  const m = [];
-  if (act === 1) {
-    if (!has(s, "MEKTUP")) m.push("Rıza'nın odasındaki sandık, göründüğünden daha derindi.");
-    if (!has(s, "BOT_KURU")) m.push("Şevket'i kapıda yeterince dikkatli süzmedin.");
-    if ((s.r.can || 0) < 1) m.push("Can'ın anlatacakları vardı. Onu dinlemedin.");
-    if (has(s, "BILDIRDI")) m.push("Telsizdeki o ses liman değildi. Halil'in uyarısını dinlemedin.");
-  } else {
-    if (!has(s, "KOD")) m.push(has(s, "MEKTUP") ? "Rıza'nın mektubunun ikinci sayfasında ne yazdığını hiç öğrenmedin." : "Rıza'nın mektubu bu gece işine çok yarardı.");
-    if (!has(s, "RIZA_GERCEK")) m.push("Rıza'yı kimin öldürdüğünü duymadın.");
-    if (!has(s, "DEFTER")) m.push("Nermin'in çantasındaki defteri görmedin.");
-    if (has(s, "TELSIZ_BOZUK")) m.push("Şevket'i telsizle yalnız bıraktın.");
-  }
-  return m.slice(0, 3);
-}
+const missedHints = (s, act) => (BOOK.hints ? BOOK.hints(s, act) : []).slice(0, 3);
 
 /* ---------- kapak ---------- */
 function renderCover() {
@@ -1205,9 +1235,7 @@ function renderCover() {
     </div>
     <div class="backcover">
       <p class="slogan">${esc(META.slogan)}</p>
-      <p>Ekim 1962. Akça Ada Feneri'nin yeni bekçisisin. Eski bekçi Rıza Usta iki ay önce bir fırtına gecesi kayboldu ve Ayvalık'ta herkes onun düşmediğini fısıldıyor.</p>
-      <p>Bu gece yine fırtına var. Gece yarısı bir gemi geçecek ve kapına üç yabancı gelecek. Her birinin bir sırrı var. Işığı yakmak da söndürmek de senin elinde.</p>
-      <p>Bu kitap baştan sona okunmaz. Her bölümün sonunda sen karar verirsin, hikaye senin kararlarınla yön değiştirir.</p>
+      ${BOOK.coverText.map((p) => `<p>${esc(p)}</p>`).join("")}
       <dl class="colophon">
         <dt>Yazar</dt><dd>${esc(META.yazar)} · <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></dd>
         <dt>Tür</dt><dd>${esc(META.tur)}</dd>
@@ -1231,12 +1259,15 @@ function renderPage(turn) {
 
   // sol sayfa
   let left = `<div class="plate"><div class="act-title">${ACTS[act][0]}<span>${ACTS[act][1]}</span></div>`;
-  if (sec.img && IMG[sec.img]) left += `<figure class="ill"><img src="${IMG[sec.img]}" alt="${esc(sec.imgLabel)}"><figcaption>${esc(sec.imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
-  left += `<div class="ledger" aria-label="Bekçinin kayıt defteri"><div class="lh">Kayıt defteri</div><div class="lv">Saat ${time.replace(":", ".")} · Rüzgâr ${sec.wind} bofor<br>Barometre ${sec.baro} mmHg</div></div>`;
-  if (!sec.img) {
+  const imgKey = val(sec.img);
+  const hasImg = !!(imgKey && IMG[imgKey]);
+  if (hasImg) left += `<figure class="ill"><img src="${IMG[imgKey]}" alt="${esc(sec.imgLabel)}"><figcaption>${esc(sec.imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
+  const lg = BOOK.ledger(sec, time);
+  left += `<div class="ledger" aria-label="${esc(lg.title)}"><div class="lh">${esc(lg.title)}</div><div class="lv">${lg.html}</div></div>`;
+  if (!hasImg) {
     const last = state.notes[state.notes.length - 1];
     left += `<div class="fleuron">✦ ✦ ✦</div>`;
-    left += last ? `<div class="margin-note hand"><span class="lbl">Defterine son yazdığın:</span>${esc(last)}</div>` : `<div class="margin-note hand"><span class="lbl">Rıza Usta'nın kuralı:</span>Denizde ne görürsen, önce yaz.</div>`;
+    left += last ? `<div class="margin-note hand"><span class="lbl">Defterine son yazdığın:</span>${esc(last)}</div>` : `<div class="margin-note hand"><span class="lbl">${esc(BOOK.rule[0])}</span>${esc(BOOK.rule[1])}</div>`;
   }
   const page = 2 * state.steps + 6;
   left = `<div class="runhead">${esc(META.baslik)}</div>` + left + `</div><div class="folio">${page}</div>`;
@@ -1269,7 +1300,7 @@ function renderPage(turn) {
   if (sec.actEnd) {
     const hints = missedHints(state, act);
     if (hints.length) {
-      right += `<div class="sub">Bu gece kaçırdıkların</div><ul class="missed">`;
+      right += `<div class="sub">${esc(BOOK.missedTitle || "Bu gece kaçırdıkların")}</div><ul class="missed">`;
       hints.forEach((h) => { right += `<li>${esc(h)}</li>`; });
       right += `</ul>`;
     }
@@ -1282,7 +1313,7 @@ function renderPage(turn) {
 
   const box = $("choices");
   const dh = document.createElement("div"); dh.className = "decide";
-  dh.textContent = sec.end ? "Kitabı kapatmadan önce" : sec.actEnd ? "Gece devam ediyor" : "Ne yapacaksın?";
+  dh.textContent = sec.end ? "Kitabı kapatmadan önce" : sec.actEnd ? (BOOK.actEndHead || "Gece devam ediyor") : "Ne yapacaksın?";
   box.appendChild(dh);
   const addBtn = (text, n, onClick, id) => {
     const b = document.createElement("button");
@@ -1295,7 +1326,7 @@ function renderPage(turn) {
   if (sec.end || sec.actEnd) {
     if (sec.next) addBtn(sec.next.t, NUM[state.sec + "#next"], () => go(sec.next, NUM[state.sec + "#next"]), "c-next");
     if (sec.end) {
-      addBtn("Geceyi baştan yaşa", 1, () => { state = fresh(); render(true); }, "c-again");
+      addBtn(BOOK.againText || "Geceyi baştan yaşa", 1, () => { state = fresh(); render(true); }, "c-again");
       addBtn("Kapağa dön", null, () => { state = Object.assign(fresh(), { sec: "cover" }); render(); }, "c-cover");
     }
   } else {
@@ -1319,7 +1350,7 @@ function go(choice, shownNum) {
   if (next.enter) next.enter(state);
   render(true);
   flipFrom(oldRight, oldBook, oldLeft);
-  if (next.end) storm.flash = 1;
+  if (next.end && window.ATM) ATM.flash = 1;
 }
 
 function flipFrom(oldRight, oldBook, oldLeft) {
@@ -1349,20 +1380,16 @@ function flipFrom(oldRight, oldBook, oldLeft) {
 function render(turn) {
   const onCover = state.sec === "cover";
   ["btn-book", "btn-cover"].forEach((id) => { $(id).style.visibility = onCover ? "hidden" : "visible"; });
-  if (onCover) { storm.target = 0.6; renderCover(); }
-  else { storm.target = Math.min(1, (S[state.sec].wind - 4) / 6); renderPage(turn); }
+  if (window.ATM) ATM.target = onCover ? (BOOK.coverAtmos ?? 0.6) : BOOK.atmos(S[state.sec]);
+  if (window.ATM && !onCover && BOOK.hour) ATM.hour = BOOK.hour(S[state.sec], val(S[state.sec].time));
+  if (onCover) renderCover(); else renderPage(turn);
   renderDrawer();
   $("main").scrollTop = 0;
 }
 
 function renderDrawer() {
   const items = $("items"); items.innerHTML = "";
-  const list = [];
-  if (has(state, "MEKTUP")) list.push(has(state, "MEKTUP_SAKLI") ? "Rıza'nın mektubu (kulede saklı)" : has(state, "KOD") ? "Rıza'nın mektubu (okundu)" : has(state, "MEKTUP_YARIM") ? "Rıza'nın mektubu (ilk sayfası okundu)" : "Rıza'nın mektubu (kapalı)");
-  if (has(state, "DEFTER")) list.push("Ziya'nın hesap defteri");
-  if (has(state, "KORUNDU") && !has(state, "TELSIZ_BOZUK")) list.push("Telsizin çıkış lambası");
-  list.push("Çakı");
-  list.forEach((x) => { const li = document.createElement("li"); li.textContent = x; items.appendChild(li); });
+  BOOK.items(state).forEach((x) => { const li = document.createElement("li"); li.textContent = x; items.appendChild(li); });
 
   const notes = $("notes"); notes.innerHTML = "";
   if (!state.notes.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = "Henüz bir şey yazmadın."; notes.appendChild(li); }
@@ -1388,8 +1415,10 @@ $("btn-no").addEventListener("click", closeConfirm);
 $("btn-yes").addEventListener("click", () => { closeConfirm(); state = Object.assign(fresh(), { sec: "cover" }); render(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("drawer").classList.remove("open"); });
 
+
 /* ---------------- Fırtına sahnesi ---------------- */
 const storm = { level: 0.2, target: 0.2, flash: 0 };
+window.ATM = storm;
 (function scene() {
   const cv = $("sea"), ctx = cv.getContext("2d");
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1485,6 +1514,7 @@ const storm = { level: 0.2, target: 0.2, flash: 0 };
   if (reduce) { frame(0); window.addEventListener("resize", () => frame(0)); }
   else requestAnimationFrame(frame);
 })();
+
 
 /* ---------------- Başlat ---------------- */
 function start(data) {
