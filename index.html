@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Macera Kütüphanesi</title>
+<meta name="description" content="Kendi Maceranı Seç kitapları: okumadığın, yaşadığın kitaplar. Her sayfada kararı sen verirsin.">
+<meta property="og:title" content="Macera Kütüphanesi">
+<meta property="og:description" content="Okumadığın, yaşadığın kitaplar. Her sayfada kararı sen verirsin.">
+<meta property="og:image" content="kitaplar/fener/img/kapak.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="katalog.js"></script>
+<script src="begeni.js"></script>
+<style>
+/* Macera Kütüphanesi: gece, ahşap raflar, tek bir lamba ışığı.
+   Düzen: tam ekran ışıklı giriş → yeni gelen vitrini → 3D kitap sırtlı raf → nasıl okunur → künye. */
+:root {
+  --night: #0e0b09;        /* oda */
+  --wood: #3b2618;         /* raf ahşabı */
+  --brass: #c9a063;        /* pirinç, ince ayrıntılar */
+  --paper: #efe6d1;        /* kağıt, ana metin rengi */
+  --lamp: #e9b34f;         /* lamba ışığı: tek vurgu */
+  --mute: #a39784;         /* ikincil metin */
+  --display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --body: "EB Garamond", "Iowan Old Style", Georgia, serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--night); color: var(--paper); font-family: var(--body); font-size: 19px; line-height: 1.6; overflow-x: hidden; font-variant-numeric: lining-nums; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--lamp); outline-offset: 4px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(18px, 4vw, 48px); }
+
+/* üst menü */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; transition: background .4s, backdrop-filter .4s; }
+.nav.solid { background: rgba(14,11,9,0.78); backdrop-filter: blur(10px); }
+.nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 66px; gap: 16px; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: 0.04em; }
+.logo svg { width: 26px; height: 26px; }
+.nav ul { display: flex; gap: clamp(12px, 2.4vw, 30px); list-style: none; margin: 0; padding: 0; font-family: var(--display); font-weight: 600; font-size: 18px; letter-spacing: 0.06em; }
+.nav ul a { text-decoration: none; color: var(--mute); transition: color .2s; }
+.nav ul a:hover { color: var(--lamp); }
+
+/* ---------- giriş: lamba ışığı ve toz ---------- */
+.hero { position: relative; min-height: 100vh; display: grid; place-items: center; overflow: hidden; isolation: isolate; }
+.hero .shelves {
+  position: absolute; inset: -40px; z-index: -3; opacity: 0.55;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 238px, #2a1a10 238px 258px, #160e08 258px 262px),
+    repeating-linear-gradient(90deg, #1c1410 0 22px, #241912 22px 48px, #1a120d 48px 62px, #2b1d14 62px 100px, #181009 100px 118px, #20160f 118px 160px);
+  filter: blur(1.2px);
+}
+.hero .light { position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background: radial-gradient(520px circle at var(--lx, 50%) var(--ly, 40%), rgba(233,179,79,0.32), rgba(233,179,79,0.08) 45%, rgba(14,11,9,0) 70%),
+              radial-gradient(ellipse at 50% 100%, rgba(14,11,9,1) 10%, rgba(14,11,9,0) 60%);
+}
+.hero .veil { position: absolute; inset: 0; z-index: -2; background: radial-gradient(ellipse at 50% 45%, rgba(14,11,9,0.2), rgba(14,11,9,0.92) 75%); }
+#dust { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; }
+.hero-inner { text-align: center; padding: 120px 20px 90px; max-width: 900px; }
+.kicker { font-family: var(--display); font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; font-size: 15px; color: var(--lamp); margin: 0 0 18px; }
+.title { font-family: var(--display); font-weight: 600; font-size: clamp(58px, 11vw, 150px); line-height: 0.92; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.title .ln { display: block; }
+.title .ln:last-child { font-style: italic; font-weight: 500; color: var(--lamp); }
+.title .ch { display: inline-block; animation: rise .9s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i) * 35ms + 150ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(0.5em) rotate(4deg); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+.lede { font-size: clamp(19px, 2vw, 23px); color: #d8ccb4; max-width: 34em; margin: 28px auto 0; text-wrap: balance; animation: fadeup 1s .9s both; }
+.hero-cta { margin-top: 34px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; animation: fadeup 1s 1.1s both; }
+@keyframes fadeup { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.btn { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; border: 0;
+  font-family: var(--display); font-weight: 700; font-size: 21px; letter-spacing: 0.06em; padding: 13px 26px; border-radius: 999px;
+  background: var(--lamp); color: #1c1407; box-shadow: 0 10px 30px rgba(233,179,79,0.25); transition: transform .2s, box-shadow .2s, background .2s; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(233,179,79,0.35); background: #f2c463; }
+.btn.ghost { background: transparent; color: var(--paper); box-shadow: inset 0 0 0 1px rgba(239,230,209,0.35); }
+.btn.ghost:hover { box-shadow: inset 0 0 0 1px var(--lamp); color: var(--lamp); }
+.stats { display: flex; justify-content: center; gap: clamp(20px, 5vw, 60px); margin-top: 48px; animation: fadeup 1s 1.3s both; }
+.stats div { font-family: var(--display); text-align: center; }
+.stats b { display: block; font-size: 42px; font-weight: 600; line-height: 1; color: var(--paper); }
+.stats span { font-size: 14px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mute); }
+.cue { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); width: 26px; height: 42px; border-radius: 14px; box-shadow: inset 0 0 0 1.5px rgba(239,230,209,0.4); }
+.cue::after { content: ""; position: absolute; left: 50%; top: 9px; width: 4px; height: 8px; margin-left: -2px; border-radius: 2px; background: var(--lamp); animation: cue 1.8s infinite; }
+@keyframes cue { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(14px); opacity: 0; } 100% { opacity: 0; } }
+
+/* bölüm başlıkları */
+section { position: relative; }
+.sec-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 34px; }
+.sec-head h2 { font-family: var(--display); font-weight: 600; font-size: clamp(40px, 6vw, 72px); line-height: 1; margin: 6px 0 0; }
+.sec-head h2 em { color: var(--lamp); font-weight: 500; }
+.reveal { transition: transform 1s cubic-bezier(.2,.7,.2,1), opacity 1s; }
+.reveal.pre { transform: translateY(40px); opacity: 0.25; }
+
+/* ---------- vitrin ---------- */
+.featured { padding: 110px 0 120px; background: radial-gradient(ellipse at 30% 50%, rgba(233,179,79,0.08), transparent 60%); }
+.feat { display: grid; grid-template-columns: minmax(260px, 420px) 1fr; gap: clamp(30px, 6vw, 80px); align-items: center; }
+.tilt { perspective: 1200px; }
+.tilt .cv { position: relative; aspect-ratio: 2 / 3; border-radius: 4px 10px 10px 4px; overflow: hidden; cursor: pointer;
+  transform: rotateY(var(--ry, -12deg)) rotateX(var(--rx, 4deg)); transition: transform .5s cubic-bezier(.2,.7,.2,1);
+  box-shadow: -18px 30px 60px rgba(0,0,0,0.65), inset 8px 0 0 rgba(0,0,0,0.3), inset 11px 0 0 rgba(255,255,255,0.06); }
+.tilt .cv img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tilt .cv .shine { position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,240,210,0.18) 48%, rgba(255,255,255,0) 62%); background-size: 250% 100%; background-position: var(--sx, 80%) 0; mix-blend-mode: screen; }
+.cv-text { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 22px 24px 30px; container-type: inline-size;
+  background: linear-gradient(rgba(6,10,12,0.72) 0%, rgba(6,10,12,0) 36%, rgba(6,10,12,0) 64%, rgba(6,10,12,0.82) 100%); text-align: center; }
+.cv-text .band { font-family: var(--display); font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em; font-size: clamp(9px, 3cqi, 13px); color: var(--lamp); border-top: 1px solid rgba(233,179,79,0.5); border-bottom: 1px solid rgba(233,179,79,0.5); padding: 5px 0; white-space: nowrap; }
+.cv-text .t { font-family: var(--display); font-weight: 600; font-size: clamp(40px, 19cqi, 84px); letter-spacing: 0.16em; padding-left: 0.16em; line-height: 1; margin-top: 14px; text-shadow: 0 2px 20px rgba(0,0,0,0.6); }
+.cv-text .a { font-family: var(--display); letter-spacing: 0.24em; text-transform: uppercase; font-size: clamp(12px, 4.6cqi, 19px); white-space: nowrap; }
+.cv-text .s { font-style: italic; font-size: clamp(13px, 4.4cqi, 18px); color: #e4d8bd; margin-bottom: 4px; }
+.feat h3 { font-family: var(--display); font-weight: 600; font-size: clamp(52px, 7vw, 92px); line-height: 0.95; margin: 8px 0 6px; }
+.feat .sub { font-style: italic; color: var(--mute); font-size: 22px; margin: 0 0 22px; }
+.feat .slogan { font-family: var(--display); font-size: clamp(26px, 2.8vw, 34px); line-height: 1.2; color: var(--lamp); margin: 0 0 16px; text-wrap: balance; }
+.feat .desc { color: #d8ccb4; max-width: 36em; margin: 0 0 24px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+.chip { font-family: var(--display); font-weight: 600; font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(239,230,209,0.22); color: #d8ccb4; }
+.feat-actions { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.ring { display: flex; align-items: center; gap: 12px; font-size: 16px; color: var(--mute); }
+.ring svg { width: 52px; height: 52px; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 4; }
+.ring .bg { stroke: rgba(239,230,209,0.12); }
+.ring .fg { stroke: var(--lamp); stroke-linecap: round; transition: stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1); }
+.ring b { font-family: var(--display); font-size: 22px; color: var(--paper); display: block; line-height: 1; }
+
+/* ---------- raf ---------- */
+.library { padding: 100px 0 120px; background: linear-gradient(#0e0b09, #140f0b 30%, #0e0b09); }
+.tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.filter { font-family: var(--display); font-weight: 600; font-size: 16px; letter-spacing: 0.08em; padding: 7px 16px; border-radius: 999px; border: 0; cursor: pointer;
+  background: rgba(239,230,209,0.06); color: #d8ccb4; transition: background .2s, color .2s; }
+.filter[aria-pressed="true"] { background: var(--lamp); color: #1c1407; }
+.search { font-family: var(--body); font-size: 17px; padding: 8px 16px; border-radius: 999px; border: 0; background: rgba(239,230,209,0.06); color: var(--paper); min-width: 200px; }
+.search::placeholder { color: var(--mute); }
+.case { position: relative; border-radius: 6px; padding: 40px 30px 0; background: linear-gradient(180deg, #1d140e, #24180f); box-shadow: inset 0 30px 60px rgba(0,0,0,0.6), inset 0 0 0 10px #2f2015, inset 0 0 0 12px #1a110a; overflow-x: auto; overflow-y: hidden; }
+.case::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(600px 260px at 50% 0%, rgba(233,179,79,0.14), transparent 70%); }
+.row { display: flex; align-items: flex-end; justify-content: center; gap: 6px; min-height: 360px; padding: 0 20px; perspective: 1400px; position: relative; z-index: 1; width: max-content; min-width: 100%; }
+.plank { height: 34px; margin: 0 -30px; position: relative; z-index: 0; background: linear-gradient(#5a3a22, #3b2618 45%, #2a1a10); box-shadow: 0 14px 24px rgba(0,0,0,0.6), inset 0 2px 0 rgba(255,220,170,0.15); }
+.bookend { width: 18px; height: 150px; align-self: flex-end; margin: 0 14px; border-radius: 3px 3px 0 0; background: linear-gradient(90deg, #8a6a3c, #c9a063 50%, #7a5a30); box-shadow: 4px 0 10px rgba(0,0,0,0.5); }
+.deco { align-self: flex-end; margin: 0 18px; }
+.deco.glass { width: 56px; height: 86px; position: relative; }
+.deco.glass::before { content: ""; position: absolute; inset: 0; border-radius: 4px; background: linear-gradient(#c9a063 0 7px, transparent 7px calc(100% - 7px), #c9a063 calc(100% - 7px)); }
+.deco.glass::after { content: ""; position: absolute; left: 8px; right: 8px; top: 9px; bottom: 9px; clip-path: polygon(0 0, 100% 0, 55% 50%, 100% 100%, 0 100%, 45% 50%); background: linear-gradient(rgba(220,230,240,0.18) 0 50%, rgba(233,179,79,0.75) 50%); animation: sand 6s linear infinite; }
+@keyframes sand { to { filter: hue-rotate(10deg); } }
+.deco.stack { display: flex; flex-direction: column-reverse; gap: 2px; }
+.deco.stack i { display: block; height: 16px; border-radius: 2px; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.25); }
+
+.bk { position: relative; flex: none; cursor: pointer; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.7,.2,1); border: 0; padding: 0; background: none; margin: 0 4px; }
+.bk .face { position: absolute; top: 0; left: 0; backface-visibility: hidden; }
+.bk .spine { width: 100%; height: 100%; border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 16px 0 14px;
+  box-shadow: inset 3px 0 6px rgba(255,255,255,0.08), inset -6px 0 10px rgba(0,0,0,0.45), inset 0 22px 0 -18px rgba(201,160,99,0.8), inset 0 -22px 0 -18px rgba(201,160,99,0.8); }
+.bk .spine .st { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--display); font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; font-size: 22px; white-space: nowrap; }
+.bk .spine .sn { font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: 0.1em; }
+.bk .spine .sa { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--display); font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.75; }
+.bk .cover { border-radius: 2px 6px 6px 2px; overflow: hidden; background-size: cover; background-position: center; }
+.bk .pages { background: repeating-linear-gradient(90deg, #e9dfc7 0 1px, #cdbf9e 1px 2px); }
+.bk:hover, .bk:focus-visible, .bk.peek { transform: translateZ(40px) translateY(-12px) rotateY(-70deg); outline: none; z-index: 5; }
+.bk:focus-visible .spine { box-shadow: 0 0 0 3px var(--lamp); }
+.bk .tag { position: absolute; left: 50%; bottom: calc(100% + 12px); transform: translateX(-50%) translateZ(1px); white-space: nowrap; font-family: var(--display); font-weight: 600; font-size: 15px; letter-spacing: 0.08em;
+  padding: 4px 12px; border-radius: 999px; background: var(--lamp); color: #1c1407; opacity: 0; transition: opacity .3s; pointer-events: none; }
+
+.bk.soon .spine::after { content: ""; position: absolute; left: -4px; right: -4px; top: 48%; height: 7px; background: linear-gradient(#b89a62, #8d7343); box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+.bk.soon .cover { filter: grayscale(0.6) brightness(0.55); display: grid; place-items: center; }
+.bk.soon .cover span { font-family: var(--display); font-weight: 700; font-size: 26px; letter-spacing: 0.2em; color: #e7dcc0; text-transform: uppercase; transform: rotate(-8deg); border: 2px solid #e7dcc0; padding: 6px 14px; }
+.slot { position: relative; flex: none; display: flex; align-items: flex-end; }
+.slot.hidden { display: none; }
+.slot .tag { position: absolute; left: 50%; bottom: calc(100% + 14px); transform: translateX(-50%) translateY(6px); white-space: nowrap; font-family: var(--display); font-weight: 600; font-size: 15px; letter-spacing: 0.08em;
+  padding: 4px 12px; border-radius: 999px; background: var(--lamp); color: #1c1407; opacity: 0; transition: opacity .3s, transform .3s; pointer-events: none; z-index: 6; }
+.slot:has(.soon) .tag { background: #3a3a2c; color: #e7dcc0; }
+.slot:hover .tag, .slot:has(.bk:focus-visible) .tag, .slot:has(.peek) .tag { opacity: 1; transform: translateX(-50%); }
+.bk .cover .ct { position: absolute; left: 0; right: 0; top: 18px; text-align: center; font-family: var(--display); font-weight: 600; font-size: 34px; letter-spacing: 0.16em; padding-left: 0.16em; color: #f3e9d2; text-shadow: 0 2px 14px rgba(0,0,0,0.7); }
+.slot .plate { position: absolute; left: 50%; top: calc(100% + 3px); transform: translateX(-50%); z-index: 3; }
+.slot .plate .like { --c: #2a1a0e; gap: 6px; padding: 4px 10px 4px 8px; font-size: 15px; color: #2a1a0e; border-radius: 3px;
+  background: linear-gradient(#e2c48a, #b98f50 60%, #9c7438); box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,245,220,0.6); white-space: nowrap; }
+.slot .plate .like:hover { box-shadow: 0 3px 8px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,245,220,0.6), 0 0 0 2px rgba(233,179,79,0.6); }
+.slot .plate .like svg { width: 16px; height: 16px; stroke-width: 2.2; }
+.slot .plate .like .l { display: none; }
+.slot .plate .like.on { background: linear-gradient(#f0d49a, #c99a55 60%, #a97d3e); }
+.slot .plate .like.on svg { fill: #8d2a1a; stroke: #8d2a1a; }
+.slot .plate .like .burst { left: 16px; }
+.old { flex: none; align-self: flex-end; border-radius: 2px; opacity: 0.7; margin: 0 1px;
+  box-shadow: inset 3px 0 5px rgba(255,255,255,0.05), inset -5px 0 8px rgba(0,0,0,0.5), inset 0 26px 0 -22px rgba(201,160,99,0.35), inset 0 -26px 0 -22px rgba(201,160,99,0.35); }
+.bk.wiggle { animation: wiggle .5s; }
+@keyframes wiggle { 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+.shelf-note { color: var(--mute); font-style: italic; margin-top: 18px; text-align: center; font-size: 17px; }
+.empty-msg { color: var(--mute); font-style: italic; align-self: center; padding: 0 30px; }
+
+/* ---------- nasıl okunur ---------- */
+.how { padding: 110px 0; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(18px, 3vw, 34px); counter-reset: s; }
+.step { position: relative; padding: 34px 28px 30px; border-radius: 18px; background: linear-gradient(160deg, rgba(239,230,209,0.07), rgba(239,230,209,0.02)); box-shadow: inset 0 0 0 1px rgba(239,230,209,0.09); overflow: hidden; }
+.step::before { counter-increment: s; content: counter(s); position: absolute; right: 18px; top: -18px; font-family: var(--display); font-weight: 700; font-size: 130px; color: rgba(233,179,79,0.08); line-height: 1; }
+.step svg { width: 54px; height: 54px; stroke: var(--lamp); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.step svg .draw { stroke-dasharray: 160; stroke-dashoffset: 160; transition: stroke-dashoffset 1.6s ease; }
+.step.on svg .draw { stroke-dashoffset: 0; }
+.step h3 { font-family: var(--display); font-weight: 600; font-size: 32px; margin: 16px 0 6px; }
+.step p { margin: 0; color: #cfc3ab; font-size: 18px; }
+
+/* ---------- künye ---------- */
+footer { padding: 70px 0 60px; border-top: 1px solid rgba(239,230,209,0.08); }
+footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+footer .big { font-family: var(--display); font-weight: 600; font-size: clamp(28px, 4vw, 44px); line-height: 1.1; margin: 0; }
+footer .big em { color: var(--lamp); }
+.ig { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--display); font-weight: 700; font-size: 22px; padding: 11px 22px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(233,179,79,0.6); color: var(--lamp); transition: background .2s, color .2s; }
+.ig:hover { background: var(--lamp); color: #1c1407; }
+.ig svg { width: 22px; height: 22px; }
+.fine { width: 100%; color: #7d7262; font-size: 15px; margin-top: 30px; }
+
+/* ---------- kitap açılış animasyonu ---------- */
+.opener { position: fixed; inset: 0; z-index: 50; pointer-events: none; }
+.opener .dim { position: absolute; inset: 0; background: #0e0b09; opacity: 0; }
+.opener .bkx { position: absolute; transform-style: preserve-3d; perspective: 1600px; }
+.opener .pg { position: absolute; inset: 0; background: #efe6d1; border-radius: 2px 6px 6px 2px; box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  background-image: linear-gradient(90deg, rgba(70,50,20,0.25), rgba(70,50,20,0) 18%); }
+.opener .cvx { position: absolute; inset: 0; transform-origin: left center; background-size: cover; background-position: center; border-radius: 2px 6px 6px 2px; backface-visibility: hidden; }
+.opener .flash { position: absolute; inset: 0; background: #efe6d1; opacity: 0; }
+
+@media (max-width: 860px) {
+  .nav ul li:not(:last-child) { display: none; }
+  .feat { grid-template-columns: 1fr; }
+  .tilt { max-width: 320px; margin: 0 auto; }
+  .steps { grid-template-columns: 1fr; }
+  .case { padding: 30px 16px 0; }
+  .row { min-height: 330px; }
+  .bk:hover { transform: none; }
+  .old, .deco { display: none; }
+  .row { padding: 0 6px; }
+  .bk.peek { transform: translateZ(30px) translateY(-10px) rotateY(-70deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .reveal.pre { transform: none; opacity: 1; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+<nav class="nav" id="nav" aria-label="Ana menü">
+  <div class="wrap">
+    <a class="logo" href="#ust" aria-label="Macera Kütüphanesi, başa dön">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 6h7a4 4 0 0 1 4 4v16a3 3 0 0 0-3-3H5z" fill="none" stroke="#e9b34f" stroke-width="2"/><path d="M27 6h-7a4 4 0 0 0-4 4v16a3 3 0 0 1 3-3h8z" fill="none" stroke="#e9b34f" stroke-width="2"/></svg>
+      Macera Kütüphanesi
+    </a>
+    <ul>
+      <li><a href="#vitrin">Yeni gelen</a></li>
+      <li><a href="#raf">Raflar</a></li>
+      <li><a href="#nasil">Nasıl okunur?</a></li>
+      <li><a id="nav-ig" href="#" target="_blank" rel="noopener">Instagram</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero" id="ust">
+  <div class="shelves" aria-hidden="true"></div>
+  <div class="veil" aria-hidden="true"></div>
+  <div class="light" id="light" aria-hidden="true"></div>
+  <canvas id="dust" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <p class="kicker">Kendi Maceranı Seç kitapları</p>
+    <h1 class="title" id="title" aria-label="Macera Kütüphanesi"><span class="ln">Macera</span><span class="ln">Kütüphanesi</span></h1>
+    <p class="lede">Okumadığın, yaşadığın kitaplar. Her sayfanın sonunda kararı sen verirsin, hikaye senin seçimlerinle dallanır.</p>
+    <div class="hero-cta">
+      <a class="btn" href="#raf">Raflara göz at</a>
+      <a class="btn ghost" href="#nasil">Nasıl okunur?</a>
+    </div>
+    <div class="stats" id="stats"></div>
+  </div>
+  <div class="cue" aria-hidden="true"></div>
+</header>
+
+<section class="featured" id="vitrin">
+  <div class="wrap feat reveal" id="feat"></div>
+</section>
+
+<section class="library" id="raf">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div><p class="kicker">Raflar</p><h2>Bir kitap <em>seç</em>.</h2></div>
+      <div class="tools" role="group" aria-label="Kitapları süz">
+        <div id="filters" class="tools"></div>
+        <label class="sr" for="q" style="position:absolute;left:-9999px">Kitap ara</label>
+        <input class="search" id="q" type="search" placeholder="Kitap ara…" autocomplete="off">
+      </div>
+    </div>
+    <div class="case reveal">
+      <div class="row" id="row"></div>
+      <div class="plank"></div>
+    </div>
+    <p class="shelf-note" id="shelf-note">Bir kitabın üstüne gel, kapağını göster. Tıkla, açılsın. Beğendiğin kitabın rafındaki ♥ plakasına dokun.</p>
+  </div>
+</section>
+
+<section class="how" id="nasil">
+  <div class="wrap">
+    <div class="sec-head reveal"><div><p class="kicker">Nasıl okunur?</p><h2>Üç adımda <em>hikayenin</em> içindesin.</h2></div></div>
+    <div class="steps">
+      <div class="step reveal">
+        <svg viewBox="0 0 56 56" aria-hidden="true"><path class="draw" d="M8 12h15a5 5 0 0 1 5 5v27a4 4 0 0 0-4-4H8zM48 12H33a5 5 0 0 0-5 5v27a4 4 0 0 1 4-4h16z"/></svg>
+        <h3>Oku</h3><p>Her bölüm kısa ve yoğun. Sahneler, karakterler ve ipuçları sayfa sayfa açılır.</p>
+      </div>
+      <div class="step reveal">
+        <svg viewBox="0 0 56 56" aria-hidden="true"><path class="draw" d="M28 48V30M28 30L14 14M28 30l14-16M10 14h8M38 14h8"/></svg>
+        <h3>Karar ver</h3><p>Sayfanın sonunda yolun ikiye, bazen üçe ayrılır. Seçtiğin § numarasına gidersin.</p>
+      </div>
+      <div class="step reveal">
+        <svg viewBox="0 0 56 56" aria-hidden="true"><path class="draw" d="M28 8l5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1z"/></svg>
+        <h3>Sonu bul</h3><p>Kararların birikir ve geri döner. Her kitabın birden çok sonu var, hepsini bulabilecek misin?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="big">Yeni kitaplar yolda.<br><em>Rafa ilk sen bak.</em></p>
+    <a class="ig" id="ig" href="#" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+      <span id="ig-name"></span>
+    </a>
+    <p class="fine">Macera Kütüphanesi · Kitaplar tarayıcıda, ücretsiz okunur. Bulduğun sonlar yalnızca bu tarayıcıda saklanır.</p>
+  </div>
+</footer>
+
+<div class="opener" id="opener" aria-hidden="true"></div>
+
+<script>
+(() => {
+  const K = window.KATALOG;
+  const books = K.kitaplar;
+  const live = books.filter((b) => b.durum === "yayinda");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = (s) => document.querySelector(s);
+  const esc = (t) => String(t ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const found = (b) => { try { return JSON.parse(localStorage.getItem(b.sonAnahtari) || "[]").length; } catch (e) { return 0; } };
+
+  /* bağlantılar */
+  $("#ig").href = $("#nav-ig").href = K.kutuphane.instagram;
+  $("#ig-name").textContent = "@" + K.kutuphane.instagramKullanici;
+
+  /* başlık harfleri */
+  let i = 0;
+  document.querySelectorAll("#title .ln").forEach((ln) => {
+    const t = ln.textContent; ln.textContent = "";
+    [...t].forEach((c) => { const s = document.createElement("span"); s.className = "ch"; s.style.setProperty("--i", i++); s.textContent = c; s.setAttribute("aria-hidden", "true"); ln.appendChild(s); });
+  });
+
+  /* sayılar */
+  const endings = live.reduce((n, b) => n + (b.sonSayisi || 0), 0);
+  const soon = books.length - live.length;
+  $("#stats").innerHTML = `<div><b>${live.length}</b><span>Kitap</span></div><div><b>${endings}</b><span>Son</span></div><div id="stat-likes" hidden><b>0</b><span>Beğeni</span></div><div><b>${soon}</b><span>Yakında</span></div>`;
+  const likeTotals = {};
+
+  /* vitrin: en yeni yayındaki kitap */
+  const F = [...live].sort((a, b) => (b.eklenme || "").localeCompare(a.eklenme || ""))[0];
+  if (F) {
+    const got = found(F), total = F.sonSayisi || 0, C = 2 * Math.PI * 22;
+    $("#feat").innerHTML = `
+      <div class="tilt"><div class="cv" id="feat-cv" role="link" tabindex="0" aria-label="${esc(F.baslik)} kitabını aç">
+        <img src="${esc(F.kapak)}" alt="">
+        <div class="cv-text"><div><div class="band">${esc(F.seri)} · Kitap ${F.kitapNo}</div><div class="t">${esc(F.baslik.toLocaleUpperCase("tr"))}</div></div>
+          <div><div class="s">${esc(F.altBaslik)}</div><div class="a">${esc(F.yazar)}</div></div></div>
+        <div class="shine"></div></div></div>
+      <div>
+        <p class="kicker">Yeni gelen · Kitap ${F.kitapNo}</p>
+        <h3>${esc(F.baslik)}</h3>
+        <p class="sub">${esc(F.altBaslik)} · ${esc(F.yazar)}</p>
+        <p class="slogan">${esc(F.slogan)}</p>
+        <p class="desc">${esc(F.tanitim)}</p>
+        <div class="chips">${F.tur.map((t) => `<span class="chip">${esc(t)}</span>`).join("")}<span class="chip">${esc(F.okumaSuresi)}</span><span class="chip">${total} son</span></div>
+        <div class="feat-actions">
+          <button class="btn" id="feat-go" type="button">${got ? "Yeniden oku" : "Okumaya başla"} <span aria-hidden="true">→</span></button>
+          <div class="ring" title="Bu tarayıcıda bulduğun sonlar">
+            <svg viewBox="0 0 52 52" aria-hidden="true"><circle class="bg" cx="26" cy="26" r="22"/><circle class="fg" id="ringfg" cx="26" cy="26" r="22" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg>
+            <div><b>${got} / ${total}</b>son buldun</div>
+          </div>
+        </div>
+      </div>`;
+    const ring = $("#ringfg");
+    setTimeout(() => { ring.style.strokeDashoffset = C * (1 - (total ? got / total : 0)); }, 400);
+    const cv = $("#feat-cv");
+    cv.addEventListener("pointermove", (e) => {
+      const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+      cv.style.setProperty("--ry", (x * 22) + "deg"); cv.style.setProperty("--rx", (-y * 16) + "deg"); cv.style.setProperty("--sx", (100 - (x + 0.5) * 100) + "%");
+    });
+    cv.addEventListener("pointerleave", () => { cv.style.removeProperty("--ry"); cv.style.removeProperty("--rx"); cv.style.removeProperty("--sx"); });
+    const open = () => openBook(F, cv);
+    cv.addEventListener("click", open);
+    cv.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+    $("#feat-go").addEventListener("click", open);
+  }
+
+  /* raf */
+  const row = $("#row");
+  const deco = (html) => { const d = document.createElement("div"); d.innerHTML = html; return d.firstElementChild; };
+  const oldies = (list) => list.forEach(([w, h, c]) => row.appendChild(deco(`<div class="old" aria-hidden="true" style="width:${w}px;height:${h}px;background:${c}"></div>`)));
+  oldies([[34, 250, "#3a2a22"], [42, 276, "#26302f"], [30, 232, "#40261f"], [38, 262, "#2b2631"]]);
+  row.appendChild(deco('<div class="bookend" aria-hidden="true"></div>'));
+  books.forEach((b) => {
+    const s = b.sirt || {}, H = s.yukseklik || 290, T = s.kalinlik || 46, D = Math.round(H * 0.68);
+    const slot = document.createElement("div"); slot.className = "slot";
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "bk" + (b.durum === "yakinda" ? " soon" : "");
+    el.dataset.id = b.id;
+    el.dataset.tags = (b.tur || []).join("|");
+    el.dataset.text = [b.baslik, b.altBaslik, b.yazar, ...(b.tur || [])].join(" ").toLocaleLowerCase("tr");
+    el.style.width = T + "px"; el.style.height = H + "px";
+    el.setAttribute("aria-label", b.durum === "yakinda" ? `${b.baslik}: yakında` : `${b.baslik} kitabını aç`);
+    const coverBg = b.kapak ? `background-image:url('${esc(b.kapak)}')` : `background:${s.renk}`;
+    el.innerHTML = `
+      <span class="face spine" style="background:${s.renk};color:${s.yazi}">
+        <span class="sn">${b.kitapNo}</span><span class="st">${esc(b.baslik)}</span><span class="sa">${esc(b.yazar.split(" ").pop())}</span></span>
+      <span class="face cover" style="${coverBg};width:${D}px;height:${H}px;left:${T}px;transform-origin:left center;transform:rotateY(90deg)">${b.durum === "yakinda" ? "<span>Yakında</span>" : `<span class="ct">${esc(b.baslik.toLocaleUpperCase("tr"))}</span>`}</span>
+      <span class="face pages" style="width:${T - 4}px;height:${D - 4}px;left:2px;top:${-D + 4}px;transform-origin:bottom center;transform:rotateX(90deg)"></span>`;
+    el.addEventListener("click", () => {
+      if (b.durum === "yakinda") { el.classList.remove("wiggle"); void el.offsetWidth; el.classList.add("wiggle"); $("#shelf-note").textContent = `${b.baslik} yakında rafta: “${b.slogan}”`; return; }
+      if (matchMedia("(hover: none)").matches && !el.classList.contains("peek")) { row.querySelectorAll(".peek").forEach((x) => x.classList.remove("peek")); el.classList.add("peek"); $("#shelf-note").textContent = "Açmak için bir kez daha dokun."; return; }
+      openBook(b, el.querySelector(".cover"));
+    });
+    slot.innerHTML = `<span class="tag">${b.durum === "yakinda" ? "Yakında" : `${found(b)} / ${b.sonSayisi} son buldun`}</span>`;
+    if (b.durum !== "yakinda" && window.Begeni) {
+      const plate = document.createElement("span"); plate.className = "plate"; slot.appendChild(plate);
+      Begeni.mount(plate, b.id, { onCount: (n) => setTagLikes(b.id, n) });
+    }
+    slot.appendChild(el);
+    row.appendChild(slot);
+  });
+  row.appendChild(deco('<div class="deco stack" aria-hidden="true"><i style="width:120px;background:#3b2a3a"></i><i style="width:110px;background:#253447"></i><i style="width:126px;background:#4a2e22"></i></div>'));
+  row.appendChild(deco('<div class="deco glass" aria-hidden="true"></div>'));
+  row.appendChild(deco('<div class="bookend" aria-hidden="true"></div>'));
+  oldies([[36, 268, "#2e2a20"], [44, 240, "#3c2420"], [32, 284, "#22303a"], [40, 256, "#352a1e"], [30, 230, "#2a2224"]]);
+
+  function setTagLikes(id, n) {
+    likeTotals[id] = n; const sum = Object.values(likeTotals).reduce((a, c) => a + c, 0);
+    const el = $("#stat-likes"); if (el) { el.hidden = false; el.querySelector("b").textContent = sum.toLocaleString("tr-TR"); }
+  }
+
+  /* filtreler ve arama */
+  const tags = ["Tümü", ...new Set(books.flatMap((b) => b.tur || []))];
+  let active = "Tümü";
+  const fbox = $("#filters");
+  tags.forEach((t) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "filter"; b.textContent = t; b.setAttribute("aria-pressed", t === active);
+    b.addEventListener("click", () => { active = t; fbox.querySelectorAll(".filter").forEach((x) => x.setAttribute("aria-pressed", x === b)); apply(); });
+    fbox.appendChild(b);
+  });
+  const apply = () => {
+    const q = $("#q").value.trim().toLocaleLowerCase("tr");
+    let shown = 0;
+    row.querySelectorAll(".bk").forEach((el) => {
+      const ok = (active === "Tümü" || el.dataset.tags.split("|").includes(active)) && (!q || el.dataset.text.includes(q));
+      el.parentElement.classList.toggle("hidden", !ok); if (ok) shown++;
+    });
+    $("#shelf-note").textContent = shown ? "Bir kitabın üstüne gel, kapağını göster. Tıkla, açılsın. Beğendiğin kitabın rafındaki ♥ plakasına dokun." : "Bu aramaya uyan bir kitap yok. Başka bir kelime dene.";
+  };
+  $("#q").addEventListener("input", apply);
+
+  /* kitap açılışı: kapak ekranın ortasına uçar, açılır, sayfaya geçilir */
+  function openBook(b, fromEl) {
+    const url = b.adres + "#oku";
+    if (reduce || !fromEl.animate) { location.href = url; return; }
+    const r = fromEl.getBoundingClientRect();
+    const W = Math.min(innerWidth * 0.7, innerHeight * 0.62, 420), Hh = W * 1.5;
+    const tx = innerWidth / 2 - W / 2, ty = innerHeight / 2 - Hh / 2;
+    const op = $("#opener");
+    op.innerHTML = `<div class="dim"></div><div class="bkx" style="left:${tx}px;top:${ty}px;width:${W}px;height:${Hh}px"><div class="pg"></div><div class="cvx" style="background-image:url('${b.kapak}')"></div></div><div class="flash"></div>`;
+    const bkx = op.querySelector(".bkx"), cvx = op.querySelector(".cvx");
+    const sx = r.width / W, sy = r.height / Hh;
+    op.querySelector(".dim").animate([{ opacity: 0 }, { opacity: 0.92 }], { duration: 500, fill: "forwards" });
+    bkx.animate([{ transform: `translate(${r.left - tx}px, ${r.top - ty}px) scale(${sx}, ${sy})`, transformOrigin: "0 0" }, { transform: "none", transformOrigin: "0 0" }],
+      { duration: 650, easing: "cubic-bezier(.2,.7,.2,1)", fill: "forwards" }).finished
+      .then(() => cvx.animate([{ transform: "perspective(2800px) rotateY(0)" }, { transform: "perspective(2800px) rotateY(-165deg)" }], { duration: 700, easing: "cubic-bezier(.5,0,.3,1)", fill: "forwards" }).finished)
+      .then(() => op.querySelector(".flash").animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, fill: "forwards" }).finished)
+      .then(() => { location.href = url; });
+  }
+  addEventListener("pageshow", (e) => { if (e.persisted) $("#opener").innerHTML = ""; });
+
+  /* kaydırınca beliren bölümler ve menü */
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.remove("pre"); e.target.classList.add("on"); io.unobserve(e.target); } }), { threshold: 0.15 });
+  document.querySelectorAll(".reveal").forEach((el) => {
+    const r = el.getBoundingClientRect();
+    if (!reduce && r.top > innerHeight) el.classList.add("pre");
+    else el.classList.add("on");
+    io.observe(el);
+  });
+  const nav = $("#nav");
+  addEventListener("scroll", () => nav.classList.toggle("solid", scrollY > 40), { passive: true });
+
+  /* giriş: imleci izleyen lamba ışığı ve toz zerrecikleri */
+  const hero = $(".hero"), light = $("#light");
+  let lx = 0.5, ly = 0.38, tx = 0.5, ty = 0.38;
+  hero.addEventListener("pointermove", (e) => { const r = hero.getBoundingClientRect(); tx = (e.clientX - r.left) / r.width; ty = (e.clientY - r.top) / r.height; });
+  const cvs = $("#dust"), ctx = cvs.getContext("2d");
+  let W = 0, H = 0, motes = [];
+  const size = () => {
+    const d = Math.min(2, devicePixelRatio || 1); W = cvs.clientWidth; H = cvs.clientHeight;
+    cvs.width = W * d; cvs.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0);
+    motes = Array.from({ length: Math.round(W * H / 9000) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.6 + 0.3, vx: (Math.random() - 0.5) * 0.15, vy: -Math.random() * 0.25 - 0.05, p: Math.random() * 6.28 }));
+  };
+  addEventListener("resize", size); size();
+  let t0 = 0;
+  const tick = (t) => {
+    const time = t / 1000;
+    if (matchMedia("(hover: none)").matches) { tx = 0.5 + Math.sin(time * 0.3) * 0.22; ty = 0.38 + Math.cos(time * 0.23) * 0.1; }
+    lx += (tx - lx) * 0.06; ly += (ty - ly) * 0.06;
+    light.style.setProperty("--lx", (lx * 100) + "%"); light.style.setProperty("--ly", (ly * 100) + "%");
+    ctx.clearRect(0, 0, W, H);
+    const cx = lx * W, cy = ly * H;
+    motes.forEach((m) => {
+      m.x += m.vx + Math.sin(time + m.p) * 0.08; m.y += m.vy;
+      if (m.y < -5) { m.y = H + 5; m.x = Math.random() * W; }
+      const d = Math.hypot(m.x - cx, m.y - cy), a = Math.max(0, 1 - d / 420) * (0.55 + 0.45 * Math.sin(time * 2 + m.p));
+      if (a <= 0.02) return;
+      ctx.fillStyle = `rgba(255,222,160,${a})`; ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, 6.28); ctx.fill();
+    });
+    if (!reduce) requestAnimationFrame(tick);
+  };
+  if (reduce) tick(0); else requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
