@@ -705,7 +705,7 @@ const ACT2 = {
       p.push({ q: "Bu adaya her ay Mehtap uğrar. Denizden bir fenerle sorarlar: uzun, kısa, uzun. «Sahil temiz mi?» demektir. Fener cevap verir. Lambanın önündeki kalın perdeyi üç kez kısa indirirsen «Temiz, yanaş.» İki kez uzun indirirsen «Jandarma var, dön.» Bunu bana öğretmeye kalktılar oğlum, para da teklif ettiler. Ben her şeyi yazdım ve Gümrük'e gidecektim." });
       p.push({ q: "Telsizi yanından ayırma. Limanı değil, 6. kanaldan Gümrük Muhafaza'yı çağır. Orada güvenebileceğin tek kişi Yüzbaşı Nazmi'dir. Bu mektubu okuyorsan beni susturdular demektir. Kim yaptıysa, üniformasının altında yine aynı adamdır." });
       p.push("Mektubu katlarken adanın batısında, karanlıkta bir ışık görüyorsun. Uzun. Kısa. Uzun. Gemi değil bu. Gemiden önce gelen bir gözcü kayığı. Biri adaya soruyor: sahil temiz mi?");
-      p.push("Cevap vermiyorsun. Daha erken. Ama mektubu nerede tutacağına şimdi karar vermelisin.");
+      p.push("Cevap vermiyorsun. Daha erken. Ama mektubu nerede tutacağına şimdi karar vermelisin. Şevket'in aşağıda sana nasıl baktığını hatırlıyorsun. Bu gece kimin üstünü arayacağı belli olmaz.");
       return p;
     },
     choices: [
@@ -830,7 +830,7 @@ const ACT2 = {
       ["Halil", "Şevket onu motoruna bindirdi. Ayvalık'a hiç varmadılar. Kayıtlara \"firari, kaçarken denize atladı\" diye geçti."],
       ["Nermin", "Ziya onu İzmir'deki köşke kapattı. Onu bir daha sokakta gören olmadı."],
       ["Can", "On yıl sonra babasının gemisinde ikinci kaptan oldu."],
-      ["Rıza Usta", has(s, "MEKTUP") ? "Mektubu cebinde kaldı. Onu bir daha hiç açmadın." : "Sandığın dibindeki mektubu kimse bulmadı."]
+      ["Rıza Usta", has(s, "MEKTUP_SAKLI") ? "Mektubu merceğin arkasında kaldı. Onu bir daha hiç açmadın." : has(s, "MEKTUP") ? "Mektubu cebinde kaldı. Onu bir daha hiç açmadın." : "Sandığın dibindeki mektubu kimse bulmadı."]
     ],
     yil: "Şevket başçavuş oldu. Her ay fenere uğruyor, senin kahveni içiyor ve gitmeden önce masaya bir zarf bırakıyor."
   },
@@ -858,7 +858,7 @@ const ACT2 = {
       }
       p.push("Nermin önüne geçiyor. \"Söndür o ışığı. Lütfen. Oğlum için.\" Şevket ayağa kalkıyor, eli tabancasında. \"Işık yanık kalacak, bekçi. Bu senin görevin.\"");
       p.push(s.via === "verdi" ? "Kelepçesini sarsan Halil bağırıyor: \"İkisini de dinleme!\"" : "Halil kapı eşiğinde, sesi alçak ama net: \"İkisini de dinleme.\"");
-      if (has(s, "KOD")) p.push("Cebindeki mektubu düşünüyorsun. Söndürmek ya da yakmak dışında bir yol daha var: perde.");
+      if (has(s, "KOD")) p.push((has(s, "MEKTUP_SAKLI") ? "Yukarıda, merceğin arkasında bıraktığın mektubu düşünüyorsun." : "Cebindeki mektubu düşünüyorsun.") + " Söndürmek ya da yakmak dışında bir yol daha var: perde.");
       p.push("Kuleye çıkan merdivenin dibindesin. Yukarıda lamba dönüyor.");
       return p;
     }
@@ -879,6 +879,12 @@ function donOpener(s) {
     if (has(s, "DEFTER")) parts.push("Ziya'nın defterinde adın var. Her ay beş yüz.");
     if (has(s, "MEKTUP")) parts.push("Rıza da yazmış, üniformalı adamı.");
     return "\"" + parts.join(" ") + "\"";
+  }
+  if (s.line === "mektup") {
+    const parts = ["Rıza'yı sen öldürdün."];
+    if (has(s, "RIZA_GERCEK")) parts.push("Halil gördü.");
+    if (has(s, "DEFTER")) parts.push("Ziya'nın defterinde de adın var.");
+    return "Merceğin pirinç kasasının arkasına uzanıp katlanmış kâğıdı çıkarıyorsun. Şevket'in gözleri kâğıda kilitleniyor. Bütün gece aradığı şey, bir adım ötesindeymiş. Lambanın ışığında okuyorsun: «Kim yaptıysa, üniformasının altında yine aynı adamdır.» Sonra başını kaldırıyorsun. \"" + parts.join(" ") + "\"";
   }
   if (s.line === "gumruk") return "\"Gümrük yolda, çavuş,\" diyorsun. \"Yüzbaşı Nazmi'yle konuştum. Bitti.\"";
   return "Hiçbir şey söylemiyorsun. Gözlerini ondan ayırmıyorsun. Mercek dönüyor, ışık ikinizin yüzünden geçip gidiyor.";
@@ -943,13 +949,15 @@ const ACT3 = {
   c_don: {
     act: 3, time: "00:20", wind: 11, baro: 727,
     title: "İki uzun",
-    text: () => [
+    text: (s) => [
       "Perdeyi indiriyorsun. Uzun. Kaldırıyorsun. Bir daha: uzun.",
       "Şevket'in yüzündeki gülümseme donup kalıyor. O da kodu biliyor. Denizde gözcü kayığının ışığı bir an duraklıyor, sonra sönüyor. Arkasında Mehtap'ın büyük ışıkları ağır ağır dönüyor, kayalardan uzaklaşıyor, açık denize çekiliyor.",
-      "Şevket'in tabancası artık sana dönük. \"Ne yaptığını biliyor musun, bekçi?\" Sesi alçak. \"Rıza da tam burada durmuştu. Tam bu perdenin önünde.\""
+      "Şevket'in tabancası artık sana dönük. \"Ne yaptığını biliyor musun, bekçi?\" Sesi alçak. \"Rıza da tam burada durmuştu. Tam bu perdenin önünde.\"",
+      ...(has(s, "MEKTUP_SAKLI") ? ["Göz ucuyla merceğin pirinç kasasına bakıyorsun. Rıza'nın mektubu bir adım ötende, Şevket'in burnunun dibinde duruyor. Haberi yok."] : [])
     ],
     choices: [
-      { t: "Gerçeği yüzüne vur: \"Rıza'yı sen öldürdün.\"", to: decideDon, if: (s) => has(s, "RIZA_GERCEK") || has(s, "DEFTER") || has(s, "MEKTUP"), fx: (s) => { s.line = "riza"; } },
+      { t: "Mektubu merceğin arkasından çıkar ve ona oku", to: decideDon, if: (s) => has(s, "MEKTUP_SAKLI"), fx: (s) => { s.line = "mektup"; } },
+      { t: "Gerçeği yüzüne vur: \"Rıza'yı sen öldürdün.\"", to: decideDon, if: (s) => (has(s, "RIZA_GERCEK") || has(s, "DEFTER") || has(s, "MEKTUP")) && !has(s, "MEKTUP_SAKLI"), fx: (s) => { s.line = "riza"; } },
       { t: "\"Gümrük yolda, çavuş. Bitti.\"", to: decideDon, if: (s) => has(s, "GUMRUK"), fx: (s) => { s.line = "gumruk"; } },
       { t: "Hiçbir şey söyleme. Gözlerini ondan ayırma.", to: decideDon, fx: (s) => { s.line = "sessiz"; } }
     ]
@@ -1001,8 +1009,8 @@ const ACT3 = {
       "Şevket'in tabancası bir an titriyor. Bir cinayetin üstüne ikincisini koymanın hesabını yapıyor, görüyorsun. Sonra tabancayı indiriyor ve merdivenlere koşuyor. Aşağıda kapı çarpıyor. Fırtınanın içinde koya doğru koşan bir karaltı."
     ],
     sabah: "Şafakta Gümrük Muhafaza'nın gri motoru koya giriyor. Yüzbaşı Nazmi'nin adamları Mehtap'ı Ayvalık açıklarında durdurmuş. Ambarda kırk sandık kaçak sigara ve Kaptan Ziya var. Şevket'in motoru fırtınada adadan uzaklaşamamış. Onu kayalıkta, sırılsıklam ve tek başına buluyorlar.",
-    akibet: () => [
-      ["Sen", "Feneri bırakmadın. Rıza'nın kayıt defterine kendi elinle bir satır ekledin: «Rıza Usta, görevi başında öldürüldü.»"],
+    akibet: (s) => [
+      ["Sen", (s.line === "mektup" ? "Rıza'nın mektubunu Yüzbaşı Nazmi'ye kendi elinle verdin. " : has(s, "MEKTUP_SAKLI") ? "Sabah kuleye çıkıp Rıza'nın mektubunu merceğin arkasından aldın ve Yüzbaşı Nazmi'ye kendi elinle verdin. " : "") + "Feneri bırakmadın. Rıza'nın kayıt defterine kendi elinle bir satır ekledin: «Rıza Usta, görevi başında öldürüldü.»"],
       ["Halil", "Mahkemede tanıklık etti. Kaçakçılıktan iki yıl yattı. Çıktığında ilk işi adaya gelip Rıza Usta'ya bir mezar taşı dikmek oldu."],
       ["Nermin ve Can", "Defter bütün şebekeyi çökertti. Nermin ile Can İzmir'de, Karşıyaka'da küçük bir evde yeni bir hayata başladı."],
       ["Şevket", "Rıza Usta'yı öldürmekten ağır hapis cezası aldı."],
@@ -1068,7 +1076,7 @@ const ACT3 = {
       ["Halil", "Şevket onu motoruna bindirdi. İki gün sonra kayıtlara \"firari, kaçarken denize düştü\" diye geçti."],
       ["Şevket", "Ay sonunda fenere uğrayıp masana kalın bir zarf bıraktı. Geri çevirmedin."],
       ["Sen", "Fenerde kaldın. Mehtap her ay uğramaya devam etti. Sen de her seferinde perdeyi üç kez indirdin."],
-      ["Rıza Usta", has(s, "MEKTUP") ? "Mektubunu bir gece sobada yaktın." : "Mektubu, sandığın dibinde kaldı."]
+      ["Rıza Usta", has(s, "MEKTUP_SAKLI") ? "Bir gece kuleye çıkıp mektubunu merceğin arkasından aldın ve sobada yaktın." : has(s, "MEKTUP") ? "Mektubunu bir gece sobada yaktın." : "Mektubu, sandığın dibinde kaldı."]
     ],
     yil: "Nermin ile Can'ı kurtardın. Ama Akça Ada Feneri artık Ziya'nın feneri."
   },
