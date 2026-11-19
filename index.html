@@ -408,7 +408,7 @@ footer .big em { color: var(--lamp); }
     const coverBg = b.kapak ? `background-image:url('${esc(b.kapak)}')` : `background:${s.renk}`;
     el.innerHTML = `
       <span class="face spine" style="background:${s.renk};color:${s.yazi}">
-        <span class="sn">${b.kitapNo}</span><span class="st">${esc(b.baslik)}</span><span class="sa">${esc(b.yazar.split(" ").pop())}</span></span>
+        <span class="sn">${b.kitapNo}</span><span class="st"${s.yaziBoyu ? ` style="font-size:${s.yaziBoyu}px;letter-spacing:0.16em"` : ""}>${esc(b.baslik)}</span><span class="sa">${esc(b.yazar.split(" ").pop())}</span></span>
       <span class="face cover" style="${coverBg};width:${D}px;height:${H}px;left:${T}px;transform-origin:left center;transform:rotateY(90deg)">${b.durum === "yakinda" ? `<span>${esc(b.cikis || "Yakında")}</span>` : `<span class="ct">${esc(b.baslik.toLocaleUpperCase("tr"))}</span>`}</span>
       <span class="face pages" style="width:${T - 4}px;height:${D - 4}px;left:2px;top:${-D + 4}px;transform-origin:bottom center;transform:rotateX(90deg)"></span>`;
     el.addEventListener("click", () => {
