@@ -34,16 +34,21 @@ window.KATALOG = {
     },
     {
       id: "amazon",
-      durum: "yakinda",
-      cikis: "20 Kasım'da",
+      durum: "yayinda",
+      eklenme: "2026-11-20",
       seri: "Kendi Maceranı Seç",
       kitapNo: 2,
       baslik: "Amazon",
       altBaslik: "Yeşil Sessizlik",
       yazar: "Burak Karatatar",
       tur: ["Macera", "Hayatta kalma"],
+      okumaSuresi: "30 dk",
+      sonSayisi: 7,
       slogan: "Uçak düştü. Orman seni bekliyor.",
       tanitim: "Küçük bir kargo uçağı ormanın derinliklerine düştü. Pilot yaralı, enkazda mühürlü bir kutu var ve ormanda yalnız değilsin.",
+      kapak: "kitaplar/amazon/img/kapak.jpg",
+      adres: "kitaplar/amazon/index.html",
+      sonAnahtari: "amazon-sonlar",
       sirt: { renk: "#2c3a22", yazi: "#cdbb86", yukseklik: 280, kalinlik: 44 }
     }
   ]

@@ -1270,8 +1270,9 @@ function renderPage(turn) {
   // sol sayfa
   let left = `<div class="plate"><div class="act-title">${ACTS[act][0]}<span>${ACTS[act][1]}</span></div>`;
   const imgKey = val(sec.img);
+  const imgLabel = val(sec.imgLabel) || "";
   const hasImg = !!(imgKey && IMG[imgKey]);
-  if (hasImg) left += `<figure class="ill"><img src="${IMG[imgKey]}" alt="${esc(sec.imgLabel)}"><figcaption>${esc(sec.imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
+  if (hasImg) left += `<figure class="ill"><img src="${IMG[imgKey]}" alt="${esc(imgLabel)}"><figcaption>${esc(imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
   const lg = BOOK.ledger(sec, time);
   left += `<div class="ledger" aria-label="${esc(lg.title)}"><div class="lh">${esc(lg.title)}</div><div class="lv">${lg.html}</div></div>`;
   if (!hasImg) {
@@ -1323,7 +1324,7 @@ function renderPage(turn) {
 
   const box = $("choices");
   const dh = document.createElement("div"); dh.className = "decide";
-  dh.textContent = sec.end ? "Kitabı kapatmadan önce" : sec.actEnd ? (BOOK.actEndHead || "Gece devam ediyor") : "Ne yapacaksın?";
+  dh.textContent = sec.end ? "Kitabı kapatmadan önce" : sec.actEnd ? ((typeof BOOK.actEndHead === "function" ? BOOK.actEndHead(sec) : BOOK.actEndHead) || "Gece devam ediyor") : "Ne yapacaksın?";
   box.appendChild(dh);
   const addBtn = (text, n, onClick, id) => {
     const b = document.createElement("button");
