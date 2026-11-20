@@ -442,6 +442,8 @@ function muhurTepki(s) {
   if (has(s, "KUTU_KUL")) return "Aline yangında yumuşayıp eğrilmiş mühre bakıyor. \"Yangın mı?\" Başını sallıyorsun. Kapağı yokluyor, sonra rahatlıyor: \"Açılmamış.\"";
   return "Aline mührü kontrol ediyor. Sağlam.";
 }
+// Köy sahnesine (k5) uğradı mı? Uğramayan okur Ytuá / Iraí / Kayara adlarını açıklamayla duymalı.
+function koyde(s) { return !!s.koy; }
 function agir(s) { return !has(s, "TEDAVI") && (has(s, "HUMMA") || !has(s, "ILACKIT")); }
 
 const S = {
@@ -738,8 +740,8 @@ const S = {
     enter: (s) => { if (s.yol === "kanal" && has(s, "KANIT_MADEN")) rel(s, "tomas", 1, "Tomás, salın fotoğrafını görünce sana bir şey anlatmaya karar verdi."); },
     text: (s) => {
       const p = [];
-      if (s.tekne === "gecti") p.push("Sepetlerin altında nefesini tutup Yaku'nun Dantas'la konuşmasını dinlemiştin. Yaku yalnızca balık tuttuğunu söyledi. Tekne bir süre yanınızda durdu, sonra motor yeniden kükredi ve uzaklaştı.");
-      if (s.tekne === "gordu") p.push("Yaku konuşurken bir an tereddüt etti, sana doğru baktı. O bakış yetti. Dantas sepetlere doğru eğildi ve kutuyu görmedi ama seni gördü. \"İyi yolculuklar,\" dedi gülümseyerek, sonra uzaklaştı. Artık nerede olduğunuzu biliyorlar.");
+      if (s.tekne === "gecti") p.push("Sepetlerin altında nefesini tutup teknedeki adamın Yaku'yla konuşmasını dinlemiştin. Sesi kibar, Portekizcesi pürüzsüzdü. Kendini tanıtırken adını duydun: \"Dantas,\" dedi. \"Ouro Verde'nin güvenlik müdürü.\" Yaku yalnızca balık tuttuğunu söyledi. Tekne bir süre yanınızda durdu, sonra motor yeniden kükredi ve uzaklaştı.");
+      if (s.tekne === "gordu") p.push("Sepetlerin altından teknedeki adamın sesini duydun. Kibar, pürüzsüz bir Portekizce. Kendini Yaku'ya tanıttı: \"Dantas,\" dedi. \"Ouro Verde'nin güvenlik müdürü.\" Yaku konuşurken bir an tereddüt etti, sana doğru baktı. O bakış yetti. Dantas sepetlere doğru eğildi ve kutuyu görmedi ama seni gördü. \"İyi yolculuklar,\" dedi gülümseyerek, sonra uzaklaştı. Artık nerede olduğunuzu biliyorlar.");
       if (s.tekne === "konustu") {
         p.push("\"Kutu yandı,\" demiştin. \"Enkazda kaldı.\" Dantas bir süre sana baktı. Sonra bakışları yavaşça kanonun dibindeki muz yaprağına kaydı ve orada kaldı. Gülümsemesi hiç bozulmadı.");
         p.push("\"Yandıysa sorun yok,\" dedi. \"Ama yanmadıysa... Nehir uzun, senhor. Ve biz her kıvrımındayız.\" Tüfekli adama başıyla bir işaret yaptı, adam namluyu indirdi. Motor kükredi. Tekne uzaklaşırken Dantas bir kez dönüp arkasına baktı.");
@@ -748,6 +750,7 @@ const S = {
       if (s.yol === "kanal") p.push("Kanaldan ana nehre çıktığınızda güneş batıyor. Salın motoru arkanızda hâlâ homurdanıyor.");
       if (s.yol === "kanal" && has(s, "KANIT_MADEN")) p.push("Kıyıda makinenin ekranını Tomás'a gösteriyorsun. İki adamın yüzü, eldivensiz eller, salın yanındaki boyalı numara: OV-07. Tomás uzun süre bakıyor. \"Bu salın sandıklarını ben taşıdım,\" diyor sonunda, sesi kısık. \"Makine parçası diye.\" Gözlerini ekrandan ayırmadan ekliyor: \"Bunu sakla. Ne olursa olsun.\"");
       if (s.yol === "kanal" && has(s, "SU_ORNEGI")) p.push("Şişeyi ateşin ışığına tutuyorsun. Dipte, kumun arasında, iğne ucu kadar gümüş damlacıklar parlıyor.");
+      if (s.yol === "kanal") p.push("Ateşin başında Tomás, sesini alçaltarak salların sahibini anlatıyor: \"O sallar Ouro Verde'nin. Nehirdeki her şeyi onların güvenlik müdürü yönetir. Adı Dantas. Kibar konuşur, ütülü gömlek giyer. Ona hayır diyen pek kimse kalmadı.\"");
       p.push("Yaku kanoyu iki nehrin birleştiği yerde, kumlu bir dilin kenarına çekiyor. Yağmur başlıyor.");
       if (agir(s)) p.push("Tomás'ın bacağına bakıyorsun ve midene bir şey oturuyor. Yaranın kenarları morarmış, içinden kötü bir koku geliyor. Ateşi o kadar yüksek ki kim olduğunu soruyor sana.");
       else p.push("Tomás'ın bacağı şiş ama yarası temiz. Antibiyotik işe yarıyor. Yorgun, ama sana bakıp gülümseyebiliyor.");
@@ -1058,15 +1061,15 @@ const S = {
       ["Tomás", "Bacağı kurtuldu. Altı ay sonra yeniden uçmaya başladı. Bu kez Aline'in sağlık ekibi için."],
       ["Dantas", has(s, "CESSNA") ? "Kokpitte tutuklandı. Mahkemede şirketin bütün ödemelerini anlattı." : "İki ay sonra Bolivya sınırında yakalandı."],
       ["Uçak", (has(s, "FOTO") && has(s, "SABOTAJ")) ? "Hangardaki fotoğraflarından yakıt hattını kesen mekaniker tanındı. Sabotaj davası ayrıca açıldı." : "Kaza raporu yeniden açıldı ama sabotajı kanıtlayacak bir şey bulunamadı."],
-      ["Yaku", (s.r.yaku || 0) < 0 ? "Pistten önce ormana dönmüştü. Davayı köyünden izledi, mahkemeye Kayara gitti." : "Kayara'yla birlikte mahkemede tanıklık etti. Köyüne, nehirle değil, kendi kuyusuyla döndü."]
+      ["Yaku", (s.r.yaku || 0) < 0 ? "Pistten önce ormana dönmüştü. Davayı köyünden izledi, mahkemeye " + (koyde(s) ? "Kayara" : "köyün yaşlısı Kayara") + " gitti." : (koyde(s) ? "Kayara'yla" : "Köyün yaşlısı Kayara'yla") + " birlikte mahkemede tanıklık etti. Köyüne, nehirle değil, kendi kuyusuyla döndü."]
     ] : [
       ["Sen", "Yazın yayımlandı. Şirketin avukatları her cümlesine itiraz etti, dergi yazının yarısını geri çekmek zorunda kaldı." + (has(s, "KUTU_ACIK") ? " Mahkemede en çok kırık mühre yüklendiler: kutuyu ormanda kim açtı, içine ne kondu?" : "")],
       ["Tomás", "Bacağı kurtuldu. Pilot lisansı, dava bitene kadar askıya alındı."],
       ["Dantas", has(s, "CESSNA") ? "Kokpitte tutuklandı. Altı ay sonra delil yetersizliğinden serbest bırakıldı." : "Kaçtı. Hakkındaki dava hâlâ sürüyor."],
       ["Uçak", "Kaza raporunda hâlâ tek satır var: «Motor arızası.»"],
-      ["Yaku", (s.r.yaku || 0) < 0 ? "Pistten önce ormana dönmüştü. Davaya Kayara tek başına tanıklık etti. Dava dört yıldır sürüyor." : "Kayara'yla birlikte tanıklık etti. Dava dört yıldır sürüyor."]
+      ["Yaku", (s.r.yaku || 0) < 0 ? "Pistten önce ormana dönmüştü. Davaya " + (koyde(s) ? "Kayara" : "köyün yaşlısı Kayara") + " tek başına tanıklık etti. Dava dört yıldır sürüyor." : (koyde(s) ? "Kayara'yla" : "Köyün yaşlısı Kayara'yla") + " birlikte tanıklık etti. Dava dört yıldır sürüyor."]
     ],
-    yil: (s) => guclu(s) ? "Ytuá'nın meydanında artık bir su arıtma kuyusu var. Çocuklar nehir yerine oradan su içiyor. Iraí'nin ellerinin titremesi azaldı. Bir sabah sana bir fotoğraf gönderiyorlar: elinde dolu bir bardak, tek elle tutuyor." : "Ouro Verde'nin üç salı nehirden çekildi, ikisi hâlâ orada. Ytuá'nın çocukları yağmur suyu içiyor. Aline her ay yeni örnek topluyor ve her seferinde sana aynı soruyu yazıyor: «Bir daha gelir misin? Bu kez fotoğraf makinenle.»"
+    yil: (s) => guclu(s) ? (koyde(s) ? "Ytuá'nın" : "Yaku'nun köyü Ytuá'nın") + " meydanında artık bir su arıtma kuyusu var. Çocuklar nehir yerine oradan su içiyor. " + (koyde(s) ? "Iraí'nin" : "Yaku'nun yeğeni Iraí'nin") + " ellerinin titremesi azaldı. Bir sabah sana bir fotoğraf gönderiyorlar: elinde dolu bir bardak, tek elle tutuyor." : "Ouro Verde'nin üç salı nehirden çekildi, ikisi hâlâ orada. " + (koyde(s) ? "Ytuá'nın" : "Yaku'nun köyü Ytuá'nın") + " çocukları yağmur suyu içiyor. Aline her ay yeni örnek topluyor ve her seferinde sana aynı soruyu yazıyor: «Bir daha gelir misin? Bu kez fotoğraf makinenle.»"
   },
   e_bedel: {
     act: 3, day: 4, time: "07:00", temp: 27, hum: 88, rain: 0,
@@ -1087,7 +1090,7 @@ const S = {
       ["Dantas", has(s, "CESSNA") ? "Cessna'nın kokpitinde tutuklandı. Cinayetle yargılandı." : "Kaçtı. Sekiz ay sonra Bolivya'da yakalandı ve cinayetle yargılandı."],
       ["Yaku", (s.r.yaku || 0) >= 0 ? "Tomás'ın mezarına nehrin yukarısından bir taş getirdi." : "Ormana döndü. Pistte olanları sonradan duydu."]
     ],
-    yil: "Santa Clara'daki eski pistin adı değişti. Tabelada artık tek bir isim var: Tomás Ferreira. Oraya inen ilk uçak, Ytuá'ya ilaç götüren bir sağlık uçağıydı."
+    yil: (s) => "Santa Clara'daki eski pistin adı değişti. Tabelada artık tek bir isim var: Tomás Ferreira. Oraya inen ilk uçak, " + (koyde(s) ? "Ytuá'ya" : "Yaku'nun köyü Ytuá'ya") + " ilaç götüren bir sağlık uçağıydı."
   },
   e_nehir: {
     act: 3, day: 4, time: "07:00", temp: 27, hum: 88, rain: 0,
@@ -1099,21 +1102,21 @@ const S = {
         p.push("Dantas'ın yüzündeki gülümseme ilk kez kayboluyor. Adamlarına bağırıyor, ormanı aramalarını söylüyor. Ama orman Yaku'nun.");
         p.push("Yarım saat sonra federal uçak yakıtı bitmek üzereyken Manaus'a dönüyor. Dantas sizi pistte bırakıp Cessna'yla gidiyor. Kutu olmadan sizinle uğraşmanın anlamı yok.");
       } else {
-        p.push((s.tasiyan === "yaku" ? "Yaku kutuyu göğsüne bastırmış, Aline'e doğru yürüyor." : s.tasiyan === "tomas" ? "Yaku kutuyu Tomás'tan alıyor ve Aline'e doğru yürüyor." : "Yaku kutuyu senden alıyor ve Aline'e doğru yürüyor.") + " Aline'in yanındaki savcıya kendi dilinde, sonra Portekizce konuşuyor. Kim olduğunu, köyünün adını, Iraí'nin yaşını söylüyor. Savcı yazıyor.");
+        p.push((s.tasiyan === "yaku" ? "Yaku kutuyu göğsüne bastırmış, Aline'e doğru yürüyor." : s.tasiyan === "tomas" ? "Yaku kutuyu Tomás'tan alıyor ve Aline'e doğru yürüyor." : "Yaku kutuyu senden alıyor ve Aline'e doğru yürüyor.") + " Aline'in yanındaki savcıya kendi dilinde, sonra Portekizce konuşuyor. Kim olduğunu, köyünün adını, " + (koyde(s) ? "Iraí'nin yaşını" : "köydeki hasta çocukların yaşlarını") + " söylüyor. Savcı yazıyor.");
         p.push("Kameralar uçaktan iniyor. Hepsi Yaku'ya dönüyor. Sen makineni indirip bir adım geri çekiliyorsun.");
       }
       return p;
     },
     sabah: (s) => s.nehir === "orman"
-      ? "Üç gün sonra Yaku, kutuyla birlikte nehrin aşağısındaki Federal Polis karakoluna kendi kanosuyla varıyor. Yanında Kayara ve köyün altı kadını var. Örnekler son gününde laboratuvara giriyor."
-      : "Laboratuvar sonuçları üç gün sonra geliyor. Yirmi çocuğun kanında cıva. Dava, Ytuá köyünün adıyla açılıyor.",
+      ? "Üç gün sonra Yaku, kutuyla birlikte nehrin aşağısındaki Federal Polis karakoluna kendi kanosuyla varıyor. Yanında " + (koyde(s) ? "Kayara ve köyün altı kadını" : "köyün yaşlısı Kayara ve altı kadın") + " var. Örnekler son gününde laboratuvara giriyor."
+      : "Laboratuvar sonuçları üç gün sonra geliyor. Yirmi çocuğun kanında cıva. Dava, " + (koyde(s) ? "Ytuá köyünün" : "Yaku'nun köyü Ytuá'nın") + " adıyla açılıyor.",
     akibet: (s) => [
-      ["Sen", "Hikâyeyi ilk sen yazmadın. Kayara'nın izin verdiği kadarını, aylar sonra yazdın. En sevdiğin yazın o oldu."],
+      ["Sen", "Hikâyeyi ilk sen yazmadın. " + (koyde(s) ? "Kayara'nın" : "Köyün yaşlısı Kayara'nın") + " izin verdiği kadarını, aylar sonra yazdın. En sevdiğin yazın o oldu."],
       ["Yaku", "Köyün sözcüsü oldu. Mahkemede ilk kez kendi dilinde konuşan tanık oldu."],
       ["Tomás", has(s, "TOMAS_BEDEL") ? "Pistteki kargaşada vuruldu. Yaku onun adını her konuşmasında andı." : "Bacağı kurtuldu. Yaku'nun köyüne her ay ilaç taşıyor."],
       ["Ouro Verde", "Dava dört yıl sürdü. Sonunda bölgeden çekilmek ve nehri temizlemek zorunda kaldı."]
     ],
-    yil: "Mahkeme Waurá-Mairi topraklarını koruma altına aldı. Kayara bir mektupla sana tek bir cümle gönderdi. Yaku çevirmiş: «Nehir yine şarkı söylüyor.»"
+    yil: (s) => "Mahkeme Waurá-Mairi topraklarını koruma altına aldı. " + (koyde(s) ? "Kayara" : "Köyün yaşlısı Kayara") + " bir mektupla sana tek bir cümle gönderdi. Yaku çevirmiş: «Nehir yine şarkı söylüyor.»"
   },
   e_pist: {
     act: 3, day: 4, time: "07:00", temp: 27, hum: 88, rain: 0,
@@ -1135,7 +1138,7 @@ const S = {
       ["Aline", "Örnekleri bir daha toplamak için köylere döndüğünde, Ouro Verde'nin avukatları ondan önce oradaydı."],
       ["Yaku", (s.r.yaku || 0) >= 0 ? "Pistten döndüğünde köyüne tek bir şey söyledi: yabancılara kanınızı vermeyin." : "Ormana döndü. Seni hiç tanımamış gibi."]
     ],
-    yil: "Ouro Verde'nin salları hâlâ nehirde. Iraí'nin elleri hâlâ titriyor."
+    yil: (s) => "Ouro Verde'nin salları hâlâ nehirde. " + (koyde(s) ? "Iraí'nin elleri hâlâ titriyor." : "Yaku'nun köyünde çocukların elleri hâlâ titriyor.")
   }
 };
 

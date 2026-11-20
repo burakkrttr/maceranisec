@@ -460,8 +460,8 @@ const S = {
     sabah: "Ayvalık'tan gelen motor, fenerin merceğinin durmuş olduğunu görüyor. Gece yarısı kurma ağırlığını yukarı çekecek kimse kalmamıştı. Mehtap karanlık bir adanın önünden geçti, rotasını kaybetti ve sabaha karşı sığlığa oturdu. Kimse ölmedi, ama yükünü gümrük memurları boşalttı.",
     akibet: [
       ["Sen", "Cesedin üç gün sonra Kancaburun'da bulundu. Kayıtlara \"görev sırasında kaza\" diye geçti."],
-      ["Halil", "Sabaha kadar kayalara tutundu. Motor geldiğinde ortada yoktu. Onu bir daha gören olmadı."],
-      ["Nermin ve Can", "Batı koyuna hiç yanaşmadılar. Fenerin karanlığını görüp geri döndüler."],
+      ["Kayalardaki adam", "Sabaha kadar kayalara tutundu. Motor geldiğinde ortada yoktu. Onu bir daha gören olmadı."],
+      ["Kayıktaki anne ve oğlu", "O gece adaya sığınmak için yola çıkmışlardı. Batı koyuna hiç yanaşmadılar; fenerin karanlığını görüp geri döndüler."],
       ["Rıza Usta", "Kapıdaki notu yerinde duruyor. Senden sonra gelen bekçi onu ciddiye aldı."]
     ],
     yil: "Akça Ada Feneri otomatik lambaya çevrildi. Adada artık bekçi yok. Rıza Usta'nın ölümü de kimsenin sormadığı bir soru olarak kaldı."
@@ -765,13 +765,13 @@ const ACT2 = {
   b5: {
     act: 2, time: (s) => s.talked.length > 1 ? "23:20" : "22:35", wind: 10, baro: 732,
     title: "Halil",
-    enter: (s) => { s.talked.push("halil"); flag(s, "UYARILDI"); note(s, "Halil: «Ziya'nın tekne pilotuyum. Rıza Usta düşmedi. Şevket'i telsizden uzak tut.»"); },
+    enter: (s) => { s.talked.push("halil"); flag(s, "UYARILDI"); note(s, "Halil: «Ziya Bey'in tekne kaptanıyım. Rıza Usta düşmedi. Şevket'i telsizden uzak tut.»"); },
     text: (s) => {
       const p = [];
       if (s.via === "verdi") p.push("Şevket odun almak için dışarı çıktığında Halil'in yanına çömeliyorsun. Birkaç dakikan var.");
       else if (s.via === "sakla") p.push("Arka odaya, yemek götürme bahanesiyle giriyorsun. Halil karanlıkta, yatağın kenarında oturuyor.");
       else p.push("Halil'i, ağırlık zincirini yağlamana yardım etsin diye merdiven boşluğuna çağırıyorsun. Şevket arkanızdan bakıyor ama kalkmıyor.");
-      p.push("Halil bu kez yalan söylemiyor. \"Ziya'nın tekne pilotuyum. Sekiz yıldır. Mehtap'ı bu kayaların arasından ben geçirirdim. İki gün önce bıraktım. Teknemi de kendim batırdım, ölü sansınlar diye.\"");
+      p.push("Halil bu kez yalan söylemiyor. \"Ziya Bey'in, Mehtap'ın sahibinin tekne kaptanıyım. Sekiz yıldır. Mehtap'ı bu kayaların arasından ben geçirirdim. İki gün önce bıraktım. Teknemi de kendim batırdım, ölü sansınlar diye.\"");
       p.push("\"Neden bıraktın?\" \"Çünkü iki ay önce, burada, bu iskelede bir şey gördüm.\" Susuyor. \"Rıza Usta düşmedi.\"");
       p.push("Sonra sesini daha da alçaltıyor. \"Şevket'i telsizden uzak tut. Bu gece Ziya'ya haber verecek olan o.\"");
       return p;
