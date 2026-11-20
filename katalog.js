@@ -69,6 +69,25 @@ window.KATALOG = {
       adres: "kitaplar/kum-firtinasi/index.html",
       sonAnahtari: "kum-firtinasi-sonlar",
       sirt: { renk: "#3a2216", yazi: "#e8a64a", yukseklik: 340, kalinlik: 48, yaziBoyu: 17 }
+    },
+    {
+      id: "karanlik-koy",
+      durum: "yayinda",
+      eklenme: "2026-11-20",
+      seri: "Kendi Maceranı Seç",
+      kitapNo: 4,
+      baslik: "Karanlık Köy",
+      altBaslik: "Bir Karadeniz korku hikâyesi",
+      yazar: "Burak Karatatar",
+      tur: ["Korku", "Gerilim"],
+      okumaSuresi: "30 dk",
+      sonSayisi: 7,
+      slogan: "Sis gelince kapını kimseye açma.",
+      tanitim: "Kasım 1987. Artvin'in yükseklerindeki Kuşkaya köyünün okuluna atanan yeni öğretmensin. Bir önceki öğretmen geçen kış kayboldu. Okulun kapısında onun el yazısıyla bir not var ve aynı gece dağdan sis iniyor.",
+      kapak: "kitaplar/karanlik-koy/img/kapak.jpg",
+      adres: "kitaplar/karanlik-koy/index.html",
+      sonAnahtari: "karanlik-koy-sonlar",
+      sirt: { renk: "#172024", yazi: "#e3a64f", yukseklik: 320, kalinlik: 46, yaziBoyu: 17 }
     }
   ]
 };

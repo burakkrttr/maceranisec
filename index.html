@@ -350,13 +350,13 @@ footer .big em { color: var(--lamp); }
   const likeTotals = {};
 
   /* vitrin: en yeni yayındaki kitap */
-  const F = [...live].sort((a, b) => (b.eklenme || "").localeCompare(a.eklenme || ""))[0];
+  const F = [...live].sort((a, b) => (b.eklenme || "").localeCompare(a.eklenme || "") || (b.kitapNo || 0) - (a.kitapNo || 0))[0];
   if (F) {
     const got = found(F), total = F.sonSayisi || 0, C = 2 * Math.PI * 22;
     $("#feat").innerHTML = `
       <div class="tilt"><div class="cv" id="feat-cv" role="link" tabindex="0" aria-label="${esc(F.baslik)} kitabını aç">
         <img src="${esc(F.kapak)}" alt="">
-        <div class="cv-text"><div><div class="band">${esc(F.seri)} · Kitap ${F.kitapNo}</div><div class="t">${esc(F.baslik.toLocaleUpperCase("tr"))}</div></div>
+        <div class="cv-text"><div><div class="band">${esc(F.seri)} · Kitap ${F.kitapNo}</div><div class="t" style="font-size:clamp(28px, ${Math.min(19, 85 / (Math.max(...F.baslik.split(/\s+/).map((w) => w.length)) * 0.92)).toFixed(1)}cqi, 84px)">${esc(F.baslik.toLocaleUpperCase("tr"))}</div></div>
           <div><div class="s">${esc(F.altBaslik)}</div><div class="a">${esc(F.yazar)}</div></div></div>
         <div class="shine"></div></div></div>
       <div>
