@@ -53,15 +53,21 @@ window.KATALOG = {
     },
     {
       id: "kum-firtinasi",
-      durum: "yakinda",
+      durum: "yayinda",
+      eklenme: "2026-11-20",
       seri: "Kendi Maceranı Seç",
       kitapNo: 3,
       baslik: "Kum Fırtınası",
       altBaslik: "Bir Star Wars hayran macerası",
       yazar: "Burak Karatatar",
       tur: ["Uzay operası", "Hayran kurgusu"],
+      okumaSuresi: "30 dk",
+      sonSayisi: 7,
       slogan: "Kapsüle dokunduğun anda uğultu başladı.",
       tanitim: "Çöl gezegeni Kessar'da bir hurdacının çırağısın. Hurdalığa düşen bir kapsülde taş bir küp buluyorsun ve aynı gece kasabaya bir Engizitör iniyor.",
+      kapak: "kitaplar/kum-firtinasi/img/kapak.jpg",
+      adres: "kitaplar/kum-firtinasi/index.html",
+      sonAnahtari: "kum-firtinasi-sonlar",
       sirt: { renk: "#3a2216", yazi: "#e8a64a", yukseklik: 340, kalinlik: 48, yaziBoyu: 17 }
     }
   ]

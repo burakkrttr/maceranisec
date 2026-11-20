@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kum Fırtınası</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<script type="application/json" id="book-meta">
+{
+  "id": "kum-firtinasi",
+  "seri": "Kendi Maceranı Seç",
+  "kitapNo": 3,
+  "baslik": "Kum Fırtınası",
+  "altBaslik": "Bir Star Wars hayran macerası",
+  "yazar": "Burak Karatatar",
+  "instagram": "https://www.instagram.com/burakkrttr/",
+  "instagramKullanici": "burakkrttr",
+  "slogan": "Kapsüle dokunduğun anda uğultu başladı.",
+  "tur": "Uzay operası · Hayran kurgusu",
+  "okumaSuresi": "Yaklaşık 30 dakika",
+  "sonSayisi": 7,
+  "kapak": "img/kapak.jpg",
+  "sonAnahtari": "kum-firtinasi-sonlar",
+  "kapakYedek": "img/kapsul.jpg",
+  "kutuphane": "../../index.html"
+}
+</script>
+<style>
+/* Tek tema bilerek: karanlık bir oda, masada açık bir kitap, arkada fırtınalı pencere.
+   Düzen: masaüstünde iki sayfalı açık kitap (solda levha ve bekçinin kaydı, sağda metin), telefonda tek sayfa. */
+:root {
+  --night: #0c1012;        /* oda, kitabın dışı */
+  --paper: #efe6d1;        /* sayfa */
+  --paper-edge: #e2d6bb;   /* sayfa kenarı, cilt gölgesi */
+  --ink: #2b241d;          /* metin mürekkebi */
+  --faded: #75685a;        /* soluk mürekkep, ikincil metin */
+  --rubric: #8d3a26;       /* kırmızı mürekkep: § numaraları, başharfler, süslemeler */
+  --lamp: #e9b34f;         /* fener ışığı, kapak vurgusu */
+  --display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --body: "EB Garamond", "Iowan Old Style", Georgia, serif;
+  --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --cloth: #3b2520;        /* cilt kumaşı */
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--night); color: var(--ink); font-family: var(--body); overflow: hidden; }
+canvas#sea { position: fixed; inset: 0; width: 100%; height: 100%; display: block; opacity: 0.42; }
+.vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(12,16,18,0) 30%, rgba(12,16,18,0.85) 100%); }
+
+/* üst şerit */
+.top {
+  background: linear-gradient(var(--night) 55%, rgba(12,16,18,0));
+  position: fixed; top: 0; left: 0; right: 0; z-index: 4;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 12px clamp(16px, 3vw, 36px);
+  font-family: var(--display); color: #cfc4ad;
+}
+.top .series { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; }
+.top .series b { color: var(--lamp); font-weight: 600; }
+.top nav { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.link {
+  font-family: var(--display); font-size: 17px; font-weight: 600; letter-spacing: 0.06em;
+  background: none; border: 0; color: #cfc4ad; cursor: pointer; padding: 6px 10px; border-radius: 2px;
+}
+.link:hover { color: var(--lamp); }
+a.link { text-decoration: none; }
+.link:focus-visible, .choice:focus-visible, .btn:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
+.confirm { display: none; gap: 4px; align-items: center; font-style: italic; color: #cfc4ad; font-size: 16px; }
+.confirm.show { display: inline-flex; }
+
+main { position: relative; z-index: 2; height: 100%; overflow-y: auto; padding: 64px clamp(10px, 3vw, 40px) 40px; }
+
+/* ---------- açık kitap ---------- */
+.book {
+  max-width: 1120px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  background: var(--paper);
+  border-radius: 3px 6px 6px 3px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.25), 0 6px 0 -2px #d9ccad, 0 10px 0 -4px #cdbf9e;
+  position: relative;
+}
+.book::before { /* cilt */
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 70px; transform: translateX(-50%); pointer-events: none;
+  background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(80,60,30,0.10) 38%, rgba(40,28,10,0.28) 50%, rgba(80,60,30,0.10) 62%, rgba(0,0,0,0) 100%);
+}
+.leaf {
+  position: relative; padding: 46px clamp(26px, 4vw, 58px) 54px;
+  background-image:
+    radial-gradient(rgba(120,95,55,0.07) 1px, transparent 1px),
+    radial-gradient(rgba(120,95,55,0.05) 1px, transparent 1px);
+  background-size: 7px 7px, 11px 11px; background-position: 0 0, 3px 5px;
+  min-height: min(760px, calc(100vh - 110px));
+}
+.leaf.left { border-right: 1px solid rgba(120,95,55,0.15); }
+.folio { position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; font-family: var(--display); font-size: 15px; color: var(--faded); letter-spacing: 0.1em; }
+
+/* sol sayfa: levha + kayıt */
+.plate { display: flex; flex-direction: column; gap: 22px; }
+.act-title { text-align: center; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.22em; font-size: 13.6px; color: var(--rubric); }
+.act-title span { display: block; font-size: 30px; letter-spacing: 0.06em; color: var(--ink); font-variant: normal; text-transform: none; font-weight: 600; margin-top: 2px; }
+.ill { margin: 0; padding: 10px; background: #f6efdf; border: 1px solid rgba(80,60,30,0.25); box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px rgba(80,60,30,0.25); }
+.ill img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; filter: sepia(0.18) contrast(1.02); }
+.ill figcaption { text-align: center; font-style: italic; font-size: 16px; color: var(--faded); margin-top: 8px; }
+.log { border-top: 1px solid rgba(80,60,30,0.3); border-bottom: 1px solid rgba(80,60,30,0.3); padding: 14px 4px; display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; gap: 6px; }
+.log div { font-size: 11.2px; color: var(--faded); text-transform: uppercase; letter-spacing: 0.12em; }
+.log b { display: block; font-family: var(--display); font-size: 30px; color: var(--ink); font-weight: 600; letter-spacing: 0.02em; font-variant-numeric: lining-nums tabular-nums; text-transform: none; }
+.margin-note { font-style: italic; font-size: 18px; line-height: 1.55; color: var(--faded); text-align: center; padding: 0 10px; text-wrap: balance; }
+.fleuron { text-align: center; color: var(--rubric); font-size: 22px; letter-spacing: 0.6em; }
+
+/* sağ sayfa: metin */
+.sect { text-align: center; font-family: var(--display); color: var(--rubric); font-size: 22px; font-weight: 600; letter-spacing: 0.08em; }
+.sect::before, .sect::after { content: "❧"; font-size: 16px; margin: 0 12px; position: relative; top: -2px; opacity: 0.8; }
+.sect::before { display: inline-block; transform: scaleX(-1); }
+.leaf h2 { font-family: var(--display); font-weight: 600; font-size: 24px; text-align: center; margin: 6px 0 4px; text-transform: uppercase; letter-spacing: 0.08em; text-wrap: balance; }
+.kind { text-align: center; font-style: italic; color: var(--rubric); font-size: 17px; margin-bottom: 4px; }
+.text { margin-top: 22px; }
+.text p { font-size: 20px; line-height: 1.58; margin: 0 0 12px; text-align: justify; hyphens: auto; -webkit-hyphens: auto; text-indent: 1.4em; }
+.text p.lead, .text p.first { text-indent: 0; }
+.text p.lead::first-letter { float: left; font-family: var(--display); font-weight: 600; color: var(--rubric); font-size: 76px; line-height: 0.82; padding: 6px 8px 0 0; }
+.text p.quote { font-style: italic; text-indent: 0; margin: 4px 1.6em 14px; text-align: left; color: #3d342b; }
+.sub { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; color: var(--rubric); font-size: 13.6px; text-align: center; margin: 26px 0 10px; }
+.fates { list-style: none; padding: 0; margin: 0; }
+.fates li { font-size: 18px; line-height: 1.5; padding: 7px 0; border-bottom: 1px dotted rgba(80,60,30,0.35); }
+.fates b { text-transform: uppercase; letter-spacing: 0.06em; font-size: 15.2px; margin-right: 6px; }
+.the-end { text-align: center; font-family: var(--display); font-size: 40px; letter-spacing: 0.4em; color: var(--ink); margin: 30px 0 4px; padding-left: 0.4em; }
+.missed { list-style: none; padding: 0; margin: 0; }
+.missed li { font-style: italic; color: var(--faded); font-size: 17px; text-align: center; padding: 3px 0; }
+.tally { text-align: center; font-style: italic; color: var(--faded); font-size: 16px; margin-top: 14px; }
+
+/* seçenekler: oyun kitabı yönergesi */
+.choices { margin-top: 26px; border-top: 1px solid rgba(80,60,30,0.3); padding-top: 14px; display: flex; flex-direction: column; }
+.choice {
+  display: flex; align-items: baseline; gap: 10px; width: 100%; text-align: left; cursor: pointer;
+  background: none; border: 0; border-bottom: 1px dotted rgba(80,60,30,0.3); padding: 11px 4px;
+  font-family: var(--body); font-size: 19px; line-height: 1.4; color: var(--ink);
+}
+.choice .ct { flex: 1; font-style: italic; }
+.choice .cn { font-family: var(--display); font-weight: 600; font-size: 20px; color: var(--rubric); white-space: nowrap; font-variant-numeric: lining-nums; }
+.choice:hover .ct { text-decoration: underline; text-decoration-color: var(--rubric); text-underline-offset: 4px; }
+.choice:hover { background: rgba(141,58,38,0.05); }
+
+/* sayfa çevirme */
+@keyframes ink { from { opacity: 0.1; transform: translateX(10px); } to { opacity: 1; transform: none; } }
+
+/* ---------- kapak ---------- */
+.cover-wrap { max-width: 1040px; margin: 0 auto; display: grid; grid-template-columns: minmax(280px, 430px) 1fr; gap: clamp(24px, 4vw, 56px); align-items: center; min-height: calc(100vh - 120px); }
+.cover {
+  container-type: inline-size;
+  position: relative; aspect-ratio: 2 / 3; border-radius: 3px 8px 8px 3px; overflow: hidden;
+  background: #101619 center / cover no-repeat;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.7), inset 6px 0 0 rgba(0,0,0,0.25), inset 9px 0 0 rgba(255,255,255,0.05);
+  color: #f1e7cf; display: flex; flex-direction: column; justify-content: space-between; padding: 30px 26px 26px 34px;
+}
+.cover::before { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(6,10,12,0.78) 0%, rgba(6,10,12,0.05) 38%, rgba(6,10,12,0.05) 62%, rgba(6,10,12,0.85) 100%); }
+.cover > * { position: relative; }
+.cover .band { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.18em; font-size: clamp(9px, 2.7cqi, 12.5px); white-space: nowrap; text-align: center; color: var(--lamp); border-top: 1px solid rgba(233,179,79,0.5); border-bottom: 1px solid rgba(233,179,79,0.5); padding: 6px 0; }
+.cover h1 { font-family: var(--display); font-weight: 600; font-size: clamp(44px, 19cqi, 88px); letter-spacing: 0.16em; text-align: center; margin: 18px 0 0; padding-left: 0.16em; line-height: 1; text-shadow: 0 2px 24px rgba(0,0,0,0.6); }
+.cover .subt { text-align: center; font-style: italic; font-size: clamp(15px, 4.6cqi, 20px); margin-bottom: 10px; color: #e4d8bd; }
+.cover .author { text-align: center; font-family: var(--display); font-size: clamp(14px, 4.8cqi, 20px); letter-spacing: 0.26em; text-transform: uppercase; padding-left: 0.26em; white-space: nowrap; }
+.backcover { color: #e6dcc4; }
+.backcover .slogan { font-family: var(--display); font-size: clamp(28px, 3.2vw, 38px); line-height: 1.2; font-weight: 600; color: #f3e9d2; margin: 0 0 18px; text-wrap: balance; }
+.backcover p { font-size: 19px; line-height: 1.6; margin: 0 0 12px; max-width: 58ch; color: #d6cbb2; }
+.colophon { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; margin: 22px 0; padding: 14px 0; border-top: 1px solid rgba(214,203,178,0.25); border-bottom: 1px solid rgba(214,203,178,0.25); font-size: 17px; }
+.colophon dt { text-transform: uppercase; letter-spacing: 0.14em; color: #a99d86; }
+.colophon dd { margin: 0; color: #efe5cd; }
+.btn {
+  font-family: var(--display); font-size: 22px; font-weight: 600; letter-spacing: 0.1em;
+  background: var(--lamp); color: #1d1608; border: 0; padding: 12px 28px; border-radius: 2px; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(233,179,79,0.25);
+}
+.btn:hover { background: #f2c56a; }
+
+/* ---------- defter ---------- */
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 6; width: min(400px, 92vw);
+  background: var(--paper); color: var(--ink); box-shadow: -20px 0 50px rgba(0,0,0,0.5);
+  transform: translateX(105%); transition: transform .35s ease; padding: 28px 28px 34px; overflow-y: auto;
+}
+.drawer.open { transform: none; }
+.drawer::before { content: ""; position: absolute; top: 0; left: 28px; width: 14px; height: 70px; background: var(--rubric); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%); }
+.drawer h3 { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; color: var(--rubric); font-size: 14.4px; margin: 26px 0 8px; text-align: center; }
+.drawer h3:first-of-type { margin-top: 54px; }
+.drawer ul { list-style: none; padding: 0; margin: 0; }
+.drawer li { font-size: 17px; line-height: 1.5; padding: 8px 0; border-bottom: 1px dotted rgba(80,60,30,0.35); }
+.drawer .empty { color: var(--faded); font-style: italic; }
+.drawer-close { position: absolute; top: 14px; right: 16px; color: var(--ink); }
+
+.toast {
+  position: fixed; left: 50%; top: 58px; z-index: 7; transform: translate(-50%, -10px);
+  font-style: italic; font-size: 18px; color: var(--paper); background: rgba(43,36,29,0.94);
+  padding: 9px 18px; border-radius: 2px; border-left: 3px solid var(--rubric);
+  opacity: 0; transition: opacity .4s, transform .4s; pointer-events: none; max-width: 90vw; text-align: center;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 860px) {
+  .book { grid-template-columns: 1fr; }
+  .book::before { display: none; }
+  .leaf { min-height: 0; padding: 30px 22px 50px; }
+  .leaf.left { border-right: 0; border-bottom: 1px solid rgba(120,95,55,0.2); padding-bottom: 24px; }
+  .plate { position: static; gap: 14px; }
+  .log b { font-size: 24px; }
+  .text p { font-size: 18.5px; text-align: left; }
+  .leaf.left .folio { display: none; }
+  main { padding-top: 92px; }
+  .top .series { font-size: 13px; }
+  .cover-wrap { grid-template-columns: 1fr; justify-items: center; }
+  .cover { width: min(360px, 86vw); }
+  .backcover { text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .turn .leaf.right > *, .turn .leaf.left .plate { animation: none; }
+  .drawer, .toast { transition: none; }
+}
+
+/* ===== kitap havası: cilt, sayfa kalınlığı, kurdele, sayfa başlıkları ===== */
+.binding {
+  max-width: 1150px; margin: 6px auto 30px; position: relative;
+  background: var(--cloth); border-radius: 6px; padding: 12px 14px 14px;
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 4px), repeating-linear-gradient(-45deg, rgba(0,0,0,0.08) 0 2px, transparent 2px 4px);
+  box-shadow: 0 34px 80px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 0 30px rgba(0,0,0,0.5);
+}
+.binding .book { box-shadow: 0 2px 6px rgba(0,0,0,0.35); border-radius: 2px; perspective: 2400px; }
+.edges { position: absolute; top: 16px; bottom: 18px; z-index: 0; border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #efe6d1 0 1px, #cfc1a0 1px 2px); }
+.edges.l { right: calc(100% - 14px); }
+.edges.r { left: calc(100% - 14px); }
+.ribbon { position: absolute; z-index: 3; top: -6px; left: calc(50% + 14px); width: 11px; height: calc(100% + 46px); pointer-events: none;
+  background: linear-gradient(90deg, #6f2a1b, #9b4430 45%, #7a2f1f); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 12px), 0 100%);
+  box-shadow: 2px 0 4px rgba(0,0,0,0.3); opacity: 0.95; }
+.leaf { background-color: var(--paper); }
+.leaf.left { background-image:
+    linear-gradient(90deg, rgba(90,65,30,0.10) 0%, rgba(90,65,30,0) 7%, rgba(90,65,30,0) 84%, rgba(70,50,20,0.16) 100%),
+    radial-gradient(rgba(120,95,55,0.07) 1px, transparent 1px), radial-gradient(rgba(120,95,55,0.05) 1px, transparent 1px); }
+.leaf.right { background-image:
+    linear-gradient(90deg, rgba(70,50,20,0.16) 0%, rgba(90,65,30,0) 16%, rgba(90,65,30,0) 93%, rgba(90,65,30,0.10) 100%),
+    radial-gradient(rgba(120,95,55,0.07) 1px, transparent 1px), radial-gradient(rgba(120,95,55,0.05) 1px, transparent 1px); }
+.leaf { background-size: auto, 7px 7px, 11px 11px; background-position: 0 0, 0 0, 3px 5px; }
+.runhead { position: absolute; top: 20px; left: 0; right: 0; text-align: center; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.26em; font-size: 11.2px; color: var(--faded); }
+.folio { bottom: 20px; text-align: left; padding: 0 clamp(26px, 4vw, 58px); font-variant-numeric: oldstyle-nums; font-size: 16px; }
+.leaf.right .folio { text-align: right; }
+
+/* bekçinin defteri: el yazısı kayıt */
+.ledger { background: #f6eedb; border: 1px solid rgba(80,60,30,0.25); padding: 12px 16px 14px; transform: rotate(-0.6deg);
+  background-image: repeating-linear-gradient(transparent 0 29px, rgba(70,90,120,0.22) 29px 30px); box-shadow: 0 2px 6px rgba(60,40,10,0.12); }
+.ledger .lh { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; font-size: 10.4px; color: var(--rubric); }
+.ledger .lv { font-family: var(--hand); font-size: 25px; line-height: 30px; color: #263a5a; }
+.margin-note.hand { font-family: var(--hand); font-style: normal; font-size: 24px; line-height: 1.25; color: #263a5a; transform: rotate(-1.2deg); }
+.margin-note .lbl { display: block; font-family: var(--body); font-style: italic; font-size: 16px; color: var(--faded); margin-bottom: 6px; }
+
+/* seçenekler: içindekiler gibi noktalı çizgi */
+.choice { border-bottom: 0; padding: 9px 2px; gap: 8px; }
+.choice .ct { flex: 0 1 auto; }
+.choice .lead-dots { flex: 1 1 24px; border-bottom: 2px dotted rgba(80,60,30,0.45); transform: translateY(-5px); min-width: 24px; }
+.choice .cn::before { content: "§ "; font-size: 15px; }
+.choices { border-top: 0; }
+.choices::before { content: "❦"; display: block; text-align: center; color: var(--rubric); font-size: 20px; margin-bottom: 6px; }
+
+/* sayfa çevirme */
+.flip { position: absolute; top: 0; bottom: 0; left: 50%; width: 50%; z-index: 5; transform-origin: left center; transform-style: preserve-3d; pointer-events: none; animation: flip .85s cubic-bezier(.45,.05,.3,1) forwards; }
+.flip .face { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip .face.back { transform: rotateY(180deg); }
+.flip .face::after { content: ""; position: absolute; inset: 0; pointer-events: none; animation: shade .85s ease forwards; }
+@keyframes flip { from { transform: rotateY(0deg); } to { transform: rotateY(-180deg); } }
+@keyframes shade { 0% { background: rgba(40,28,10,0); } 50% { background: rgba(40,28,10,0.28); } 100% { background: rgba(40,28,10,0); } }
+.hide-under { visibility: hidden; }
+.lift { position: absolute; inset: 0; z-index: 5; transform-origin: left center; pointer-events: none; animation: lift .6s ease-in forwards; background: var(--paper); overflow: hidden; }
+@keyframes lift { 0% { transform: perspective(1400px) rotateY(0); opacity: 1; box-shadow: 0 0 0 rgba(0,0,0,0); } 75% { opacity: 1; box-shadow: 20px 0 40px rgba(0,0,0,0.35); } 100% { transform: perspective(1400px) rotateY(-100deg); opacity: 0; } }
+
+@media (max-width: 860px) {
+  .binding { padding: 8px 8px 10px; }
+  .edges, .ribbon { display: none; }
+  .ledger .lv { font-size: 22px; }
+  .runhead { top: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .flip, .lift { display: none; } }
+
+/* ===== karar kartları ===== */
+.choices { margin-top: 30px; gap: 12px; }
+.choices::before { content: none; }
+.decide { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; font-size: 13.6px; color: var(--rubric); }
+.decide::before, .decide::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(141,58,38,0.5)); }
+.decide::after { background: linear-gradient(90deg, rgba(141,58,38,0.5), transparent); }
+.choice {
+  display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 14px;
+  padding: 12px 16px 12px 12px; border: 1px solid rgba(80,60,30,0.22); border-radius: 3px;
+  background: #f7f0de; box-shadow: inset 0 0 0 3px #f7f0de, inset 0 0 0 4px rgba(80,60,30,0.12), 0 1px 2px rgba(60,40,10,0.08);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.choice:hover { background: #f9f3e4; border-color: rgba(141,58,38,0.55); transform: translateY(-2px);
+  box-shadow: inset 0 0 0 3px #f9f3e4, inset 0 0 0 4px rgba(141,58,38,0.25), 0 8px 18px rgba(60,40,10,0.14); }
+.choice .ct { font-style: normal; font-size: 19px; line-height: 1.35; }
+.choice:hover .ct { text-decoration: none; }
+.choice .lead-dots { display: none; }
+.choice .seal {
+  width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 30%, #b45a40, #8d3a26 55%, #6e2a1a);
+  box-shadow: inset 0 0 0 3px rgba(255,235,210,0.18), inset 0 -3px 6px rgba(0,0,0,0.25), 0 2px 3px rgba(60,20,10,0.3);
+  color: #f6e9d0; font-family: var(--display); font-weight: 600; font-size: 19px; font-variant-numeric: lining-nums; letter-spacing: 0.02em;
+}
+.choice .seal.blank { background: radial-gradient(circle at 35% 30%, #a99a80, #85765e 60%, #6b5e49); font-size: 20px; }
+.choice .go { font-style: italic; font-size: 15px; color: var(--rubric); opacity: 0; transform: translateX(-6px); transition: opacity .18s, transform .18s; white-space: nowrap; }
+.choice:hover .go, .choice:focus-visible .go { opacity: 1; transform: none; }
+@media (max-width: 860px) {
+  .choice { grid-template-columns: 44px 1fr; padding: 11px 12px 11px 10px; }
+  .choice .seal { width: 40px; height: 40px; font-size: 17px; }
+  .choice .go { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .choice, .choice .go { transition: none; } .choice:hover { transform: none; } }
+
+/* yumuşatılmış kararlar: durağanken basılı satır, üstüne gelince kart */
+.choices { gap: 0; }
+.choice {
+  background: transparent; border: 0; border-radius: 3px; box-shadow: none;
+  border-bottom: 1px solid rgba(80,60,30,0.18); padding: 12px 14px 12px 6px;
+}
+.choice:last-child { border-bottom: 0; }
+.choice { grid-template-columns: 52px 1fr; }
+.choice .go { display: none; }
+.choice .seal { width: 42px; height: 42px; font-size: 18px; box-shadow: inset 0 0 0 2px rgba(255,235,210,0.16), 0 1px 2px rgba(60,20,10,0.25); transition: transform .18s ease; }
+.choice:hover, .choice:focus-visible {
+  background: #f7f0de; border-bottom-color: transparent; transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(141,58,38,0.35), 0 6px 16px rgba(60,40,10,0.12);
+}
+.choice:hover .seal { transform: rotate(-8deg) scale(1.05); }
+@media (hover: none) {
+  .choice { padding-top: 13px; padding-bottom: 13px; }
+  .choice:active { background: #f7f0de; box-shadow: 0 0 0 1px rgba(141,58,38,0.35); }
+}
+@media (prefers-reduced-motion: reduce) { .choice .seal { transition: none; } .choice:hover .seal { transform: none; } }
+
+.ig { color: var(--lamp); text-decoration: none; border-bottom: 1px solid rgba(233,179,79,0.45); }
+.ig:hover { color: #f2c56a; border-bottom-color: #f2c56a; }
+.leaf .ig { color: var(--rubric); border-bottom-color: rgba(141,58,38,0.4); }
+
+/* Cormorant'ın eski stil "1" rakamı "ı" gibi görünüyor: başlıklarda düz rakam */
+body, .sect, .cover .band, .top .series, .choice .seal, h1, h2 { font-variant-numeric: lining-nums; }
+
+/* Kum Fırtınası: pas kırmızısı mürekkep, koyu kahve cilt, iki güneşin amber ışığı */
+:root {
+  --night: #0b0806;
+  --rubric: #9a3f22;
+  --cloth: #2a1a12;
+  --lamp: #e8a64a;
+  --paper: #efe4cf; --paper-edge: #dccdb0;
+}
+canvas#sea { opacity: 0.85; }
+.ribbon { background: linear-gradient(90deg, #6e2a16, #9a3f22 45%, #7a301a); }
+.choice .seal { background: radial-gradient(circle at 35% 30%, #c4643c, #9a3f22 55%, #6a2912); }
+.drawer::before { background: var(--rubric); }
+.leaf .ig { color: var(--rubric); }
+p.quote { font-style: italic; }
+.cover h1 { font-size: clamp(34px, 13.5cqi, 64px); letter-spacing: 0.1em; padding-left: 0.1em; }
+
+</style>
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+</head>
+<body>
+<canvas id="sea" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="series"><b>Kendi Maceranı Seç</b> · Kitap 3 · Kum Fırtınası</div>
+  <nav>
+    <a class="link" id="lnk-lib" href="#" hidden>Kütüphane</a>
+    <button class="link" id="btn-book" type="button">Defter <span id="note-count"></span></button>
+    <button class="link" id="btn-cover" type="button">Kapak</button>
+    <span class="confirm" id="confirm">Okuma baştan başlar. Emin misin?
+      <button class="link" id="btn-yes" type="button">Evet</button>
+      <button class="link" id="btn-no" type="button">Hayır</button>
+    </span>
+  </nav>
+</header>
+
+<main id="main"><div id="view"></div></main>
+
+<aside class="drawer" id="drawer" aria-label="Bekçinin defteri">
+  <button class="link drawer-close" id="btn-close" type="button">Kapat</button>
+  <h3>Ceplerin</h3>
+  <ul id="items"></ul>
+  <h3>Gözlemlerin</h3>
+  <ul id="notes"></ul>
+  <h3>Bulduğun sonlar</h3>
+  <ul id="endings"></ul>
+</aside>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const ENDINGS = [
+  { id: "isyan",    title: "İsyanın Kıvılcımı" },
+  { id: "bedel",    title: "Son Işık" },
+  { id: "golge",    title: "Gölgeye Adım" },
+  { id: "teslim",   title: "Boyun Eğiş" },
+  { id: "kacak",    title: "Kaçakçının Yolu" },
+  { id: "kum",      title: "Kum Altında" },
+  { id: "yalniz",   title: "Tek Başına" }
+];
+
+const IMG = {
+  kapsul: "img/kapsul.jpg", kup: "img/kup.jpg", mekik: "img/mekik.jpg",
+  sena: "img/sena.jpg", engizitor: "img/engizitor.jpg",
+  istasyon: "img/istasyon.jpg", garnizon: "img/garnizon.jpg", tapinak: "img/tapinak.jpg",
+  yuzlesme: "img/yuzlesme.jpg", kalkis: "img/kalkis.jpg"
+};
+
+function flag(s, k) { s.f[k] = true; }
+function has(s, k) { return !!s.f[k]; }
+function rel(s, who, d, msg) { s.r[who] = (s.r[who] || 0) + d; if (msg) toast(msg); }
+function note(s, t) { s.notes.push(t); }
+// Küp kurşun kutuda mı? (Yalan yolunda Orrin kutuyu açıp küpü eline verdi.)
+function kutu(s) { return has(s, "KURSUN") && !has(s, "ORRIN_SERBEST"); }
+function senaTanir(s) { return s.yer === "kantin" || s.senaTanisti; }
+
+const S = {
+  /* ================= 1. PERDE: HURDALIK ================= */
+  d1: {
+    act: 1, time: "17:40", ruzgar: 0.1, img: "kapsul", imgLabel: "Hurdalığa düşen kapsül",
+    title: "Kapsül",
+    text: () => [
+      "Kessar'ın iki güneşi hurdalığın üstünde aynı anda batıyor. Kum önce bakır rengine dönüyor, sonra griye kesiyor. Rüzgâr dinmiş; hurda yığınlarının arasında yalnızca soğuyan metalin tıkırtısı var.",
+      "Orrin seni hurdalığın en ucuna çağırıyor. Yaşlı tüccarın elinde hâlâ yağlı bir anahtar, yüzünde hiç görmediğin bir ifade. Önünde, kumu yarıp gömülmüş, bir insan boyunda paslı bir kurtarma kapsülü duruyor. Gövdesi kararmış, atmosfere girerken yanmış olmalı.",
+      "\"Bunu kim fırlatmış, biliyor musun?\" diyor Orrin. Sesi alçak. Kapsülün kapağında yarısı kazınmış bir işaret var: bir zamanlar kanatlı bir şeymiş, şimdi birinin bıçakla silmeye çalıştığı bir leke.",
+      "Bilmiyorsun. Ama kapsülün sıcak gövdesine elini koyduğun anda kulağının içinde, çok uzaktan gelen bir ses gibi, bir uğultu başlıyor. Rüzgâr değil bu. Rüzgâr dinmiş.",
+      "Omzunda KT-4 tıkırdıyor. Küçük tamir droidin tek gözünü kapsüle çeviriyor ve bir kere, kısa bir uyarı sesi çıkarıyor. Bu sesi daha önce hiç duymadın."
+    ],
+    choices: [
+      { t: "Kapsülün kapağını zorla aç", to: "d2", fx: (s) => { s.via = "ac"; rel(s, "kt4", -1); } },
+      { t: "Orrin'e sor: «Neden bu kadar korkuyorsun?»", to: "d2", fx: (s) => { s.via = "sor"; rel(s, "orrin", 1, "Orrin, ona bir şey sorduğun için şaşırdı."); } },
+      { t: "KT-4'e kapsülü taratmasını söyle", to: "d2", fx: (s) => { s.via = "tara"; rel(s, "kt4", 1); } }
+    ]
+  },
+
+  d2: {
+    act: 1, time: "17:55", ruzgar: 0.12,
+    title: "Taş küp",
+    text: (s) => {
+      const p = [];
+      if (s.via === "ac") p.push("Levyeyi kapağın kenarına sokup yükleniyorsun. KT-4 omzunda telaşla bipliyor; umursamıyorsun. Kapak bir inlemeyle açılıyor, içeriden sıcak, yanık kokulu bir hava çıkıyor.");
+      if (s.via === "sor") p.push("Orrin uzun süre cevap vermiyor. Sonra anahtarı kumun üstüne bırakıyor. \"O işareti en son gençliğimde gördüm,\" diyor. \"Görenlerin çoğu artık yaşamıyor.\" Kapağı kendisi açıyor, yavaşça, bir mezarı açar gibi.");
+      if (s.via === "tara") p.push("KT-4 kapsülün etrafında bir tur atıyor, ince kolunu bir delikten içeri sokuyor. Ekranında tek bir satır beliriyor: «Canlı yok. Güç kaynağı yok. Bilinmeyen bir enerji imzası var.» Sonra kapağın kilidini kendisi açıyor.");
+      p.push("Kapsülün içi boş. Koltuk kemerleri kesilmiş, kontrol paneli sökülmüş. Biri buradan kaçmış, ya da buradan alınmış.");
+      p.push("Ama koltuğun altında, bir bez parçasına sarılı, avucun büyüklüğünde bir şey var. Bezi açıyorsun. Koyu, taş gibi bir küp; yüzeyleri ince çizgilerle oyulmuş. Parmakların değdiği anda çizgilerin içinde soluk mavi bir ışık kıpırdıyor, bir nefes alıp verir gibi.");
+      p.push("Uğultu güçleniyor. Orrin bir adım geri çekiliyor. \"Holokron,\" diyor, sanki kelimeyi söylemek bile yasakmış gibi. \"Bir Jedi'ın.\"");
+      p.push("Ufukta, son güneşin battığı yerde, bir ışık beliriyor. Yıldız değil. Yavaşça büyüyor. Kasabaya doğru alçalan bir mekiğin iniş ışıkları.");
+      return p;
+    },
+    choices: [
+      { t: "Küpü cebine koy", to: "d3", fx: (s) => { s.kup = "sen"; flag(s, "HOLOKRON"); } },
+      { t: "Küpü Orrin'e ver", to: "d3", fx: (s) => { s.kup = "orrin"; rel(s, "orrin", 1, "Orrin küpü bir şey söylemeden ceketinin iç cebine koydu."); } },
+      { t: "Küpü yeniden kapsüle koy ve kapağı kapat", to: "d3", fx: (s) => { s.kup = "kapsul"; } }
+    ]
+  },
+
+  d3: {
+    act: 1, time: "18:40", ruzgar: 0.2,
+    title: "Duyuru",
+    text: (s) => {
+      const p = [];
+      if (s.kup === "sen") p.push("Küp cebinde ağır. Taş olmasına rağmen hafif bir sıcaklığı var, kalbine yakın bir yerde atıyor gibi.");
+      if (s.kup === "orrin") p.push("Orrin küpü ceketinin iç cebine koyup düğmesini iliklemiş. Yürürken eli hep o cebin üstünde.");
+      if (s.kup === "kapsul") p.push("Kapsülün kapağını kapattın, üstüne iki kat hurda brandası çektin. Uzaktan bakınca yüzlerce paslı yığından biri gibi duruyor.");
+      p.push("Mekik, Varn kasabasının tozlu meydanına iniyor. Motorları sustuktan sonra bile kasaba susmuyor: kapılar çarpıyor, kepenkler iniyor, bir çocuğun adı iki kez bağırılıyor, sonra sessizlik.");
+      p.push("Meydandaki eski hoparlörler cızırdıyor. Düz, kayıttan okunuyormuş gibi bir ses:");
+      p.push({ q: "Varn sakinlerine. Bu akşam bölgenize bir kurtarma kapsülü düştü. İçinde İmparatorluk'a ait bir eşya bulunuyor. Kapsülü ya da eşyayı bulan, sabaha kadar garnizona teslim edecek. Ödül beş bin kredi. Saklayanlar İmparatorluk'a ihanetle yargılanacak." });
+      p.push("Beş bin kredi. Orrin'le bir yılda o kadar kazanmıyorsunuz.");
+      if (s.kup === "kapsul") p.push("Orrin dişlerinin arasından konuşuyor: \"Kapsülü taramayla bulurlar, evlat. Sabaha kadar her hurda yığınını çevirirler. Küpü orada bırakmak, onlara hediye paketiyle vermek demek.\"");
+      else p.push("Orrin sana bakıyor. Bir şey söylemiyor. Söylemesine gerek yok.");
+      return p;
+    },
+    choices: [
+      { t: "Kuru Kuyu'ya git: gezegenden çıkmanın yolunu ara", to: "d4", fx: (s) => { s.yer = "kantin"; } },
+      { t: "Meydana git, kimin geldiğini gör", to: "d3b" },
+      { t: "Hurdalığa koş, küpü kapsülden geri al", to: "d5", if: (s) => s.kup === "kapsul", fx: (s) => { s.kup = "sen"; flag(s, "HOLOKRON"); s.geriAldi = true; } },
+      { t: "Atölyeye dön, kapıyı kilitle", to: "d5", if: (s) => s.kup !== "kapsul" }
+    ]
+  },
+
+  d3b: {
+    act: 1, time: "18:55", ruzgar: 0.2, img: "mekik", imgLabel: "Meydana inen mekik",
+    title: "Meydan",
+    enter: (s) => { flag(s, "GORDU"); },
+    text: (s) => [
+      "Meydanın kenarındaki su deposunun gölgesine siniyorsun. KT-4 omzunda kıpırdamadan duruyor, tek gözünün ışığını kısmış.",
+      "Mekiğin rampası iniyor. Önce beyaz zırhlı stormtrooper'lar çıkıyor, iki sıra halinde, adımları aynı anda. Sonra bir subay, elinde bir veri tableti. En son, acele etmeden, uzun boylu biri iniyor: yerlere kadar uzanan siyah bir palto, boynunda gri bir zırh yakası. Yüzü solgun, neredeyse kansız.",
+      "Kasaba onun kim olduğunu bilmiyor. Sen de bilmiyorsun. Ama Orrin'in sana bir kez, bir kış gecesi, sesini alçaltarak anlattığı bir şey geliyor aklına: İmparatorluk'un Jedi avcıları. Engizitörler.",
+      "Adam meydanın ortasında duruyor. Gözlerini kapatıyor. Bir süre öylece bekliyor, sanki rüzgârı dinliyor. Sonra başını yavaşça çeviriyor. Tam senin saklandığın yöne." + (s.kup === "sen" ? " Cebindeki küp bir an ısınıyor." : ""),
+      "Gözlerini açtığında bakışı su deposunun üstünden kayıp geçiyor. Seni görmedi. Galiba görmedi."
+    ],
+    choices: [
+      { t: "Kuru Kuyu'ya geç, burada durma", to: "d4", fx: (s) => { s.yer = "kantin"; } },
+      { t: "Atölyeye dön, Orrin'e ne gördüğünü anlat", to: "d5", fx: (s) => { s.anlatti = true; } }
+    ]
+  },
+
+  d4: {
+    act: 1, time: "19:30", ruzgar: 0.25, img: "sena", imgLabel: "Kuru Kuyu'da Sena",
+    title: "Kuru Kuyu",
+    text: (s) => {
+      const p = [];
+      if (has(s, "GORDU")) p.push("Meydandaki adamın kapalı gözleri hâlâ aklında. Kuru Kuyu'nun kapısını itip içeri girdiğinde sırtın hâlâ ürperiyor.");
+      p.push("Kuru Kuyu, Varn'ın tek meyhanesi. Tavandan sarkan lambalar, duman, sulandırılmış içki ve kimsenin kimseye adını sormadığı masalar. Bu gece masaların yarısı boş. Duyuruyu herkes duydu.");
+      p.push("Köşedeki masada daha önce hiç görmediğin bir kadın oturuyor. Yıpranmış kahverengi bir pilot ceketi giymiş; omzundaki arma sökülmüş, yerinde sadece dikiş izleri kalmış. Kapıya bakıyor, eli masanın altında.");
+      p.push("\"Bu kasabada dışarıya gemi yok,\" diyor, sen daha bir şey sormadan. \"Biliyorum, sordum. Benimki garnizonda, el konmuş.\" Seni süzüyor. \"Sen hurdacının çırağısın, değil mi? Orrin'in.\" Başını sallıyorsun.");
+      p.push("\"Sena.\" Elini uzatmıyor. \"Gemim yakıt bobini yüzünden indi. İmparatorluk da uçamayan gemiyi sever, hemen el koyar. Bir bobin bulursam, bir de garnizonun kapısından geçmenin yolunu bulursam, bu gece burada olmam.\" Durup sana bakıyor. \"Orrin'in hurdalığında bobin var mı?\"");
+      p.push("Var. Bir tane. Orrin onu yıllardır kimseye satmadı.");
+      return p;
+    },
+    choices: [
+      { t: "Ona küpü anlat", to: "d5", fx: (s) => { flag(s, "SENA_BILIYOR"); flag(s, "TELSIZ"); rel(s, "sena", 2, "Sena sana güvenmeye karar verdi."); note(s, "Sena: «Bir Jedi holokronu mu? O zaman bu gece ikimizin de buradan çıkması lazım.» Sana bir telsiz verdi."); } },
+      { t: "Bobini teklif et, karşılığında seni de götürsün", to: "d5", fx: (s) => { flag(s, "ANLASMA"); flag(s, "TELSIZ"); rel(s, "sena", 1); note(s, "Sena'yla anlaştın: bobin karşılığında bir yer. Sana bir telsiz verdi."); } },
+      { t: "Bir şey söyleme, kalk git", to: "d5" }
+    ]
+  },
+
+  d5: {
+    act: 1, time: "22:30", ruzgar: 0.3, img: "kup", imgLabel: "Taş küp",
+    title: "Uğultu",
+    text: (s) => {
+      const p = [];
+      if (has(s, "SENA_BILIYOR")) p.push("Sena küpü duyunca yüzü değişti. \"Bir Jedi holokronu mu?\" dedi alçak sesle. \"O zaman bu gece ikimizin de buradan çıkması lazım.\" Masanın altından eski bir telsiz çıkarıp sana verdi. \"Kanal dört. Bana ihtiyacın olursa.\"");
+      else if (has(s, "ANLASMA")) p.push("Sena bobini duyunca ilk kez gülümsedi. \"Anlaştık. Bobini getir, sana bir yer ayırırım.\" Masanın altından eski bir telsiz çıkarıp sana verdi. \"Kanal dört.\"");
+      else if (s.yer === "kantin") p.push("Kuru Kuyu'dan bir şey söylemeden çıktın. Sena arkandan baktı, bir şey demedi.");
+      if (s.kapsuldenAldi) p.push("Atölyeye dönmeden önce hurdalığa uğradın. Brandayı çekip kapağı açtın; küp koltuğun altında, bıraktığın yerdeydi. Uzakta, kasabanın öbür ucunda, tarayıcı ışıkları kumun üstünde gezinmeye başlamıştı.");
+      if (s.geriAldi) p.push("Hurdalığa koştun. Brandayı çekip kapağı açtın, küp koltuğun altında, bıraktığın yerdeydi. Avucuna aldığında ısınıyor, mavi ışık bir an parlayıp sönüyordu.");
+      if (s.anlatti) p.push("Orrin'e meydanda gördüğünü anlattın. Siyah palto, gri yaka, kapalı gözler. Orrin uzun süre bir şey demedi, sonra atölyenin bütün kepenklerini tek tek indirdi.");
+      p.push("Gece atölyede. Orrin arka odada, eski bir telsizin başında, İmparatorluk kanallarını dinliyor. KT-4 tezgâhın üstünde şarj oluyor; tek gözü yarı kapalı.");
+      p.push(s.eskiKup === "orrin"
+        ? "Küp Orrin'in demir kasasında. Ama kasanın içinden bile duyuyorsun onu: o uğultu, kulağının içinde, gittikçe bir sese benziyor. Orrin kasayı açıp küpü sana uzatıyor. \"Bu seni çağırıyor,\" diyor. \"Beni değil.\""
+        : "Küp tezgâhın üstünde, önünde. Uğultu artık kulağının içinde değil; sanki odanın her yerinden geliyor. Ve gittikçe bir sese benziyor.");
+      p.push("Parmaklarını yüzeyine koyduğunda çizgilerdeki ışık güçleniyor. Bir an, çok kısa bir an, gözlerinin önünde bir yüz beliriyor: kısa saçlı, yorgun bir kadın, bir şey söylemek ister gibi dudakları kıpırdıyor. Sonra kayboluyor.");
+      p.push("Orrin arka odanın kapısında duruyor. \"Telsizde konuşuyorlar,\" diyor. \"Taramaya başladılar. Kapsülü buldular. Boş buldular.\"");
+      return p;
+    },
+    enter: (s) => { if (s.kup === "kapsul") { s.kapsuldenAldi = true; } if (s.kup !== "sen") { s.eskiKup = s.kup; s.kup = "sen"; flag(s, "HOLOKRON"); } },
+    choices: [
+      { t: "Küpü dinle, o yüzü yeniden görmeye çalış", to: "d6", fx: (s) => { flag(s, "VIZYON"); note(s, "Küpteki kadın: «Beni bulan… Kessar'da değilim artık. Ama kristal hâlâ orada, garnizonun altında. Onu onlara bırakma.»"); } },
+      { t: "Küpü kurşun kaplı alet kutusuna kapat", to: "d6", fx: (s) => { flag(s, "KURSUN"); note(s, "Küpü kurşun kaplı kutuya kapattın. Uğultu kesildi."); } },
+      { t: "Orrin'e sor: «Sen bunu nereden biliyorsun?»", to: "d6", fx: (s) => { flag(s, "ORRIN_HIKAYE"); rel(s, "orrin", 1, "Orrin, yıllardır kimseye anlatmadığı şeyi sana anlattı."); note(s, "Orrin: Gençliğinde kaçakçıydı. Bir Jedi'ı iki kez bu çölden kaçırdı. Üçüncüsünde gelemedi."); } }
+    ]
+  },
+
+  d6: {
+    act: 1, time: "23:50", ruzgar: 0.5, img: "engizitor", imgLabel: "Kapıdaki Engizitör",
+    title: "Kapı",
+    text: (s) => {
+      const p = [];
+      if (has(s, "VIZYON")) p.push("Gözlerini kapatıp küpü avuçlarının arasında tutuyorsun. Kadının yüzü yeniden beliriyor, bu kez sesiyle: «Beni bulan… Kessar'da değilim artık. Ama kristal hâlâ orada, garnizonun altında. Onu onlara bırakma.» Sonra ışık sönüyor ve elin titriyor.");
+      if (has(s, "KURSUN")) p.push("Küpü Orrin'in kurşun kaplı alet kutusuna koyup kapağı kapatıyorsun. Uğultu bir anda kesiliyor. Sessizlik o kadar ani ki kulakların çınlıyor. Orrin başını sallıyor: \"Tarayıcılar kurşunu geçemez. Belki onun gözü de geçemez.\"");
+      if (has(s, "ORRIN_HIKAYE")) p.push("Orrin tezgâha yaslanıyor. \"Gençken kaçakçıydım,\" diyor. \"Bir Jedi'ı iki kez bu çölden kaçırdım. Üçüncüsünde gelemedim. Ondan sonra bir daha gemiye binmedim.\" Küpe bakıyor. \"Bunun sahibi kimse, birinin onu bekliyor olması gerek.\"");
+      p.push("Gece yarısına on dakika var. Rüzgâr yükseliyor; atölyenin teneke çatısı kum taneleriyle dövülmeye başlıyor. Kum fırtınası geliyor.");
+      p.push("Sonra kapıya vuruluyor. Üç kez, sakin, aralıklı.");
+      p.push("Orrin kapıyı açıyor. Eşikte " + (has(s, "GORDU") ? "meydandaki adam duruyor: siyah palto, gri yaka, solgun yüz." : "uzun boylu bir adam duruyor: yerlere kadar uzanan siyah bir palto, boynunda gri bir zırh yakası, kansız denecek kadar solgun bir yüz.") + " Arkasında iki stormtrooper, fırtınanın tozunda yarı görünür." + (has(s, "GORDU") ? " Bakışları Orrin'in omzunun üstünden geçip doğrudan seni buluyor. Meydanda seni gördü. Görmüş." : ""));
+      p.push("\"İyi akşamlar,\" diyor. Sesi yumuşak, neredeyse kibar. \"Ben Yedinci Kardeş. Bu akşam kayıp bir şeyi arıyorum.\"" + (has(s, "KURSUN") ? " Gözlerini kapatıyor, bekliyor. Kaşları hafifçe çatılıyor, sanki bir şey duyması gerekirken duymuyormuş gibi." : " Gözlerini kapatmasına gerek yok. Başını tezgâha, küpün olduğu yere çeviriyor ve gülümsüyor."));
+      if (!has(s, "GORDU")) p.push("Orrin'in yüzündeki renk çekiliyor. Sana dönmeden, dudaklarını zor oynatarak tek bir kelime fısıldıyor: \"Engizitör.\" Bir kış gecesi sana anlattıklarını hatırlıyorsun: İmparatorluk'un Jedi avcıları. Engizitörler.");
+      return p;
+    },
+    choices: [
+      { t: "Küpü ona ver", to: "e_teslim" },
+      { t: "Yalan söyle: «Burada hurdadan başka bir şey yok.»", to: "act1_end", fx: (s) => { s.kacis = "yalan"; } },
+      { t: "Arka kapıdan KT-4'le fırtınaya kaç", to: "act1_end", fx: (s) => { s.kacis = "arka"; } },
+      { t: "Telsizden Sena'yı çağır, oyalan", to: "act1_end", if: (s) => has(s, "TELSIZ"), fx: (s) => { s.kacis = "sena"; } }
+    ]
+  },
+
+  act1_end: {
+    act: 1, time: "00:20", ruzgar: 0.85,
+    actEnd: true, next: { t: "2. Perde'ye geç", to: "e1" },
+    title: "Kum fırtınası",
+    enter: (s) => {
+      if (s.kacis === "sena") flag(s, "ORRIN_YANINDA");
+      else if (s.kacis === "yalan" && has(s, "KURSUN")) flag(s, "ORRIN_SERBEST");
+      else flag(s, "ORRIN_ESIR");
+      flag(s, "HOLOKRON");
+    },
+    text: (s) => {
+      const p = [];
+      if (s.kacis === "yalan" && has(s, "KURSUN")) {
+        p.push("\"Burada hurdadan başka bir şey yok,\" diyorsun. Sesin titremiyor, kendine şaşırıyorsun.");
+        p.push("Engizitör uzun süre sana bakıyor. Sonra atölyenin içinde ağır ağır yürüyor; parmaklarını rafların üstünde gezdiriyor, kurşun kutunun yanından geçiyor, durmuyor. \"Fırtına diniyor,\" diyor kapıda. \"Şafakta tekrar geleceğim. O zamana kadar hatırlamaya çalışın.\" Gidiyor.");
+        p.push("Kapı kapanır kapanmaz Orrin kutuyu açıp küpü sana uzatıyor. \"Şafağı bekleme,\" diyor. \"Şimdi git. Ben burada kalıp yine yalan söylerim. Yaşlı adama inanırlar.\" Sana sarılıyor; Orrin hiç sarılmaz.");
+      } else if (s.kacis === "yalan") {
+        p.push("\"Burada hurdadan başka bir şey yok,\" diyorsun.");
+        p.push("Engizitör gülümsemesini bozmadan tezgâha yürüyor. Elini kaldırıyor; küp, sanki görünmez bir ip çekiyormuş gibi tezgâhın üstünde kıpırdıyor. O anda Orrin, elindeki ağır anahtarı lambaya fırlatıyor. Karanlık. Bir bağırış. Orrin'in sesi: \"Küpü al ve koş!\"");
+        p.push((has(s, "KURSUN") ? "Kurşun kutuyu" : "Küpü") + " kapıp arka kapıdan fırtınaya dalıyorsun. KT-4 omzuna tutunmuş, çığlık gibi bipliyor. Arkanda, atölyenin içinde bir şey kırmızı bir ışıkla parlıyor. Sonra Orrin'in sesi kesiliyor.");
+      } else if (s.kacis === "arka") {
+        p.push((has(s, "KURSUN") ? "Kurşun kutuyu" : "Küpü") + " kapıp arka kapıya atılıyorsun. Engizitör sakin bir sesle \"Durun,\" diyor, emir bile değil. Orrin kapının önüne geçiyor, kollarını iki yana açıyor. \"Yaşlı bir hurdacıyla uğraşın biraz, efendim.\"");
+        p.push("Fırtınaya dalıyorsun. KT-4 omzuna tutunmuş, gözünün ışığını kısmış. Arkana bir kez bakıyorsun: atölyenin kapısında, kum perdesinin ardında, iki stormtrooper Orrin'i kollarından tutmuş çıkarıyor.");
+      } else {
+        p.push("Telsize fısıldıyorsun: \"Kanal dört. Sena. Orrin'in atölyesi. Şimdi.\" Sonra Engizitör'e dönüyorsun ve konuşuyorsun: kapsülü, hurdalığı, havayı, ne gelirse. Orrin anlıyor, o da konuşmaya başlıyor; ikiniz bir yaşlı, bir genç, saçma sapan bir hurda pazarlığına giriyorsunuz.");
+        p.push("Engizitör'ün sabrı tükenmek üzereyken atölyenin arka duvarı bir motor kükremesiyle sarsılıyor. Sena'nın kum motoru, farları yanık, arka kapıya yanaşıyor. \"Binin!\" Orrin'i kolundan çekip motora atlıyorsunuz. " + (has(s, "KURSUN") ? "Kurşun kutu kolunun altında." : "Küp cebinde.") + " Motor fırtınanın içine dalıyor; arkanızda kırmızı bir ışık bir an parlayıp kum perdesinde kayboluyor.");
+      }
+      p.push("Kum fırtınası artık her yerde. Gökyüzü yok, ufuk yok; yalnızca rüzgâr ve kum." + (s.kacis === "sena" ? "" : " ") + (s.kacis === "sena" ? "" : has(s, "KURSUN") && s.kacis !== "yalan" ? "Kurşun kutu kolunun altında; içindeki küp susuyor, ama ağırlığını hissediyorsun." : "Küp cebinde atıyor, uğultu fırtınanın sesine karışıyor."));
+      p.push(has(s, "ANLASMA") || has(s, "SENA_BILIYOR")
+        ? "Sena'nın gemisi garnizonda, el konmuş halde duruyor. Bobin ise hâlâ Orrin'in hurdalığında. Bu gece Kessar'dan çıkmanın tek yolu garnizondan geçiyor."
+        : has(s, "ORRIN_SERBEST") ? "Engizitör şafakta geri gelecek. Kessar'dan çıkmanın tek yolu garnizondaki gemilerden geçiyor; ve şafağa yalnızca birkaç saat var." : "Kessar'dan çıkmanın tek yolu garnizondaki gemilerden geçiyor. Ve kasabada senin kim olduğunu bilmeyen kimse kalmadı.");
+      return p;
+    }
+  },
+
+  e_teslim: {
+    act: 1, time: "00:05", ruzgar: 0.6,
+    end: { id: "teslim", kind: "Erken son" },
+    title: "Boyun Eğiş",
+    text: (s) => [
+      "Küpü ona verdin. Korktun; kim korkmazdı ki? Ama daha ilk gecede, bir hurdacının atölyesinde, sana fısıldayan şeyi elinle başkasına uzattın.",
+      "Engizitör küpü avucunda tartıyor. Işık çizgilerin içinde bir an çırpınıyor, sonra sönüyor. \"Akıllıca,\" diyor. \"Çoğu insan bunu son ana kadar anlamaz.\" Beş bin krediyi tezgâhın üstüne bırakıyor, sayıp kontrol etmene gerek kalmadan.",
+      "Kapıdan çıkarken duruyor ve sana dönüyor. \"Sen onu duydun, değil mi?\" diye soruyor. Cevap vermiyorsun. Gülümsüyor. \"Bir gün tekrar konuşuruz.\""
+    ],
+    sabah: "Sabah mekik kalkıyor. Kasaba yeniden kepenklerini açıyor. Orrin bütün gün seninle konuşmuyor.",
+    akibet: (s) => [
+      ["Sen", "Krediyle Orrin'in borçlarını kapattın. Uğultu bir daha hiç gelmedi. Bazı geceler onu özlediğini fark ediyorsun."],
+      ["Orrin", "Atölyeyi sana bıraktı. Son sözü şuydu: «Hurdaya ne düşerse düşsün, önce sahibini sor. Biz sormadık.»"],
+      ["Küp", "Bir İmparatorluk kasasında, adı olmayan bir rafta."],
+      s.yer === "kantin" ? ["Sena", has(s, "TELSIZ") ? "Telsiz bir daha hiç cızırdamadı." : "Onu bir daha hiç görmedin."] : ["KT-4", "Hurdalıkta, hep yanında. Bazı geceler kapsülün düştüğü köşeye uzun uzun bakıyor."]
+    ],
+    yil: "Bir yıl sonra kasabaya yine bir mekik iniyor. Rampadan inen siyah paltolu adam doğrudan senin atölyene yürüyor. \"Konuşmamız gerektiğini söylemiştim,\" diyor."
+  },
+
+  /* ================= 2. PERDE: KAÇIŞ ================= */
+  e1: {
+    act: 2, konum: "Açık çöl", time: "00:40", ruzgar: 0.95,
+    title: "Fırtınada",
+    enter: (s) => { if (s.kacis === "sena") flag(s, "SENA_YANINDA"); },
+    text: (s) => {
+      const p = [];
+      if (has(s, "ORRIN_YANINDA")) {
+        p.push("Sena'nın kum motoru fırtınanın içinde bir kör gibi ilerliyor. Farlar kumun içinde iki soluk leke; ötesi yok. Orrin arkada, sana sımsıkı tutunmuş, ceketinin altında kalın, ağır bir şey taşıyor.");
+        p.push("Motor öksürüyor. Bir kez, iki kez. \"Hava girişine kum doldu,\" diye bağırıyor Sena rüzgârın içinden. \"Bir saat daha giderse yolda kalırız!\"");
+        p.push("Orrin elini kaldırıp karanlığın bir yerini gösteriyor. \"Eski nem istasyonu! Sola, iki tepe öte. Çatısı sağlam.\"");
+      } else {
+        p.push(has(s, "ORRIN_SERBEST")
+          ? "Orrin'in sarılışı hâlâ sırtında. Atölyeden çıkıp kasabanın son evlerini geçtiğinde fırtına seni bütünüyle yutuyor."
+          : (s.kacis === "arka" ? "Orrin'i kollarından tutup çıkaran askerlerin görüntüsü gözünün önünden gitmiyor." : "Orrin'in sesinin kesildiği an kulaklarında çınlıyor.") + " Kasabanın son evlerini geçtiğinde fırtına seni bütünüyle yutuyor; geri dönmek istesen de artık hangi yönden geldiğini bilmiyorsun.");
+        p.push("Gözlüğünü takıyorsun, atkını burnunun üstüne çekiyorsun. Kum yüzüne iğne gibi batıyor. KT-4 omzunda, tek gözünün ışığını kısmış; bir sağa bir sola dönüyor, sanki bir şey dinliyor.");
+        p.push("Gece yarısını geçti. Garnizon kasabanın kuzeyinde, iki saatlik yol. Bu fırtınada belki dört. Belki hiç.");
+      }
+      return p;
+    },
+    choices: [
+      { t: "Eski nem istasyonuna sığının", to: "e2", if: (s) => has(s, "ORRIN_YANINDA") },
+      { t: "Fırtınaya rağmen garnizona sürün", to: "e_kum", if: (s) => has(s, "ORRIN_YANINDA"), fx: (s) => { s.kum = "motor"; } },
+      { t: "Telsizden Sena'yı çağır", to: "e2", if: (s) => !has(s, "ORRIN_YANINDA") && has(s, "TELSIZ"), fx: (s) => { flag(s, "SENA_YANINDA"); s.senaCagri = true; } },
+      { t: "KT-4'e sor: sığınacak bir yer biliyor mu?", to: "e2", if: (s) => !has(s, "ORRIN_YANINDA"), fx: (s) => { s.kt4Siginak = true; rel(s, "kt4", 1, "KT-4 kendini işe yarar hissetti."); } },
+      { t: "Durma, fırtınada garnizona yürü", to: (s) => (s.r.kt4 || 0) >= 1 ? "e4" : "e_kum", if: (s) => !has(s, "ORRIN_YANINDA"), fx: (s) => { s.kum = "yaya"; s.yurudu = true; } }
+    ]
+  },
+
+  e2: {
+    act: 2, konum: "Eski nem istasyonu", time: "01:30", ruzgar: 0.8, img: "istasyon", imgLabel: "Nem istasyonu",
+    title: "Nem istasyonu",
+    enter: (s) => { if (has(s, "ORRIN_YANINDA")) flag(s, "BOBIN"); },
+    text: (s) => {
+      const p = [];
+      if (s.senaCagri) p.push("Telsiz uzun süre cızırdıyor. Sonra Sena'nın sesi: \"Neredesin? Tamam, kıpırdama. KT-4'in ışığını yak.\" Yarım saat sonra fırtınanın içinden iki soluk far beliriyor. Motorunun hava girişi kumla dolmuş, öksürüyor. \"Burada kalamayız,\" diyor. \"Eski nem istasyonu yakında.\"");
+      if (s.kt4Siginak) p.push("KT-4 bir an düşünüyor gibi duruyor, sonra omzundan atlayıp önünde yürümeye başlıyor. Ezberinde bir harita varmış gibi tepelerin arasından kıvrılıyor. Yarım saat sonra kumun içinden yarısı gömülü bir kule beliriyor.");
+      p.push("Eski nem istasyonu kumun içinden çıkan paslı bir kule. Kapısı yarı gömülü; omuzla iterek içeri giriyorsunuz. İçerisi kuru, sessiz, ve uzun zamandır kimse girmemiş gibi kokuyor. Fırtına duvarların dışında uğulduyor.");
+      if (has(s, "ORRIN_YANINDA")) p.push("Orrin ceketinin altındaki ağır şeyi yere bırakıyor: yakıt bobini. \"Bunu almadan çıkmam ben,\" diyor, nefes nefese. Sena bobine bakıyor, sonra Orrin'e. Ve bu gece ilk kez gülüyor.");
+      if (has(s, "SENA_YANINDA")) p.push("Sena eldivenlerini çıkarıp ellerini ovuşturuyor. \"Gemim garnizonun hangarında,\" diyor. \"Adı Kum Serçesi. Bobin takılırsa on dakikada kalkar.\"" + (has(s, "BOBIN") ? "" : " Sana bakıyor. \"Ve bobin hâlâ Orrin'in hurdalığında.\""));
+      else p.push("Yalnızsın. KT-4 bir köşede şarjını kontrol ediyor. Duvardaki küçük pencereden fırtına dışında bir şey görünmüyor.");
+      p.push(kutu(s)
+        ? "Kurşun kutuyu dizlerinin üstüne koyuyorsun. Kapağını aralasan uğultu geri gelecek; biliyorsun."
+        : "Küp cebinde. Uğultu burada, bu sessizlikte, neredeyse bir nefes kadar yakın.");
+      if (has(s, "VIZYON")) p.push("Kadının sözleri aklından çıkmıyor: kristal, garnizonun altında.");
+      return p;
+    },
+    choices: [
+      { t: "Hurdalığa dön, bobini al", to: "e3", if: (s) => !has(s, "BOBIN") && (has(s, "ANLASMA") || has(s, "SENA_BILIYOR") || has(s, "SENA_YANINDA")) },
+      { t: "Küpü avuçlarına al: «Kristal nerede?»", to: "e2b", if: (s) => has(s, "VIZYON") },
+      { t: "Küpü dinle, belki sana bir şey söyler", to: "e2b", if: (s) => !has(s, "VIZYON"), fx: (s) => { flag(s, "VIZYON"); } },
+      { t: "Şafak sökmeden garnizona git", to: "e4" }
+    ]
+  },
+
+  e2b: {
+    act: 2, konum: "Eski nem istasyonu", time: "01:50", ruzgar: 0.75,
+    title: "Ilara",
+    enter: (s) => { flag(s, "TUNEL"); if (!s.ilaraNot) { s.ilaraNot = true; note(s, "Ilara Venn: «Garnizon eski bir tapınağın üstünde. Kristal tapınağın kalbinde. Kuru Kuyu'dan bir tünel iner.»"); } },
+    text: (s) => {
+      const p = [];
+      if (kutu(s)) p.push("Kurşun kutunun kapağını açıyorsun. Uğultu, kutudan bir su gibi taşıp odayı dolduruyor.");
+      p.push("Küpü iki avucunun arasına alıp gözlerini kapatıyorsun. Bu kez yüz hemen geliyor. Kısa saçlı kadın, yorgun, bir mağaranın serin ışığında oturuyor gibi.");
+      p.push({ q: "Adım Ilara Venn. Bu mesajı bulan, beni dinle. Garnizon eski bir tapınağın üstüne kurulu. Tapınağın kalbinde bir kristal var; onu İmparatorluk'tan önce oraya ben sakladım. Kasabadaki eski kuyudan bir tünel iner. Kuru kuyudan." });
+      p.push("Kuru Kuyu. Meyhane. Onlarca kez önünden geçtin; adının nereden geldiğini hiç düşünmedin.");
+      p.push({ q: "Seni arayacak olan kişi, karanlığı öfkeden besler. Sana acı verecek, sonra o acıyı sana bir silah gibi uzatacak. Silahı alma." });
+      p.push("Yüz kayboluyor. Ellerin titriyor. " + (has(s, "SENA_YANINDA") ? "Sena seni izliyormuş, ağzını açıp bir şey diyemiyor." : "KT-4 köşeden sana bakıyor, gözünün ışığı her zamankinden parlak."));
+      return p;
+    },
+    choices: [
+      { t: "Önce hurdalığa uğra, bobini al; sonra tünelden in", to: "e3", if: (s) => !has(s, "BOBIN") && (has(s, "ANLASMA") || has(s, "SENA_BILIYOR") || has(s, "SENA_YANINDA")), fx: (s) => { s.tunelSonra = true; } },
+      { t: "Kuru Kuyu'ya git, tünelden in", to: "e4", fx: (s) => { s.tuneldenGir = true; } },
+      { t: "Garnizona dışarıdan yaklaş", to: "e4" }
+    ]
+  },
+
+  e3: {
+    act: 2, konum: "Varn · hurdalık", time: "02:20", ruzgar: 0.6,
+    title: "Hurdalık",
+    enter: (s) => { flag(s, "BOBIN"); },
+    text: (s) => {
+      const p = [];
+      p.push("Fırtına biraz dindi. Kasabaya hurdalığın arka tarafından, eski bir çit deliğinden giriyorsun. Atölyenin önünde bir lamba yanıyor ve lambanın altında beyaz zırhlı bir stormtrooper nöbet tutuyor.");
+      if (has(s, "SENA_YANINDA")) p.push("Sena çitin dışında, bir hurda yığınının gölgesinde bekliyor. \"Beş dakika,\" diye fısıldıyor. \"Sonra seni almaya gelirim.\"");
+      if (has(s, "ORRIN_SERBEST")) {
+        p.push("Arka pencereden içeri bakıyorsun. Orrin tezgâhın başında oturmuş, sanki hiçbir şey olmamış gibi çay demliyor. Seni görüyor. Hiç şaşırmıyor. Yavaşça kalkıp bir rafın arkasından bobini çıkarıyor ve pencereden uzatıyor.");
+        p.push("\"Garnizona mı?\" diye fısıldıyor. Başını sallıyorsun. Bir an bakışıyorsunuz. \"Yaşlıyım,\" diyor. \"Ama yolu bilirim.\"");
+      } else {
+        p.push("Atölyenin kapısı mühürlenmiş. Arka pencereden içeri bakıyorsun: raflar devrilmiş, tezgâh yarılmış, yerde Orrin'in eski piposu. Kırık.");
+        p.push("Bobin Orrin'in onu hep sakladığı yerde, döşeme tahtasının altında. Kimse bulmamış. Alırken ellerinin titrediğini fark ediyorsun. Korkudan değil.");
+      }
+      return p;
+    },
+    choices: [
+      { t: "Orrin'i de al; KT-4 nöbetçiyi oyalasın", to: "e4", if: (s) => has(s, "ORRIN_SERBEST"), fx: (s) => { if ((s.r.kt4 || 0) >= 0) flag(s, "ORRIN_KATILDI"); else { flag(s, "ORRIN_KATILDI"); flag(s, "ALARM_ERKEN"); } } },
+      { t: "Orrin'i bırak: «Burada daha güvendesin.»", to: "e4", if: (s) => has(s, "ORRIN_SERBEST"), fx: (s) => { rel(s, "orrin", 1, "Orrin, onu korumaya çalıştığını anladı."); } },
+      { t: "Bobini al, Orrin'i kurtaracağına yemin et", to: "e4", if: (s) => !has(s, "ORRIN_SERBEST"), fx: (s) => { flag(s, "YEMIN"); flag(s, "OFKE"); note(s, "Kırık pipoyu cebine koydun. Orrin'i garnizondan çıkaracaksın."); } },
+      { t: "Bobini al, kimseye görünmeden çık", to: "e4", if: (s) => !has(s, "ORRIN_SERBEST") }
+    ]
+  },
+
+  e4: {
+    act: 2, konum: "Varn garnizonu", time: "03:20", ruzgar: 0.35, img: (s) => s.tuneldenGir ? "tapinak" : "garnizon", imgLabel: (s) => s.tuneldenGir ? "Garnizonun altındaki tapınak" : "Varn garnizonu",
+    title: "Garnizon",
+    enter: (s) => { if (s.tunelSonra) s.tuneldenGir = true; if (!has(s, "SENA_YANINDA")) { s.senaHangarda = true; flag(s, "SENA_YANINDA"); if (s.yer !== "kantin") s.senaTanisti = true; } },
+    text: (s) => {
+      const p = [];
+      if (s.yurudu) p.push("KT-4 fırtınanın içinde seni bir pusula gibi yönlendirdi; iki saat boyunca onun kısa biplerinin peşinden yürüdün. Gözlerin kumdan kan çanağı, ama vardın.");
+      if (has(s, "ORRIN_KATILDI")) p.push(has(s, "ALARM_ERKEN")
+        ? "KT-4 nöbetçinin ayaklarının dibinde ıslık çalıp dönmeye başladığında asker telsizine bağırdı. Orrin'le hurdalığın arkasından koşarak çıktınız; arkanızda kasabanın ışıkları birer birer yandı. Garnizon artık birilerinin geldiğini biliyor."
+        : "KT-4 nöbetçinin ayaklarının dibinde ıslık çalıp dönmeye başladı; asker ona eğildiği an Orrin pencereden süzülüp yanına geldi. Yaşına göre şaşırtıcı derecede sessiz.");
+      if (s.tuneldenGir) {
+        p.push("Kuru Kuyu'nun mahzeninde, fıçıların arkasında, taş bir kapak buluyorsun. Altında dar, kuru bir tünel; duvarlarında küpün yüzeyindekilere benzeyen çizgiler. Bir saat boyunca yerin altında yürüyorsun. Tünel, garnizonun tam altında, yarısı göçmüş eski bir tapınağa açılıyor. Ortada, bir taş kaidenin üstünde, mavi bir ışık bekliyor.");
+        p.push("Tapınağın bir köşesinden dar bir merdiven yukarı çıkıyor. Tepesindeki paslı ızgaradan garnizonun avlusu görünüyor: hangar, iniş pisti, alçak beton binalar.");
+      } else p.push("Garnizon, kasabanın kuzeyindeki kayalık tepenin üstünde. Yüksek beton duvarlar, gözcü kuleleri, kumun üstünde gezinen projektörler. Duvarın doğusunda, bir drenaj kanalının ızgarası gevşek.");
+      if (has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI")) p.push("Orrin arkanda, nefes nefese, hurdacı gözleriyle her şeyi tartıyor.");
+      const senaTanir = s.yer === "kantin";
+      if (s.senaHangarda) p.push((s.tuneldenGir ? "Izgaradan bakarken hangarın dibinde bir gölge kıpırdıyor. " : "Hangara bakan duvarın dibinde bir gölge kıpırdıyor. ") + (senaTanir
+        ? "Sena. Tek başına, bir maymuncukla hangarın servis kapısını zorluyor." + (s.tuneldenGir ? " O yıpranmış pilot ceketini nerede görsen tanırsın." : " Seni görünce durup gülümsüyor: \"Demek sen de aynı fikirdesin.\"")
+        : "Yıpranmış bir pilot ceketi giymiş bir kadın, tek başına, bir maymuncukla hangarın servis kapısını zorluyor. Omzundaki arma sökülmüş." + (s.tuneldenGir ? " Izgaranın gıcırtısını duyunca dönüp tabancasını kaldırıyor; senin omzundaki droidi görünce indiriyor ve sessizce ızgaraya kadar gelip dibine çömeliyor. \"Sena,\" diye fısıldıyor. \"Gemim içeride, el konmuş. Sen de mi kaçıyorsun?\"" : " Seni görünce elini belindeki tabancaya atıyor, sonra yüzündeki kumu ve omzundaki droidi görüp indiriyor. \"Sena,\" diyor. \"Gemim içeride, el konmuş. Sen de mi kaçıyorsun?\"")));
+      else p.push((s.tuneldenGir ? "Sena yanında, ızgaradan hangara bakıyor." : "Sena yanında, nefesini tutmuş, hangarın servis kapısına bakıyor.") + " \"Kum Serçesi orada,\" diyor. \"On dakika bana yeter.\"");
+      if (has(s, "ORRIN_ESIR")) p.push((s.tuneldenGir ? "Avlunun öbür ucunda" : "Duvarın içinde") + ", alçak bir binanın penceresinde parmaklıklar var. Hücre bloğu. Orrin orada." + (has(s, "YEMIN") ? " Cebindeki kırık pipoyu sıkıyorsun." : ""));
+      p.push("İniş pistinde Engizitör'ün mekiği duruyor, rampası yarı açık; yanında yalnızca bir nöbetçi.");
+      p.push("Gökyüzü griye dönmek üzere. Şafağa bir saat var. Nöbet değişimi on beş dakika sonra. Bir şey yapabilirsin, belki iki değil.");
+      return p;
+    },
+    choices: [
+      { t: "Hangara gir: Sena'nın gemisini hazırla", to: "act2_end", fx: (s) => { s.hedef = "gemi"; } },
+      { t: "Hücre bloğuna: Orrin'i çıkar", to: "act2_end", if: (s) => has(s, "ORRIN_ESIR"), fx: (s) => { s.hedef = "orrin"; } },
+      { t: "Kristale uzan", to: "act2_end", if: (s) => s.tuneldenGir, fx: (s) => { s.hedef = "kristal"; } },
+      { t: "Engizitör'ün mekiğine tek başına gizlen", to: "act2_end", fx: (s) => { s.hedef = "mekik"; } }
+    ]
+  },
+
+  act2_end: {
+    act: 2, konum: "Varn garnizonu", time: "04:10", ruzgar: 0.2,
+    actEnd: true, next: { t: "3. Perde'ye geç", to: "f1" },
+    title: "Alarm",
+    enter: (s) => {
+      if (s.hedef === "orrin") flag(s, "ORRIN_KURTARILDI");
+      if (s.hedef === "kristal") flag(s, "KRISTAL");
+      if (s.hedef === "gemi" && has(s, "BOBIN")) flag(s, "GEMI_HAZIR");
+    },
+    text: (s) => {
+      const p = [];
+      if (s.hedef === "gemi") {
+        p.push("Servis kapısından hangara sızıyorsunuz. Kum Serçesi, köşede, bir elektrik kelepçesiyle yere çakılı duruyor: kısa kanatlı, yıpranmış, sevimli bir yük gemisi.");
+        p.push(has(s, "BOBIN")
+          ? "Bobini Sena'ya uzatıyorsun. Sena motor kapağını açıp bobini yerine oturtuyor, sen kelepçenin güç kablosunu KT-4'e veriyorsun. KT-4 iki saniyede kelepçeyi açıyor. Motorlar ısınmaya başlıyor."
+          : "Sena motor kapağını açıyor ve küfrediyor. Bobin yok. Gemi kalkamaz. \"Başka bir yol bulacağız,\" diyor, ama sesi ona inanmıyor.");
+      }
+      if (s.hedef === "orrin") {
+        p.push((s.tuneldenGir ? "Izgarayı kaldırıp avluya çıkıyor, gölgeden gölgeye" : "Drenaj kanalından içeri sızıyor,") + " hücre bloğunun arka koridoruna çıkıyorsun. KT-4 kapı paneline bağlanıyor; ışıklar bir an titreyip sönüyor. Üçüncü hücrede Orrin, yere oturmuş, sırtı duvarda. Yüzünde morluklar var. Seni görünce gözleri doluyor.");
+        p.push("\"Aptal çocuk,\" diyor. \"Bunun için mi geldin?\" Kolunu omzuna atıyorsun.");
+      }
+      if (s.hedef === "kristal") {
+        if (!s.senaHangarda) p.push("Sena ızgarayı aralıyor. \"Ben gemiye gidiyorum,\" diye fısıldıyor. \"Sen onu al ve gel. On dakika.\"" + ((has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI")) ? " Orrin onun peşinden tırmanıyor; ızgaradan son bir kez sana bakıyor." : "") + " Tapınakta KT-4'le yalnız kalıyorsun.");
+        p.push("Taş kaidenin önünde duruyorsun. Kristal avucun büyüklüğünde, içinde mavi bir ışık akıyor; küpteki ışıkla aynı. Uzanıp aldığında " + (kutu(s) ? "kurşun kutunun içindeki küp bile ısınıyor" : "cebindeki küp de parlıyor") + ", ikisi birbirini tanımış gibi.");
+        p.push("O an, tapınağın yukarısında, garnizonun içinde bir şey seni hissediyor. Biliyorsun. Çünkü sen de onu hissediyorsun: soğuk, sabırlı, merdivenlerden aşağı inen bir varlık.");
+      }
+      if (s.hedef === "mekik") {
+        p.push("Engizitör'ün mekiği iniş pistinde, rampası yarı açık. Nöbetçi değişirken içeri süzülüyor, yük bölmesindeki sandıkların arasına siniyorsun. KT-4 omzunda titriyor. Bu gemi kalktığında nereye gideceğini bilmiyorsun; tek bildiğin Kessar'dan uzağa.");
+        p.push((has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI") ? "Sena'yı da Orrin'i de dışarıda bıraktın." : "Sena'yı dışarıda bıraktın.") + (has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI") ? " Belki kendilerini kurtarırlar. Belki kurtaramazlar." : " Belki kendini kurtarır. Belki kurtaramaz."));
+      }
+      p.push("Ve sonra sirenler. Önce bir tane, sonra her yerden. Projektörler dönüyor, garnizonun bütün ışıkları bir anda yanıyor." + (has(s, "ALARM_ERKEN") ? " Kasabadaki kaçışınızı haber alan garnizon zaten tetikteymiş." : ""));
+      p.push("Hoparlörden düz bir ses: \"Bütün birimler. Hedef garnizonun içinde. Canlı istenmektedir.\" Sonra başka bir ses, yumuşak, neredeyse kibar, sanki kulağının dibinde: \"Seni bekliyordum.\"");
+      return p.filter(Boolean);
+    }
+  },
+
+  e_kum: {
+    act: 2, konum: "Açık çöl", time: "05:30", ruzgar: 0.9,
+    end: { id: "kum", kind: "Erken son" },
+    title: "Kum Altında",
+    text: (s) => s.kum === "motor" ? [
+      "Fırtınaya meydan okudunuz ve fırtına kazandı. Sığınacak yer varken durmadınız.",
+      "Motor bir tepenin yamacında son kez öksürüp susuyor. Sena kumu temizlemeye çalışıyor, olmuyor. Orrin üçünüzü motorun rüzgâr almayan tarafına çekiyor; sırtlarınızı birbirinize verip atkılarınızı yüzünüze kapatıyorsunuz. Kum, üstünüze yavaş yavaş, bir battaniye gibi örtülüyor.",
+      (kutu(s) ? "Kurşun kutunun içinde küp" : "Küp cebinde") + " son bir kez ısınıyor. Sonra sadece rüzgâr."
+    ] : [
+      "Fırtınada yön bulamadın. KT-4'ü dinlemedin, ya da KT-4 seni yeterince tanımıyordu.",
+      "Bir saat yürüdün, belki iki. Sonra bir tepenin yamacında dizlerin çöktü. KT-4 omzundan inip önünde dönmeye başladı, bipledi, bipledi. Sesi rüzgârda kayboldu.",
+      (kutu(s) ? "Kurşun kutunun içinde küp" : "Küp cebinde") + " son bir kez ısındı. Uğultu yumuşadı, neredeyse bir ninni gibi. Sonra sadece rüzgâr."
+    ],
+    sabah: (s) => "Sabah fırtına diniyor. Kessar'ın iki güneşi her zamanki gibi aynı anda doğuyor. Kumun üstünde " + (s.kum === "motor" ? "bir motorun kırık arka kanadından başka bir şey görünmüyor." : "küçük, paslı bir droid oturuyor. Tek gözünü kuma dikmiş, bekliyor."),
+    akibet: (s) => [
+      ["Sen", "Seni bulmadılar. Ne İmparatorluk ne başkası."],
+      ["Küp", "Kumun altında. Belki bir gün, bir başka fırtına onu yeniden yüzeye çıkarır."],
+      ...(s.kum === "motor" ? [["Sena", "Motoru son ana kadar kurtarmaya çalıştı. Sonra elini senin elinin üstüne koydu."]] : []),
+      ["Orrin", s.kum === "motor" ? "Yanındaydı. Sonuna kadar." : (has(s, "ORRIN_ESIR") ? "Garnizonda, bir hücrede. Seni hiç unutmadı." : "Atölyesinde, her akşam kapıya bakarak.")],
+      ["KT-4", s.kum === "motor" ? "Seninle birlikte." : "Haftalarca o tepede bekledi. Sonra bir hurdacı onu buldu, temizledi. Hâlâ her akşam güneşler batarken çölün aynı yerine bakıyor."]
+    ],
+    yil: "Varn'da çocuklar bir masal anlatıyor: fırtınalı gecelerde çölden mavi bir ışık yükselirmiş. Bakanın kulağında bir uğultu başlarmış."
+  },
+
+  /* ================= 3. PERDE: HOLOKRON ================= */
+  f1: {
+    act: 3, konum: (s) => s.hedef === "mekik" ? "Engizitör'ün mekiği" : s.hedef === "kristal" ? "Garnizonun altındaki tapınak" : "Varn garnizonu", time: "04:12", ruzgar: 0.15,
+    title: "Sirenler",
+    text: (s) => {
+      const p = [];
+      if (s.hedef === "mekik") return [
+        "Sirenler mekiğin gövdesinden bile duyuluyor. Rampa kapanıyor, motorlar ateşleniyor. Sandıkların arasında nefesini tutuyorsun; gemi titreyerek yerden kesiliyor.",
+        "Kokpitten bir telsiz konuşması geliyor: \"Kardeş garnizonda kalıyor. Mekiği yörüngedeki gemiye götürüyorum.\" Pilot yalnız. Engizitör aşağıda kaldı.",
+        "Küçük bir lomboza eğiliyorsun. Garnizon aşağıda küçülüyor. Hangarın önünde bir gölge koşuyor: belki Sena. Projektörler onu arıyor.",
+        "KT-4 omzunda hiç kıpırdamıyor. Tek gözü, kokpit kapısının paneline dikili."
+      ];
+      if (s.hedef === "gemi" && has(s, "GEMI_HAZIR")) {
+        p.push("Kum Serçesi'nin motorları uğulduyor. Sena kokpite atlıyor, düğmelere ezbere dokunuyor. \"İki dakika!\" diye bağırıyor. \"Motorlar ısınmadan kalkarsak pistin sonunda yere çakılırız!\"");
+        p.push("Hangarın büyük kapısı dışarıdan yumruklanıyor gibi titriyor. Sonra titreme duruyor. Kapının ortasında, metalin içinden kızıl bir ışık beliriyor ve yavaşça aşağı iniyor. Biri kapıyı kesiyor.");
+      } else if (s.hedef === "gemi") {
+        p.push("Kum Serçesi kalkamaz. Sena hangarın yan penceresinden iniş pistine bakıyor. Pistte, rampası hâlâ açık, Engizitör'ün mekiği duruyor.");
+        p.push("\"O gemi,\" diyor. \"Onunla gideriz. Ben her şeyi uçururum.\" Servis kapısını aralıyorsunuz. Avlu projektör ışığıyla bembeyaz.");
+      } else if (s.hedef === "orrin") {
+        p.push("Orrin'in kolu omzunda, koridorda topallayarak ilerliyorsunuz. KT-4 arkanızdaki kapıyı kilitledi; öbür taraftan ağır botların sesi geliyor.");
+        p.push("\"Beni bırak,\" diyor Orrin, nefes nefese. \"Ben seni yavaşlatırım. Bir gemin varsa koş.\"");
+      } else {
+        p.push((kutu(s) ? "Kristal avucunda. Küp kurşun kutuda, ama kristal onu yine de buluyor; ikisi birlikte nabız gibi atıyor" : "Kristal avucunda, küp cebinde. İkisi birlikte nabız gibi atıyor") + "; tapınağın duvarlarındaki çizgiler, ışıkları her attığında bir anlığına parlıyor.");
+        p.push("Merdivenin tepesinden bir ses geliyor: ızgaranın kaldırılışı. Sonra ayak sesleri. Acele etmeyen, ölçülü ayak sesleri.");
+        p.push("Arkanda, karanlıkta, Kuru Kuyu'ya dönen tünelin ağzı duruyor.");
+      }
+      return p;
+    },
+    choices: [
+      { t: "Gemiye koş, Sena'yı bekle", to: "f3", if: (s) => s.hedef === "gemi" && has(s, "GEMI_HAZIR") },
+      { t: "Avluyu geçip mekiğe koşun", to: "f3", if: (s) => s.hedef === "gemi" && !has(s, "GEMI_HAZIR") },
+      { t: "Sena'ya «Git!» de; küpü aç, kapıyı sen tut", to: "e_bedel", if: (s) => s.hedef === "gemi", fx: (s) => { s.direkBedel = true; } },
+      { t: "Orrin'i sırtlan, hangara koş", to: "f3", if: (s) => s.hedef === "orrin", fx: (s) => { rel(s, "orrin", 1, "Orrin, onu sırtında taşıdığını hiç unutmayacak."); } },
+      { t: "Onu dinle: yalnız koş", to: "e_yalniz", if: (s) => s.hedef === "orrin", fx: (s) => { s.yalniz = "orrin"; } },
+      { t: "Merdivende onu bekle", to: "f3", if: (s) => s.hedef === "kristal" },
+      { t: "Tünelden geri kaç", to: "e_yalniz", if: (s) => s.hedef === "kristal", fx: (s) => { s.yalniz = "tunel"; } },
+      { t: "Saklı kal; nereye giderse git", to: "e_kacak", if: (s) => s.hedef === "mekik", fx: (s) => { s.kacak = "yalniz"; } },
+      { t: "KT-4'e işaret ver: kokpiti ele geçirin, geri dönün", to: "f3", if: (s) => s.hedef === "mekik", fx: (s) => { s.geriDondu = true; rel(s, "kt4", 1, "KT-4 hayatının en cesur işini yaptı."); } }
+    ]
+  },
+
+  f3: {
+    act: 3, konum: (s) => s.hedef === "kristal" ? "Garnizonun altındaki tapınak" : "Varn garnizonu", time: "04:20", ruzgar: 0.1, img: (s) => s.hedef === "kristal" ? null : "yuzlesme", imgLabel: "Yedinci Kardeş",
+    title: "Yedinci Kardeş",
+    text: (s) => {
+      const p = [];
+      const tapinak = s.hedef === "kristal";
+      if (s.geriDondu) p.push("KT-4 kokpit kapısının kilidini iki saniyede açıyor; pilot daha arkasını dönemeden onun koltuğuna bağlanan sistemleri kilitliyor. Mekik bir yay çizip geri dönüyor ve garnizonun avlusuna sert bir şekilde iniyor. Sena hangarın gölgesinden koşarak çıkıyor, rampaya atlıyor." + ((has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI")) ? " Orrin arkasından, topallayarak." : ""));
+      else if (s.hedef === "gemi" && has(s, "GEMI_HAZIR")) p.push("Kapı ikiye ayrılıp yere düşüyor. Kızıl ışık sönüyor.");
+      else if (s.hedef === "gemi") p.push("Avlunun ortasına vardığınızda projektörler birden sabitleniyor. Hepsi aynı noktada: sizde.");
+      else if (s.hedef === "orrin") p.push("Hangarın servis kapısına üç adım kalmışken kapı kendiliğinden açılıyor.");
+      p.push(tapinak
+        ? "Merdivenin son basamağında duruyor. Uzun, gri saçlı, siyah paltolu. Gözleri kapalı. Kristalin mavi ışığı yüzüne vuruyor ve o bunu hissediyormuş gibi gülümsüyor."
+        : (s.geriDondu ? "Rampanın dibinde duruyor. Uzun, gri saçlı, siyah paltolu. Gözleri kapalı. Ne zaman geldiğini kimse görmedi." : "Karşınızda duruyor. Uzun, gri saçlı, siyah paltolu. Gözleri kapalı. Elinde ince, uzun bir kılıç; namlusu henüz sönük."));
+      p.push({ q: "Kessar'a bir holokron için geldim. Bir çocuk bulacağımı bilmiyordum. Ama hissettim seni, daha kapsülü açtığın an." });
+      if (has(s, "ORRIN_ESIR") && !has(s, "ORRIN_KURTARILDI")) p.push({ q: "Yaşlı hurdacı hücresinde. Seni sordu. Ona ne cevap verdiğimi merak ediyor musun?" });
+      if (has(s, "YEMIN")) p.push("Cebindeki kırık pipo bir anda ağırlaşıyor. Göğsünde bir şey ısınıyor, küpün ısısından farklı bir şey. Kızgın, karanlık bir şey.");
+      if (has(s, "KRISTAL")) p.push({ q: "Ilara Venn o kristali buraya saklarken ben de buradaydım. Onu bulamadım. Sen buldun. Görüyor musun ne kadar özelsin?" });
+      p.push({ q: "İçindeki kadın sana sabrı öğretir, bekleyişi, kaybetmeyi. Ben sana kazanmayı öğretirim. Öfkeni bana ver; onu bir kılıca çevireyim." });
+      if (!tapinak && (s.hedef === "orrin" || has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI"))) p.push("Orrin yanında, yüzü bembeyaz. Fısıldıyor: \"Onu dinleme, evlat.\"");
+      if (!tapinak && !s.geriDondu) p.push(has(s, "GEMI_HAZIR") ? "Arkanda Kum Serçesi'nin motorları yükseliyor. Sena kokpitten bağırıyor: \"Hazır!\"" : s.hedef === "orrin" ? "Hangarın içinden Sena'nın sesi geliyor: \"Pistteki mekik! Ona koşacağız!\"" : "Pistte mekik bekliyor. Sena seninle birlikte donmuş, eli tabancasında.");
+      return p;
+    },
+    choices: [
+      { t: "Öfkenin sesini dinle: ona saldır", to: "e_golge", if: (s) => has(s, "OFKE") || (has(s, "ORRIN_ESIR") && !has(s, "ORRIN_KURTARILDI")) },
+      { t: "Uzattığı eli tut", to: "e_golge", if: (s) => !(has(s, "OFKE") || (has(s, "ORRIN_ESIR") && !has(s, "ORRIN_KURTARILDI"))) },
+      { t: "Küpü aç, içindeki kadına seslen", to: "f4" },
+      { t: "Orrin'e bak: elinde o ağır anahtar var", to: "f5", if: (s) => s.hedef !== "kristal" && (has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI")) && (s.r.orrin || 0) >= 2, fx: (s) => { s.orrinPlan = true; } },
+      { t: "KT-4'e bak: bir planı var gibi", to: "f5", if: (s) => (s.r.kt4 || 0) >= 1 && s.hedef !== "kristal", fx: (s) => { s.kt4Plan = true; } }
+    ]
+  },
+
+  f4: {
+    act: 3, konum: (s) => s.hedef === "kristal" ? "Garnizonun altındaki tapınak" : "Varn garnizonu", time: "04:25", ruzgar: 0.1,
+    title: "Holokron",
+    text: (s) => {
+      const p = [];
+      p.push(kutu(s) ? "Kurşun kutunun kapağını çekip atıyorsun. Küp avucuna düşüyor, sanki kendiliğinden." : "Küpü cebinden çıkarıyorsun.");
+      p.push("Gözlerini kapatıyorsun. Bu kez yüz gelmiyor; sadece ses. Kulağının dibinde değil, içinde.");
+      p.push({ q: "Korkma. Öfke de korku da senin. Ama sen onlardan büyüksün. Bırak ışık geçsin." });
+      p.push(has(s, "KRISTAL")
+        ? "Küp açılıyor. Köşelerinden ince mavi çizgiler ayrılıyor ve avucundaki kristale uzanıyor. İkisi birleştiği an ışık bir dalga gibi patlıyor. Engizitör'ün elindeki kızıl kılıç tam o an yanıyor ve dalgaya değdiği yerde cam gibi çatlıyor. Adam geriye savruluyor, sırtı duvara çarpıyor. Gözlerini açıyor. Sarı, şaşkın gözler."
+        : "Küp açılıyor. Köşelerinden mavi bir ışık yükseliyor, aranızda bir duvar gibi duruyor. Engizitör kızıl kılıcını yakıp ışığa vuruyor; her darbede ışık titriyor ama dağılmıyor. Kolların yanıyor. Ne kadar tutabileceğini bilmiyorsun.");
+      p.push(s.hedef === "kristal"
+        ? "Tapınağın tavanından taşlar dökülüyor. Merdiven açık. Yukarıda, avlunun öbür ucunda, hangarın kapısında Sena bekliyor olmalı."
+        : "Garnizonun her yanından askerler koşuyor ama ışığın içine kimse giremiyor. Sena'nın sesi arkandan geliyor: \"Gel! Şimdi!\"");
+      return p;
+    },
+    choices: [
+      { t: "Işığı tut; onlar gitsin", to: "e_bedel" },
+      { t: "Işığı bırak, koş", to: "f5" }
+    ]
+  },
+
+  f5: {
+    act: 3, konum: "Kessar göğü", time: "04:40", ruzgar: 0.05, img: "kalkis", imgLabel: "Kalkış",
+    title: "Kalkış",
+    text: (s) => {
+      const p = [];
+      const serce = has(s, "GEMI_HAZIR");
+      if (s.orrinPlan) p.push("Orrin sana bir kez göz kırpıyor. Sonra, kırk yıllık bir kaçakçının bileğiyle, ağır anahtarı avlunun en büyük projektörüne fırlatıyor. Cam patlıyor, kıvılcımlar yağıyor, avlunun yarısı karanlığa gömülüyor. Engizitör kılıcını yakıyor ama bir anlığına yön arıyor; o bir an size yetiyor. Karanlığın içinden rampaya koşuyorsunuz, Orrin'in kolu omzunda.");
+      else if (s.kt4Plan) p.push("KT-4 omzundan fırlayıp hangarın duvarındaki yangın panosuna yapışıyor. Bir saniye sonra tavandaki bütün söndürücüler aynı anda patlıyor; avlu beyaz bir köpük bulutuna dönüyor. Engizitör'ün gözleri kapalı ama askerlerinkiler değil. Bulutun içinden körlemesine koşuyorsunuz. KT-4 son anda rampaya atlıyor.");
+      else if (s.hedef === "kristal") p.push("Merdivenleri ikişer ikişer çıkıyorsun. Avluyu bir rüzgâr gibi geçiyorsun; askerler hâlâ tapınaktaki ışığa bakıyor. Sena seni hangarın önünde görüyor ve pistteki mekiğe doğru koşmaya başlıyor.");
+      else p.push("Arkanı dönüp koşuyorsun. Işık arkanda bir süre daha duruyor, sonra yavaşça sönüyor.");
+      p.push(serce
+        ? "Kum Serçesi pistten ok gibi fırlıyor. Burnu yükselirken gövdesi sarsılıyor; Sena dişlerini sıkıp kolu sonuna kadar çekiyor."
+        : "Mekiğin rampası daha kapanmadan Sena kalkışa geçiyor. \"Bu şeyin kontrolleri berbat,\" diye mırıldanıyor, ama sesi gülüyor.");
+      p.push("Arkanızdan iki İmparatorluk avcısı havalanıyor. Lazer ateşi kanatların yanından geçiyor. KT-4 bir panele bağlanmış, ekranlardaki hedefleri teker teker kaydırıyor; sen nişangâhın başında, onun gösterdiği yere ateş ediyorsun. Bir avcı kayalara çarpıyor, ötekini fırtınanın son kuyruğu yutuyor.");
+      if (has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI") || has(s, "ORRIN_KURTARILDI")) p.push("Orrin arka koltukta, bir eli göğsünde, gözleri pencerede. Varn aşağıda küçülüyor. Bütün ömrünü geçirdiği kasaba bir avuç ışığa dönüşüyor. Hiçbir şey söylemiyor.");
+      p.push("Ve sonra güneşler. Kessar'ın iki güneşi aynı anda ufkun üstüne çıkıyor; fırtınadan arta kalan toz altın rengine boyanıyor. Gemi atmosferi delip karanlığa çıkıyor.");
+      p.push("Sena koltuğunda dönüp sana bakıyor. \"Peki,\" diyor. \"Şimdi nereye?\"" + ((s.r.sena || 0) >= 2 ? " Bir an duruyor. \"Nereye dersen. Bu gece bana güvendin; ben de sana güveniyorum.\"" : ""));
+      return p;
+    },
+    choices: [
+      { t: "Sena'nın dostlarına: holokron isyana gitsin", to: "e_isyan" },
+      { t: "Kimseye verme: kendi yolunuzu çizin", to: "e_kacak", fx: (s) => { s.kacak = "sena"; } }
+    ]
+  },
+
+  e_isyan: {
+    act: 3, konum: "Hiperuzay", uzay: true, time: "05:10", ruzgar: 0.05,
+    end: { id: "isyan", kind: (s) => has(s, "KRISTAL") ? "En iyi son" : "Son" },
+    title: "İsyanın Kıvılcımı",
+    text: (s) => [
+      "Sena bir rota giriyor ve gemi yıldızların arasına atlıyor. Yıldızlar uzun beyaz çizgilere dönüşüyor.",
+      "Holokronu kucağına alıyorsun. Artık uğuldamıyor; nefes alıyor gibi, yavaş ve sakin." + (has(s, "KRISTAL") ? " Kristal yanında, ikisi birbirine dokunacak kadar yakın." : ""),
+      "\"İsyan sana inanacak mı?\" diye soruyor KT-4, ya da öyle bipliyor. Bilmiyorsun. Ama ilk kez, bir gemiyle değil, bir şeyle kaçmadığını hissediyorsun. Bir şeye doğru gidiyorsun."
+    ],
+    sabah: (s) => "Üç gün sonra, gizli bir üste, yorgun yüzlü bir kadın holokronu iki eliyle alıyor. Küp avucunda bir kez parlıyor. Kadının gözleri doluyor: \"Ilara Venn'i tanırdım,\" diyor." + (has(s, "TUNEL") ? "" : " Küpteki kadının bir adı varmış demek."),
+    akibet: (s) => [
+      ["Sen", has(s, "KRISTAL") ? "İsyanın içinde, Ilara'nın bıraktığı yoldan yürüyen ilk çırak. Kristal bir gün bir kılıcın kalbi olacak." : "İsyanın en genç pilot adayı. Geceleri holokronun yanında oturup sesini bekliyorsun."],
+      ["Sena", "Pilot koltuğunda, hangi gemi olursa olsun. Sen hep yanındaki koltukta."],
+      ["Orrin", has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI") || has(s, "ORRIN_KURTARILDI") ? "Üssün hurdalığında. Bozuk gemileri bir haftada uçar hâle getiriyor; kimse nasıl yaptığını anlamıyor." : (has(s, "ORRIN_ESIR") ? "Bir yıl sonra isyancılar Varn garnizonunu bastı. Hücreden çıkan ilk adam, sorduğu ilk soru: «Çocuk iyi mi?»" : "Varn'da, atölyesinde. Her gece gökyüzüne bakıyor, kayan yıldızların hangisinin sen olduğunu tahmin ediyor.")],
+      ["KT-4", "Üssün en çok sevilen droidi. Kimse onun eski bir hurda yığınından çıktığına inanmıyor."]
+    ],
+    yil: "Yıllar sonra Kessar'a İmparatorluk'tan kurtulmuş bir gemi iniyor. Rampadan inen ilk kişi kumun içine eğilip bir avuç alıyor. Sıcak."
+  },
+
+  e_kacak: {
+    act: 3, konum: "Dış Kenar", uzay: true, time: "06:00", ruzgar: 0.05,
+    end: { id: "kacak", kind: "Son" },
+    title: "Kaçakçının Yolu",
+    text: (s) => s.kacak === "yalniz" ? [
+      "Mekik yörüngedeki dev gemiye yanaşırken KT-4 yük bölmesinin acil kapağını açıyor. Bir kaçış kapsülü. Tıpkı hurdalığa düşen gibi.",
+      "Kapsül seni Dış Kenar'ın kıyısındaki tozlu bir ticaret istasyonuna bırakıyor. Kimse kim olduğunu sormuyor. Burası öyle bir yer.",
+      "Küpü bir paçavraya sarıp sırt çantanın dibine koyuyorsun. Orrin'den öğrendiğin tek şey işe yarıyor: hurda alıp satmak."
+    ] : [
+      "Sena bir süre sessiz kalıyor. Sonra omuz silkiyor. \"İsyan da bir gün bir şey isteyecek senden. Herkes ister.\" Rotayı değiştiriyor.",
+      "Dış Kenar'ın kimsenin haritasında olmayan limanlarında yük taşıyorsunuz. Bazen yasal, çoğu zaman değil. Gemi küçük, para az, hayat geniş.",
+      "Holokron yük bölmesinde, bir yakıt bobininin altında saklı. Geceleri bazen uğulduyor. Sen duymazdan geliyorsun. Çoğu gece."
+    ],
+    sabah: (s) => s.kacak === "yalniz" ? "İstasyonun penceresinden yıldızlar görünüyor. Hiçbiri Kessar'ın güneşleri değil." : "Bir sabah bir limanda, bir kaçakçı masasında biri Kessar'dan söz ediyor: garnizonda bir gece bir ışık görülmüş. Sena sana bakıyor. Sen bardağına bakıyorsun.",
+    akibet: (s) => [
+      ["Sen", s.kacak === "yalniz" ? "Dış Kenar'da bir hurdacı. İyi bir hurdacı. Engizitörlerin haberleri gelince istasyon değiştiriyorsun." : "Dış Kenar'ın en genç kaçakçılarından biri. İmparatorluk adını bilmiyor. Henüz."],
+      ["Sena", s.kacak === "yalniz" ? "Onu bir daha görmedin. Bazen bir limanda kahverengi bir pilot ceketi görünce kalbin duruyor." : "Kaptan. Sen ikinci pilot. Kavga etmediğiniz gün yok, birbirinizi bırakacağınız gün de yok."],
+      ["Orrin", has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI") || has(s, "ORRIN_KURTARILDI") ? (s.kacak === "yalniz" ? "Garnizonda kaldı. Ne olduğunu hiç öğrenemedin." : "Geminin motorlarını senden daha iyi tanıyor. Ve hâlâ sana aptal çocuk diyor.") : (has(s, "ORRIN_ESIR") ? "Garnizonun hücresinde. Onu çıkarmaya döneceğine dair kendine verdiğin söz hâlâ boğazında." : "Varn'da. Ayda bir, imzasız bir para gönderiyorsun.")],
+      ["Holokron", "Saklı. Sessiz. Bekliyor."]
+    ],
+    yil: "Bazı limanlarda bir hikâye anlatılıyor: çantasında taş bir küp taşıyan bir kaçakçı varmış. Küpü kimseye satmazmış, hangi fiyata olursa olsun."
+  },
+
+  e_bedel: {
+    act: 3, konum: (s) => s.hedef === "kristal" ? "Garnizonun altındaki tapınak" : "Varn garnizonu", time: "04:30", ruzgar: 0.1,
+    end: { id: "bedel", kind: "Son" },
+    title: "Son Işık",
+    text: (s) => {
+      const p = [];
+      if (s.direkBedel) p.push((kutu(s) ? "Kurşun kutuyu açıp küpü avucuna alıyorsun" : "Küpü cebinden çıkarıyorsun") + " ve Sena'ya dönmeden \"Git!\" diye bağırıyorsun. Küp açılıyor; içinden yükselen mavi ışık " + (has(s, "GEMI_HAZIR") ? "kesilen kapının yarığını" : "servis kapısını") + " bir duvar gibi kapatıyor. Öbür tarafta kızıl bir kılıç yanıyor ve ışığa vurmaya başlıyor.");
+      p.push("Işığı tutuyorsun. Kolların yanıyor, sonra yanmayı bırakıyor. Ses içinde hâlâ konuşuyor, ama artık kelimelerle değil.");
+      p.push(s.hedef === "kristal"
+        ? "KT-4'ü omzundan alıp merdivene doğru itiyorsun. \"Git. Onu bul.\" Bir an duruyor, sonra koşuyor. Az sonra yukarıdan, avlunun öbür ucundan, bir geminin kalktığını duyuyorsun. Sena. Seni bekleyemezdi; sen de bunu istemezdin."
+        : "Sena'nın sesi arkandan geliyor, bir kez, iki kez. Sonra rampanın kapandığını, motorların yükseldiğini duyuyorsun." + (has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI") || has(s, "ORRIN_KURTARILDI") ? " Orrin'in son sözü motorların sesine karışıyor; anlamıyorsun ama biliyorsun ne dediğini." : "") + " KT-4'ün tiz bir bipi. O da gemide.");
+      p.push("Engizitör ışığın öbür tarafında. Kılıcını indirmiş. Sana bakıyor; gözleri açık. Yüzünde öfke değil, başka bir şey var. Kıskançlık belki.");
+      p.push("Işık son bir kez parlıyor. Sonra her şey beyaz.");
+      return p;
+    },
+    sabah: (s) => "Askerler " + (s.hedef === "kristal" ? "tapınağa" : "avluya") + " döndüğünde orada kimseyi bulamıyorlar. Ne bir çocuk, ne bir küp. Sadece taşın üstünde, iki küçük ayak izi ve kumun içinde parlayan mavi bir toz.",
+    akibet: (s) => [
+      ["Sen", "Kimse bilmiyor. Küpteki kadının sesi gibi, belki bir yerde, belki her yerde."],
+      ["Sena", "Kaçtı. Holokronun adını hiç söylemedi, kimseye. Ama gemisinin adını değiştirdi; artık o da bir ışığın adını taşıyor."],
+      ["Orrin", has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI") || has(s, "ORRIN_KURTARILDI") ? "Sena'yla gitti. Bir daha hiçbir kapsülü açmadı." : (has(s, "ORRIN_ESIR") ? "O gece hücresinin penceresinden mavi bir ışık gördü. Ağladı mı, güldü mü, kendi de bilmiyor." : "Varn'da. Atölyesinin kapısını hiç kilitlemiyor artık.")],
+      ["Yedinci Kardeş", "Kessar'dan eli boş döndü. Bir daha hiç gözlerini kapatmadı."]
+    ],
+    yil: "Varn'da fırtınalı gecelerde çocuklar pencereye koşuyor. Kumun içinde mavi bir ışık görürsen dilek tutarmışsın. Kimse kimin dileğini tuttuğunu bilmiyor."
+  },
+
+  e_golge: {
+    act: 3, konum: (s) => s.hedef === "kristal" ? "Garnizonun altındaki tapınak" : "Varn garnizonu", time: "04:25", ruzgar: 0.1,
+    end: { id: "golge", kind: "Karanlık son" },
+    title: "Gölgeye Adım",
+    text: (s) => {
+      const p = [];
+      const ofke = has(s, "OFKE") || (has(s, "ORRIN_ESIR") && !has(s, "ORRIN_KURTARILDI"));
+      p.push(ofke
+        ? "Öfke bir dalga gibi yükseliyor ve sen onu durdurmuyorsun. Elini kaldırıyorsun; dokunmadan, ama Engizitör'ün silahı elinden fırlayıp duvara çarpıyor. Onun hiç kıpırdamadığını fark ediyorsun. Gülümsüyor."
+        : "Elini uzatıyorsun. Elleri soğuk. Ama içinden geçen şey soğuk değil; sıcak, kızgın, güçlü. İlk kez hiçbir şeyden korkmuyorsun.");
+      p.push(kutu(s) ? "Kurşun kutunun içinde küp susuyor. Bir daha hiç uğuldamayacakmış gibi." : "Cebindeki küp soğuyor. Uğultu, bir mum gibi sönüyor.");
+      p.push({ q: (has(s, "TUNEL") ? "İşte. Ilara'nın" : "İşte. O kadının") + " sana hiçbir zaman veremeyeceği şey. Şimdi gel. Öğreteceğim çok şey var." });
+      if (has(s, "SENA_YANINDA")) p.push("Bir yerlerden Sena'nın sesi geliyor, adını bağırıyor. Sana çok uzak geliyor. Sanki başka birinin adı.");
+      return p;
+    },
+    sabah: "Sabah, Engizitör'ün mekiği Kessar'dan kalkıyor. Yolcu bölmesinde, siyah bir pelerin içinde bir genç oturuyor. Penceresinden bakmıyor.",
+    akibet: (s) => [
+      ["Sen", "Sekizinci Kardeş. Adını kimse bilmiyor; sen de artık hatırlamıyorsun."],
+      ["Holokron", "Bir İmparatorluk kasasında. Bir gün onu açmaya çalıştın. Açılmadı."],
+      ["Orrin", has(s, "ORRIN_ESIR") && !has(s, "ORRIN_KURTARILDI") ? "Hücresinden çıkarıldı ve serbest bırakıldı. Senin emrinle. Sana teşekkür etmedi; seni tanımadı." : "Varn'da ya da başka bir yerde; senden haber almamak için dua ederek."],
+      ["KT-4", "O gece garnizonda bırakıldı. Sena'nın gemisine kimin taşıdığını kimse bilmiyor."]
+    ],
+    yil: "Yıllar sonra bir isyancı üssünde eski, tek gözlü bir droid, genç pilotlara bir hikâye anlatıyor. Hikâyenin sonunu hiç söylemiyor."
+  },
+
+  e_yalniz: {
+    act: 3, konum: (s) => s.yalniz === "tunel" ? "Kuru Kuyu'nun tüneli" : "Varn garnizonu", time: "04:30", ruzgar: 0.1,
+    end: { id: "yalniz", kind: "Son" },
+    title: "Tek Başına",
+    text: (s) => s.yalniz === "tunel" ? [
+      "Tünelin karanlığına dalıyorsun. Kristal avucunda, küp " + (kutu(s) ? "kurşun kutuda" : "cebinde") + "; ikisi de seninle birlikte susuyor. Arkandan ayak sesleri gelmiyor. Neden gelmediğini düşünmemeye çalışıyorsun.",
+      "Bir saat sonra Kuru Kuyu'nun mahzenine çıkıyorsun. Kasaba uyanıyor; sirenleri herkes duymuş. Kimse seni görmüyor.",
+      "Garnizonun üstünden bir gemi kalkıyor. Sena'nın gemisi mi, Engizitör'ün mekiği mi, bilmiyorsun. Uzun süre bakıyorsun."
+    ] : [
+      "Orrin'i koridorda bırakıyorsun. Arkana bakmıyorsun; bakarsan duracağını biliyorsun.",
+      "Hangara vardığında Sena orada değil. Servis kapısı açık, içerisi boş. Ya kaçtı ya yakalandı. Drenaj kanalından dışarı süzülüyor, çöle koşuyorsun.",
+      "Arkanda garnizonun bütün ışıkları yanıyor. Önünde, ufkun üstünde, iki güneş doğmak üzere."
+    ],
+    sabah: (s) => s.yalniz === "tunel" ? "Kessar'ın iki güneşi doğarken sen bir hurda kamyonunun arkasında, kasabadan uzaklaşıyorsun. Cebinde iki şey var: bir küp ve bir kristal. Hepsi bu." : "Sabah, çölün ortasında bir nem istasyonunda uyanıyorsun. Eski, paslı bir kule." + (s.kt4Siginak || s.senaCagri ? " Burayı tanıyorsun." : " KT-4 seni buraya nasıl getirdi, hatırlamıyorsun."),
+    akibet: (s) => [
+      ["Sen", "Hayattasın. Holokron seninle. Bir gün birinin onu sana sorması için bekliyorsun; ama o gün gelene kadar yalnızsın."],
+      ["Sena", s.yalniz === "tunel" ? "O gece bir gemi kalktı. Belki o. Belki onu yakaladılar ve kalkan Engizitör'dü. Hiç öğrenemedin." : "Onu bir daha görmedin."],
+      ["Orrin", s.yalniz === "orrin" ? "Onu koridorda bıraktın. Bunu hiçbir zaman unutmadın. O ise unuttuğunu söylerdi." : (has(s, "ORRIN_ESIR") ? "Hücresinde." : (has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI")) ? "Sena'yla birlikteydi. O gece kalkan gemide miydi, bilmiyorsun." : "Varn'da, atölyesinde. Bir gece kapısını çalacaksın; ama o gece değil.")],
+      ["KT-4", "Omzunda. Tek arkadaşın. Bazen geceleri, o da susuyor."]
+    ],
+    yil: "Yıllar sonra çölün bir yerinde, kimsenin uğramadığı bir vadide yaşlı bir hurdacı yaşıyor. Omzunda pas tutmuş bir droid. Ve kumun içinde, yalnızca geceleri görülen mavi bir ışık."
+  }
+};
+
+/* KUM FIRTINASI: kitaba özel ayarlar */
+const BOOK = {
+  start: "d1",
+  rel: { orrin: 0, sena: 0, kt4: 0 },
+  acts: { 1: ["Birinci Perde", "Hurdalık"], 2: ["İkinci Perde", "Kaçış"], 3: ["Üçüncü Perde", "Holokron"] },
+  coverText: [
+    "Galaktik İmparatorluk her yerde. Jedi'lar yok edileli yıllar oldu; adları artık yalnızca fısıltıyla anılıyor.",
+    "Dış Kenar'daki çöl gezegeni Kessar'da, ihtiyar bir hurda tüccarının yanında çalışan bir gençsin. Bir akşam hurdalığa düşen eski bir kapsülün içinde, hiç görmemen gereken bir şey buluyorsun. Aynı gece kasabaya bir İmparatorluk mekiği iniyor.",
+    "Bu kitap baştan sona okunmaz. Her bölümün sonunda sen karar verirsin, hikâye senin kararlarınla yön değiştirir."
+  ],
+  missedTitle: "Bu perdede kaçırdıkların",
+  actEndHead: (sec) => sec.act === 1 ? "Fırtına sürüyor" : "Sirenler susmuyor",
+  againText: "Kessar'a geri dön",
+  rule: ["Orrin'in kuralı:", "Hurdaya ne düşerse düşsün, önce sahibini sor."],
+  ledger: (sec, time) => ({ title: "Kessar", html: `Saat ${time.replace(":", ".")} · ${(typeof sec.konum === "function" ? sec.konum(state) : sec.konum) || "Varn kasabası"}<br>${sec.uzay ? "Kessar geride kaldı" : sec.ruzgar > 0.5 ? "Kum fırtınası" : sec.ruzgar > 0.2 ? "Sert rüzgâr" : "Durgun hava"}` }),
+  atmos: (sec) => sec.ruzgar ?? 0.15,
+  hour: (sec, time) => { const [h, m] = time.split(":").map(Number); return h + m / 60; },
+  coverAtmos: 0.25,
+  items: (s) => {
+    const list = ["Anahtar takımı", "Su matarası"];
+    if (has(s, "HOLOKRON")) list.push(has(s, "KURSUN") && !has(s, "ORRIN_SERBEST") ? "Taş küp, kurşun kutunun içinde" : "Taş küp (holokron)");
+    if (has(s, "KRISTAL")) list.push("Mavi kristal");
+    if (has(s, "TELSIZ")) list.push("Sena'nın telsizi (kanal dört)");
+    if (has(s, "BOBIN") && !has(s, "GEMI_HAZIR")) list.push("Yakıt bobini");
+    if (has(s, "YEMIN")) list.push("Orrin'in kırık piposu");
+    return list;
+  },
+  hints: (s, act) => {
+    const m = [];
+    if (act === 1) {
+      if (!has(s, "VIZYON")) m.push("Küpün sesine hiç kulak vermedin.");
+      if (!has(s, "TELSIZ")) m.push("Kuru Kuyu'daki pilottan bir telsiz alabilirdin.");
+      if (has(s, "ORRIN_ESIR")) m.push("Orrin'i Engizitör'le yalnız bıraktın.");
+      if (!has(s, "KURSUN")) m.push("Küpü onun gözünden saklamanın bir yolu vardı.");
+      if (!has(s, "ORRIN_HIKAYE")) m.push("Orrin'in geçmişini hiç sormadın.");
+    }
+    if (act === 2) {
+      if (!has(s, "TUNEL")) m.push("Küp sana garnizona giden başka bir yol gösterebilirdi.");
+      if (!has(s, "BOBIN")) m.push("Garnizondaki gemi bobinsiz kalkamazdı.");
+      if (!has(s, "ORRIN_KURTARILDI") && has(s, "ORRIN_ESIR")) m.push("Orrin hâlâ bir hücrede.");
+      if (has(s, "ORRIN_SERBEST") && !has(s, "ORRIN_KATILDI")) m.push("Orrin yolu bildiğini söylemişti.");
+      if (!has(s, "KRISTAL")) m.push("Tapınağın kalbindeki ışık seni bekliyordu.");
+    }
+    if (act === 3) {
+      if (!has(s, "KRISTAL")) m.push("Küp yalnız değildi; garnizonun altında onu tamamlayan bir şey vardı.");
+      if (!has(s, "ORRIN_KURTARILDI") && has(s, "ORRIN_ESIR")) m.push("Orrin'i hücreden çıkarabilirdin.");
+      if ((s.r.orrin || 0) < 2 && (has(s, "ORRIN_YANINDA") || has(s, "ORRIN_KATILDI") || has(s, "ORRIN_KURTARILDI"))) m.push("Orrin'i daha iyi tanısaydın, o da bir hamle yapardı.");
+      if ((s.r.kt4 || 0) < 1) m.push("KT-4'e biraz daha güvenseydin, onun da bir planı olurdu.");
+      if (!has(s, "TUNEL")) m.push("Küpteki kadın sana eski bir yolu göstermek istiyordu.");
+    }
+    return m;
+  }
+};
+
+
+/* ---------------- Kitap motoru ---------------- */
+const META = JSON.parse(document.getElementById("book-meta").textContent);
+const ACTS = BOOK.acts;
+const END_KEY = META.sonAnahtari || (META.id + "-sonlar");
+const fresh = () => ({ sec: BOOK.start, f: {}, r: Object.assign({}, BOOK.rel), notes: [], talked: [], num: null, steps: 0 });
+let state = Object.assign(fresh(), { sec: "cover" });
+const val = (v) => (typeof v === "function" ? v(state) : v);
+const $ = (id) => document.getElementById(id);
+const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/* § numaraları: başlangıç 1, gerisi sabit tohumla karıştırılmış (klasik oyun kitabı gibi) */
+const NUM = (() => {
+  let seed = 1962;
+  const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const keys = [];
+  Object.keys(S).forEach((k) => {
+    keys.push(k);
+    (S[k].choices || []).forEach((c, i) => keys.push(k + "#" + i));
+    if (S[k].next) keys.push(k + "#next");
+  });
+  const pool = []; for (let n = 2; n <= 240; n++) pool.push(n);
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const map = { a1: 1 }; let p = 0;
+  keys.forEach((k) => { if (k !== "a1") map[k] = pool[p++]; });
+  return map;
+})();
+
+let MUTE = false, toastTimer = null;
+function toast(msg) {
+  if (MUTE) return;
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
+}
+function loadEndings() { try { return JSON.parse(localStorage.getItem(END_KEY) || "[]"); } catch (e) { return []; } }
+function saveEnding(id) {
+  const list = loadEndings();
+  if (!list.includes(id)) { list.push(id); try { localStorage.setItem(END_KEY, JSON.stringify(list)); } catch (e) {} }
+}
+
+const missedHints = (s, act) => (BOOK.hints ? BOOK.hints(s, act) : []).slice(0, 3);
+
+/* ---------- kapak ---------- */
+function renderCover() {
+  const found = loadEndings().length;
+  $("view").innerHTML = `
+  <section class="cover-wrap">
+    <div class="cover" style="background-image:url('${META.kapak}'),url('${META.kapakYedek}')" role="img" aria-label="${esc(META.baslik)} kitabının kapağı">
+      <div>
+        <div class="band">${esc(META.seri)} · Kitap ${META.kitapNo}</div>
+        <h1>${esc(META.baslik.toLocaleUpperCase("tr"))}</h1>
+      </div>
+      <div><div class="subt">${esc(META.altBaslik)}</div><div class="author">${esc(META.yazar)}</div></div>
+    </div>
+    <div class="backcover">
+      <p class="slogan">${esc(META.slogan)}</p>
+      ${BOOK.coverText.map((p) => `<p>${esc(p)}</p>`).join("")}
+      <dl class="colophon">
+        <dt>Yazar</dt><dd>${esc(META.yazar)} · <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></dd>
+        <dt>Tür</dt><dd>${esc(META.tur)}</dd>
+        <dt>Okuma</dt><dd>${esc(META.okumaSuresi)}</dd>
+        <dt>Sonlar</dt><dd>${META.sonSayisi} farklı son${found ? ` · bulduğun: ${found} / ${META.sonSayisi}` : ""}</dd>
+      </dl>
+      <button class="btn" id="btn-start" type="button">Okumaya başla</button>
+    </div>
+  </section>`;
+  $("btn-start").addEventListener("click", () => { state = fresh(); render(true); });
+}
+
+/* ---------- sayfa ---------- */
+function choiceNum(secId, c, i) { return NUM[secId + "#" + i]; }
+
+function renderPage(turn) {
+  const sec = S[state.sec];
+  const act = sec.act || 1;
+  const time = val(sec.time);
+  const num = state.num || NUM[state.sec];
+
+  // sol sayfa
+  let left = `<div class="plate"><div class="act-title">${ACTS[act][0]}<span>${ACTS[act][1]}</span></div>`;
+  const imgKey = val(sec.img);
+  const imgLabel = val(sec.imgLabel) || "";
+  const hasImg = !!(imgKey && IMG[imgKey]);
+  if (hasImg) left += `<figure class="ill"><img src="${IMG[imgKey]}" alt="${esc(imgLabel)}"><figcaption>${esc(imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
+  const lg = BOOK.ledger(sec, time);
+  left += `<div class="ledger" aria-label="${esc(lg.title)}"><div class="lh">${esc(lg.title)}</div><div class="lv">${lg.html}</div></div>`;
+  if (!hasImg) {
+    const last = state.notes[state.notes.length - 1];
+    left += `<div class="fleuron">✦ ✦ ✦</div>`;
+    left += last ? `<div class="margin-note hand"><span class="lbl">Defterine son yazdığın:</span>${esc(last)}</div>` : `<div class="margin-note hand"><span class="lbl">${esc(BOOK.rule[0])}</span>${esc(BOOK.rule[1])}</div>`;
+  }
+  const page = 2 * state.steps + 6;
+  left = `<div class="runhead">${esc(META.baslik)}</div>` + left + `</div><div class="folio">${page}</div>`;
+
+  // sağ sayfa
+  let right = `<div class="runhead">${ACTS[act][1]}</div><div class="sect">§ ${num}</div>`;
+  if (sec.end) right += `<div class="kind">${esc(val(sec.end.kind))}</div>`;
+  if (sec.actEnd) right += `<div class="kind">${ACTS[act][0]}nin sonu</div>`;
+  right += `<h2>${esc(sec.title)}</h2><div class="text">`;
+  let leadDone = false;
+  sec.text(state).forEach((para) => {
+    if (typeof para === "object") right += `<p class="quote">«${esc(para.q)}»</p>`;
+    else {
+      const cap = !leadDone && /^[A-Za-zÇĞİÖŞÜçğıöşü]/.test(para);
+      right += `<p class="${cap ? "lead" : (!leadDone ? "first" : "")}">${esc(para)}</p>`; leadDone = true;
+    }
+  });
+  right += `</div>`;
+
+  if (sec.end) {
+    right += `<div class="sub">Sabah</div><div class="text"><p class="first">${esc(val(sec.sabah))}</p></div>`;
+    right += `<div class="sub">Kimin başına ne geldi</div><ul class="fates">`;
+    val(sec.akibet).forEach(([w, t]) => { right += `<li><b>${esc(w)}.</b> ${esc(t)}</li>`; });
+    right += `</ul><div class="sub">Bir yıl sonra</div><div class="text"><p class="first">${esc(val(sec.yil))}</p></div>`;
+    right += `<div class="the-end">SON</div>`;
+    saveEnding(sec.end.id);
+    right += `<div class="tally">Bulduğun sonlar: ${loadEndings().length} / ${META.sonSayisi}</div>`;
+    right += `<div class="tally">Yazarı takip et: <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></div>`;
+  }
+  if (sec.actEnd) {
+    const hints = missedHints(state, act);
+    if (hints.length) {
+      right += `<div class="sub">${esc(BOOK.missedTitle || "Bu gece kaçırdıkların")}</div><ul class="missed">`;
+      hints.forEach((h) => { right += `<li>${esc(h)}</li>`; });
+      right += `</ul>`;
+    }
+  }
+
+  right += `<div class="choices" id="choices"></div><div class="folio">${page + 1}</div>`;
+
+  const read = Math.min(14, 3 + Math.round(state.steps * 0.8)), rest = Math.max(3, 16 - read);
+  $("view").innerHTML = `<div class="binding"><div class="edges l" style="width:${read}px"></div><div class="edges r" style="width:${rest}px"></div><article class="book" id="book"><div class="leaf left" id="leaf-l">${left}</div><div class="leaf right" id="leaf-r">${right}</div></article><div class="ribbon"></div></div>`;
+
+  const box = $("choices");
+  const dh = document.createElement("div"); dh.className = "decide";
+  dh.textContent = sec.end ? "Kitabı kapatmadan önce" : sec.actEnd ? ((typeof BOOK.actEndHead === "function" ? BOOK.actEndHead(sec) : BOOK.actEndHead) || "Gece devam ediyor") : "Ne yapacaksın?";
+  box.appendChild(dh);
+  const addBtn = (text, n, onClick, id) => {
+    const b = document.createElement("button");
+    b.className = "choice"; b.type = "button"; if (id) b.id = id;
+    b.innerHTML = (n == null ? `<span class="seal blank" aria-hidden="true">❧</span>` : `<span class="seal" aria-label="Bölüm ${n}">${n}</span>`)
+      + `<span class="ct">${esc(text)}</span><span class="go" aria-hidden="true">${n == null ? "kapağa dön" : "sayfaya git"}</span>`;
+    b.addEventListener("click", onClick);
+    box.appendChild(b);
+  };
+  if (sec.end || sec.actEnd) {
+    if (sec.next) addBtn(sec.next.t, NUM[state.sec + "#next"], () => go(sec.next, NUM[state.sec + "#next"]), "c-next");
+    if (sec.end) {
+      addBtn(BOOK.againText || "Geceyi baştan yaşa", 1, () => { state = fresh(); render(true); }, "c-again");
+      addBtn("Kapağa dön", null, () => { state = Object.assign(fresh(), { sec: "cover" }); render(); }, "c-cover");
+    }
+  } else {
+    sec.choices.forEach((c, i) => {
+      if (c.if && !c.if(state)) return;
+      const n = choiceNum(state.sec, c, i);
+      addBtn(c.t, n, () => go(c, n), "c-" + i);
+    });
+  }
+}
+
+function go(choice, shownNum) {
+  const oldRight = $("leaf-r") ? $("leaf-r").innerHTML : null;
+  const oldLeft = $("leaf-l") ? $("leaf-l").innerHTML : null;
+  const oldBook = $("book") ? $("book").innerHTML : null;
+  state.steps = (state.steps || 0) + 1;
+  if (choice.fx) choice.fx(state);
+  state.sec = typeof choice.to === "function" ? choice.to(state) : choice.to;
+  state.num = shownNum || null;
+  const next = S[state.sec];
+  if (next.enter) next.enter(state);
+  render(true);
+  flipFrom(oldRight, oldBook, oldLeft);
+  if (next.end && window.ATM) ATM.flash = 1;
+}
+
+function flipFrom(oldRight, oldBook, oldLeft) {
+  const book = $("book");
+  if (!book || !oldRight || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const twoPage = getComputedStyle(book).gridTemplateColumns.split(" ").length > 1;
+  if (twoPage) {
+    const newLeft = $("leaf-l");
+    const fl = document.createElement("div");
+    fl.className = "flip";
+    fl.innerHTML = `<div class="face front leaf right">${oldRight}</div><div class="face back leaf left">${newLeft.innerHTML}</div>`;
+    // çevrilen sayfa üstünü örtene kadar altta eski sol sayfa görünür, gerçek kitaptaki gibi
+    const newLeftHTML = newLeft.innerHTML;
+    if (oldLeft) newLeft.innerHTML = oldLeft; else newLeft.classList.add("hide-under");
+    book.appendChild(fl);
+    setTimeout(() => { newLeft.innerHTML = newLeftHTML; newLeft.classList.remove("hide-under"); fl.remove(); }, 860);
+  } else {
+    const lf = document.createElement("div");
+    lf.className = "lift book";
+    lf.innerHTML = oldBook;
+    lf.style.display = "block";
+    book.appendChild(lf);
+    setTimeout(() => lf.remove(), 620);
+  }
+}
+
+function render(turn) {
+  const onCover = state.sec === "cover";
+  ["btn-book", "btn-cover"].forEach((id) => { $(id).style.visibility = onCover ? "hidden" : "visible"; });
+  if (window.ATM) ATM.target = onCover ? (BOOK.coverAtmos ?? 0.6) : BOOK.atmos(S[state.sec]);
+  if (window.ATM && !onCover && BOOK.hour) ATM.hour = BOOK.hour(S[state.sec], val(S[state.sec].time));
+  if (onCover) renderCover(); else renderPage(turn);
+  renderDrawer();
+  $("main").scrollTop = 0;
+}
+
+function renderDrawer() {
+  const items = $("items"); items.innerHTML = "";
+  BOOK.items(state).forEach((x) => { const li = document.createElement("li"); li.textContent = x; items.appendChild(li); });
+
+  const notes = $("notes"); notes.innerHTML = "";
+  if (!state.notes.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = "Henüz bir şey yazmadın."; notes.appendChild(li); }
+  state.notes.forEach((n) => { const li = document.createElement("li"); li.textContent = n; notes.appendChild(li); });
+  $("note-count").textContent = state.notes.length ? "(" + state.notes.length + ")" : "";
+
+  const ends = $("endings"); ends.innerHTML = "";
+  const found = loadEndings();
+  ENDINGS.forEach((e) => {
+    const li = document.createElement("li");
+    li.textContent = found.includes(e.id) ? e.title : "· · ·";
+    if (!found.includes(e.id)) li.className = "empty";
+    ends.appendChild(li);
+  });
+}
+
+if (META.kutuphane) { const l = $("lnk-lib"); l.href = META.kutuphane; l.hidden = false; }
+$("btn-book").addEventListener("click", () => $("drawer").classList.add("open"));
+$("btn-close").addEventListener("click", () => $("drawer").classList.remove("open"));
+$("btn-cover").addEventListener("click", () => { $("confirm").classList.add("show"); $("btn-cover").style.display = "none"; });
+const closeConfirm = () => { $("confirm").classList.remove("show"); $("btn-cover").style.display = ""; };
+$("btn-no").addEventListener("click", closeConfirm);
+$("btn-yes").addEventListener("click", () => { closeConfirm(); state = Object.assign(fresh(), { sec: "cover" }); render(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("drawer").classList.remove("open"); });
+
+
+/* ---------------- Çöl gezegeni: iki güneş, kum tepeleri, yıldızlar, kum fırtınası ---------------- */
+const desert = { level: 0.15, target: 0.15, flash: 0, hour: 18, h: 18 };
+window.ATM = desert;
+(function scene() {
+  const cv = $("sea"), ctx = cv.getContext("2d");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, dpr, dunes = [], stars = [], grains = [];
+  let seed = 5;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const mix = (c1, c2, t) => c1.map((v, i) => Math.round(lerp(v, c2[i], t)));
+  // saat: 17 gün batımı, 19 alacakaranlık, 20+ gece, 5 şafak
+  const SKY = [
+    [0, [8, 8, 20], [24, 18, 30]], [4.5, [14, 12, 30], [60, 40, 50]], [6, [90, 70, 90], [230, 150, 90]],
+    [9, [110, 150, 190], [235, 200, 150]], [16, [120, 150, 180], [240, 190, 130]], [17.5, [90, 70, 90], [240, 130, 70]],
+    [19, [30, 24, 46], [120, 60, 50]], [20.5, [8, 8, 20], [24, 18, 30]], [24, [8, 8, 20], [24, 18, 30]]
+  ];
+  function skyAt(h) {
+    for (let i = 0; i < SKY.length - 1; i++) {
+      const [a, t1, b1] = SKY[i], [b, t2, b2] = SKY[i + 1];
+      if (h >= a && h <= b) { const t = (h - a) / (b - a); return [mix(t1, t2, t), mix(b1, b2, t)]; }
+    }
+    return [SKY[0][1], SKY[0][2]];
+  }
+  const nightness = (h) => (h < 4.5 || h > 20.5) ? 1 : (h < 6 ? 1 - (h - 4.5) / 1.5 : (h > 18.5 ? (h - 18.5) / 2 : 0));
+  function size() {
+    dpr = Math.min(2, window.devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    seed = 5;
+    dunes = [0, 1, 2].map((d) => { const pts = []; for (let x = -50; x <= W + 50; x += 40) pts.push([x, H * (0.6 + d * 0.11) + Math.sin(x * (0.004 + d * 0.002) + d * 2) * (30 - d * 6) + rnd() * 10]); return pts; });
+    stars = Array.from({ length: 180 }, () => ({ x: rnd() * W, y: rnd() * H * 0.6, r: rnd() * 1.3, p: rnd() * 6 }));
+    grains = Array.from({ length: 400 }, () => ({ x: Math.random() * W, y: Math.random() * H, v: 2 + Math.random() * 5, l: 6 + Math.random() * 18 }));
+  }
+  window.addEventListener("resize", size); size();
+  function frame(t) {
+    const time = t / 1000;
+    desert.level += (desert.target - desert.level) * 0.02;
+    desert.h += (desert.hour - desert.h) * 0.02;
+    const h = desert.h, L = desert.level, n = nightness(h);
+    const [top, bot] = skyAt(h);
+    const g = ctx.createLinearGradient(0, 0, 0, H * 0.75);
+    g.addColorStop(0, `rgb(${top})`); g.addColorStop(1, `rgb(${bot})`);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    if (n > 0.1) stars.forEach((s) => { ctx.fillStyle = `rgba(255,245,230,${n * (0.4 + 0.5 * Math.sin(time + s.p))})`; ctx.fillRect(s.x, s.y, s.r + 0.6, s.r + 0.6); });
+    // iki güneş (gündüz/batım), ya da iki küçük ay (gece)
+    const day = 1 - n, sx = W * 0.68, sy = H * (0.25 + 0.35 * Math.min(1, Math.max(0, (h - 15) / 4)));
+    [[0, 34, "255,210,140"], [70, 20, "255,170,110"]].forEach(([dx, r, c], i) => {
+      const x = sx + dx, y = sy + i * 18;
+      const gl = ctx.createRadialGradient(x, y, 0, x, y, r * 5); gl.addColorStop(0, `rgba(${c},${0.55 * day})`); gl.addColorStop(1, `rgba(${c},0)`);
+      ctx.fillStyle = gl; ctx.fillRect(x - r * 5, y - r * 5, r * 10, r * 10);
+      ctx.fillStyle = `rgba(${c},${0.9 * day})`; ctx.beginPath(); ctx.arc(x, y, r * 0.5, 0, 7); ctx.fill();
+    });
+    if (n > 0.3) [[W * 0.22, H * 0.18, 10], [W * 0.27, H * 0.13, 5]].forEach(([x, y, r]) => { ctx.fillStyle = `rgba(220,220,235,${n * 0.8})`; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); });
+    dunes.forEach((pts, d) => {
+      const c = mix(mix([196, 120, 70], [60, 40, 40], n), [20, 14, 14], d * 0.25 + n * 0.3);
+      ctx.fillStyle = `rgb(${c})`; ctx.beginPath(); ctx.moveTo(0, H);
+      pts.forEach(([x, y]) => ctx.lineTo(x + (reduce ? 0 : Math.sin(time * 0.03 + d) * 4), y)); ctx.lineTo(W, H); ctx.fill();
+    });
+    // kum fırtınası
+    if (L > 0.05) {
+      ctx.fillStyle = `rgba(200,140,80,${0.25 * L})`; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = `rgba(230,180,120,${0.2 + 0.4 * L})`; ctx.lineWidth = 1; ctx.beginPath();
+      const cnt = Math.floor(grains.length * L);
+      for (let i = 0; i < cnt; i++) { const p = grains[i]; ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.l, p.y + 1); if (!reduce) { p.x -= p.v * (1 + L * 2); if (p.x < -20) { p.x = W + 20; p.y = Math.random() * H; } } }
+      ctx.stroke();
+    }
+    if (desert.flash > 0) { ctx.fillStyle = `rgba(255,230,200,${desert.flash * 0.3})`; ctx.fillRect(0, 0, W, H); desert.flash *= 0.88; if (desert.flash < 0.02) desert.flash = 0; }
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  if (reduce) { frame(0); window.addEventListener("resize", () => frame(0)); }
+  else requestAnimationFrame(frame);
+})();
+
+/* ---------------- Başlat ---------------- */
+function start(data) {
+  if (data && data.sec && (data.sec === "cover" || S[data.sec])) state = Object.assign(fresh(), data);
+  else if (location.hash === "#oku") state = fresh();
+  render();
+}
+window.claude?.hot?.snapshot?.(() => state);
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>
