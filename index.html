@@ -134,6 +134,8 @@ section { position: relative; }
 .case { position: relative; border-radius: 6px; padding: 40px 30px 0; background: linear-gradient(180deg, #1d140e, #24180f); box-shadow: inset 0 30px 60px rgba(0,0,0,0.6), inset 0 0 0 10px #2f2015, inset 0 0 0 12px #1a110a; overflow-x: auto; overflow-y: hidden; }
 .case::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(600px 260px at 50% 0%, rgba(233,179,79,0.14), transparent 70%); }
 .row { display: flex; align-items: flex-end; justify-content: center; gap: 6px; min-height: 360px; padding: 0 20px; perspective: 1400px; position: relative; z-index: 1; width: max-content; min-width: 100%; }
+.shelf-label { position: relative; z-index: 2; width: max-content; margin: 0 auto 14px; font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase; color: #2a1a10; background: linear-gradient(#e9c27a, #b98a3e); padding: 4px 16px 3px 19px; border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.4); }
+#shelf-en { padding-top: 46px; }
 .plank { height: 34px; margin: 0 -30px; position: relative; z-index: 0; background: linear-gradient(#5a3a22, #3b2618 45%, #2a1a10); box-shadow: 0 14px 24px rgba(0,0,0,0.6), inset 0 2px 0 rgba(255,220,170,0.15); }
 .bookend { width: 18px; height: 150px; align-self: flex-end; margin: 0 14px; border-radius: 3px 3px 0 0; background: linear-gradient(90deg, #8a6a3c, #c9a063 50%, #7a5a30); box-shadow: 4px 0 10px rgba(0,0,0,0.5); }
 .deco { align-self: flex-end; margin: 0 18px; }
@@ -282,8 +284,14 @@ footer .big em { color: var(--lamp); }
       </div>
     </div>
     <div class="case reveal">
+      <div class="shelf-label" id="lbl-tr" hidden>Türkçe</div>
       <div class="row" id="row"></div>
       <div class="plank"></div>
+      <div id="shelf-en" hidden>
+        <div class="shelf-label" lang="en">English</div>
+        <div class="row" id="row-en"></div>
+        <div class="plank"></div>
+      </div>
     </div>
     <p class="shelf-note" id="shelf-note">Bir kitabın üstüne gel, kapağını göster. Tıkla, açılsın. Beğendiğin kitabın rafındaki ♥ plakasına dokun.</p>
   </div>
@@ -350,7 +358,7 @@ footer .big em { color: var(--lamp); }
   const likeTotals = {};
 
   /* vitrin: en yeni yayındaki kitap */
-  const F = [...live].sort((a, b) => (b.eklenme || "").localeCompare(a.eklenme || "") || (b.kitapNo || 0) - (a.kitapNo || 0))[0];
+  const F = [...live].filter((b) => !b.dil || b.dil === "tr").sort((a, b) => (b.eklenme || "").localeCompare(a.eklenme || "") || (b.kitapNo || 0) - (a.kitapNo || 0))[0];
   if (F) {
     const got = found(F), total = F.sonSayisi || 0, C = 2 * Math.PI * 22;
     $("#feat").innerHTML = `
@@ -388,35 +396,43 @@ footer .big em { color: var(--lamp); }
     $("#feat-go").addEventListener("click", open);
   }
 
-  /* raf */
-  const row = $("#row");
+  /* raflar: üstte Türkçe, altta İngilizce (katalogda "dil": "en") */
   const deco = (html) => { const d = document.createElement("div"); d.innerHTML = html; return d.firstElementChild; };
-  const oldies = (list) => list.forEach(([w, h, c]) => row.appendChild(deco(`<div class="old" aria-hidden="true" style="width:${w}px;height:${h}px;background:${c}"></div>`)));
-  oldies([[34, 250, "#3a2a22"], [42, 276, "#26302f"], [30, 232, "#40261f"], [38, 262, "#2b2631"]]);
+  const dilOf = (b) => b.dil || "tr";
+  const kaynakOf = (b) => books.find((x) => x.id === b.kaynak) || b;
+  const enBooks = books.filter((b) => dilOf(b) === "en");
+  if (enBooks.length) { $("#shelf-en").hidden = false; $("#lbl-tr").hidden = false; }
+  const shelves = [[$("#row"), books.filter((b) => dilOf(b) === "tr")], [$("#row-en"), enBooks]];
+  shelves.forEach(([row, list], si) => {
+  const oldies = (l) => l.forEach(([w, h, c]) => row.appendChild(deco(`<div class="old" aria-hidden="true" style="width:${w}px;height:${h}px;background:${c}"></div>`)));
+  oldies(si ? [[38, 262, "#2b2631"], [30, 240, "#3a2a22"], [42, 270, "#26302f"]] : [[34, 250, "#3a2a22"], [42, 276, "#26302f"], [30, 232, "#40261f"], [38, 262, "#2b2631"]]);
   row.appendChild(deco('<div class="bookend" aria-hidden="true"></div>'));
-  books.forEach((b) => {
+  list.forEach((b) => {
+    const en = dilOf(b) === "en";
     const s = b.sirt || {}, H = s.yukseklik || 290, T = s.kalinlik || 46, D = Math.round(H * 0.68);
     const slot = document.createElement("div"); slot.className = "slot";
     const el = document.createElement("button");
     el.type = "button";
     el.className = "bk" + (b.durum === "yakinda" ? " soon" : "");
     el.dataset.id = b.id;
-    el.dataset.tags = (b.tur || []).join("|");
+    if (en) el.lang = "en";
+    el.dataset.tags = (kaynakOf(b).tur || []).join("|");
     el.dataset.text = [b.baslik, b.altBaslik, b.yazar, ...(b.tur || [])].join(" ").toLocaleLowerCase("tr");
     el.style.width = T + "px"; el.style.height = H + "px";
-    el.setAttribute("aria-label", b.durum === "yakinda" ? `${b.baslik}: ${b.cikis ? b.cikis + " rafta" : "yakında"}` : `${b.baslik} kitabını aç`);
+    el.setAttribute("aria-label", b.durum === "yakinda" ? (en ? `${b.baslik}: coming soon` : `${b.baslik}: ${b.cikis ? b.cikis + " rafta" : "yakında"}`) : (en ? `Open ${b.baslik}` : `${b.baslik} kitabını aç`));
     const coverBg = b.kapak ? `background-image:url('${esc(b.kapak)}')` : `background:${s.renk}`;
     el.innerHTML = `
       <span class="face spine" style="background:${s.renk};color:${s.yazi}">
         <span class="sn">${b.kitapNo}</span><span class="st"${s.yaziBoyu ? ` style="font-size:${s.yaziBoyu}px;letter-spacing:0.16em"` : ""}>${esc(b.baslik)}</span><span class="sa">${esc(b.yazar.split(" ").pop())}</span></span>
-      <span class="face cover" style="${coverBg};width:${D}px;height:${H}px;left:${T}px;transform-origin:left center;transform:rotateY(90deg)">${b.durum === "yakinda" ? `<span>${esc(b.cikis || "Yakında")}</span>` : `<span class="ct">${esc(b.baslik.toLocaleUpperCase("tr"))}</span>`}</span>
+      <span class="face cover" style="${coverBg};width:${D}px;height:${H}px;left:${T}px;transform-origin:left center;transform:rotateY(90deg)">${b.durum === "yakinda" ? `<span>${esc(b.cikis || (en ? "Soon" : "Yakında"))}</span>` : `<span class="ct">${esc(b.baslik.toLocaleUpperCase(dilOf(b)))}</span>`}</span>
       <span class="face pages" style="width:${T - 4}px;height:${D - 4}px;left:2px;top:${-D + 4}px;transform-origin:bottom center;transform:rotateX(90deg)"></span>`;
     el.addEventListener("click", () => {
       if (b.durum === "yakinda") { el.classList.remove("wiggle"); void el.offsetWidth; el.classList.add("wiggle"); $("#shelf-note").textContent = `${b.baslik} ${b.cikis || "yakında"} rafta: “${b.slogan}”`; return; }
-      if (matchMedia("(hover: none)").matches && !el.classList.contains("peek")) { row.querySelectorAll(".peek").forEach((x) => x.classList.remove("peek")); el.classList.add("peek"); $("#shelf-note").textContent = "Açmak için bir kez daha dokun."; return; }
+      if (matchMedia("(hover: none)").matches && !el.classList.contains("peek")) { document.querySelectorAll(".row .peek").forEach((x) => x.classList.remove("peek")); el.classList.add("peek"); $("#shelf-note").textContent = "Açmak için bir kez daha dokun."; return; }
       openBook(b, el.querySelector(".cover"));
     });
-    slot.innerHTML = `<span class="tag">${b.durum === "yakinda" ? esc(b.cikis || "Yakında") : `${found(b)} / ${b.sonSayisi} son buldun`}</span>`;
+    if (en) slot.lang = "en";
+    slot.innerHTML = `<span class="tag">${b.durum === "yakinda" ? esc(b.cikis || (en ? "Coming soon" : "Yakında")) : (en ? `${found(b)} / ${b.sonSayisi} endings found` : `${found(b)} / ${b.sonSayisi} son buldun`)}</span>`;
     if (b.durum !== "yakinda" && window.Begeni) {
       const plate = document.createElement("span"); plate.className = "plate"; slot.appendChild(plate);
       Begeni.mount(plate, b.id, { onCount: (n) => setTagLikes(b.id, n) });
@@ -427,7 +443,8 @@ footer .big em { color: var(--lamp); }
   row.appendChild(deco('<div class="deco stack" aria-hidden="true"><i style="width:120px;background:#3b2a3a"></i><i style="width:110px;background:#253447"></i><i style="width:126px;background:#4a2e22"></i></div>'));
   row.appendChild(deco('<div class="deco glass" aria-hidden="true"></div>'));
   row.appendChild(deco('<div class="bookend" aria-hidden="true"></div>'));
-  oldies([[36, 268, "#2e2a20"], [44, 240, "#3c2420"], [32, 284, "#22303a"], [40, 256, "#352a1e"], [30, 230, "#2a2224"]]);
+  oldies(si ? [[44, 240, "#3c2420"], [32, 284, "#22303a"], [36, 250, "#2e2a20"]] : [[36, 268, "#2e2a20"], [44, 240, "#3c2420"], [32, 284, "#22303a"], [40, 256, "#352a1e"], [30, 230, "#2a2224"]]);
+  });
 
   function setTagLikes(id, n) {
     likeTotals[id] = n; const sum = Object.values(likeTotals).reduce((a, c) => a + c, 0);
@@ -435,7 +452,7 @@ footer .big em { color: var(--lamp); }
   }
 
   /* filtreler ve arama */
-  const tags = ["Tümü", ...new Set(books.flatMap((b) => b.tur || []))];
+  const tags = ["Tümü", ...new Set(books.filter((b) => !b.dil || b.dil === "tr").flatMap((b) => b.tur || []))];
   let active = "Tümü";
   const fbox = $("#filters");
   tags.forEach((t) => {
@@ -446,7 +463,7 @@ footer .big em { color: var(--lamp); }
   const apply = () => {
     const q = $("#q").value.trim().toLocaleLowerCase("tr");
     let shown = 0;
-    row.querySelectorAll(".bk").forEach((el) => {
+    document.querySelectorAll(".row .bk").forEach((el) => {
       const ok = (active === "Tümü" || el.dataset.tags.split("|").includes(active)) && (!q || el.dataset.text.includes(q));
       el.parentElement.classList.toggle("hidden", !ok); if (ok) shown++;
     });
