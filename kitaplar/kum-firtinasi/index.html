@@ -587,7 +587,7 @@ const S = {
       } else if (s.kacis === "yalan") {
         p.push("\"Burada hurdadan başka bir şey yok,\" diyorsun.");
         p.push("Engizitör gülümsemesini bozmadan tezgâha yürüyor. Elini kaldırıyor; küp, sanki görünmez bir ip çekiyormuş gibi tezgâhın üstünde kıpırdıyor. O anda Orrin, elindeki ağır anahtarı lambaya fırlatıyor. Karanlık. Bir bağırış. Orrin'in sesi: \"Küpü al ve koş!\"");
-        p.push((has(s, "KURSUN") ? "Kurşun kutuyu" : "Küpü") + " kapıp arka kapıdan fırtınaya dalıyorsun. KT-4 omzuna tutunmuş, çığlık gibi bipliyor. Arkanda, atölyenin içinde bir şey kırmızı bir ışıkla parlıyor. Sonra Orrin'in sesi kesiliyor.");
+        p.push((has(s, "KURSUN") ? "Kurşun kutuyu" : "Küpü") + " kapıp arka kapıdan fırtınaya dalıyorsun. KT-4 omzuna tutunmuş, çığlık gibi bipliyor. Arkanda, atölyenin içinde bir şey devriliyor, cam kırılıyor. Sonra Orrin'in sesi kesiliyor.");
       } else if (s.kacis === "arka") {
         p.push((has(s, "KURSUN") ? "Kurşun kutuyu" : "Küpü") + " kapıp arka kapıya atılıyorsun. Engizitör sakin bir sesle \"Durun,\" diyor, emir bile değil. Orrin kapının önüne geçiyor, kollarını iki yana açıyor. \"Yaşlı bir hurdacıyla uğraşın biraz, efendim.\"");
         p.push("Fırtınaya dalıyorsun. KT-4 omzuna tutunmuş, gözünün ışığını kısmış. Arkana bir kez bakıyorsun: atölyenin kapısında, kum perdesinin ardında, iki stormtrooper Orrin'i kollarından tutmuş çıkarıyor.");
@@ -830,7 +830,7 @@ const S = {
       ];
       if (s.hedef === "gemi" && has(s, "GEMI_HAZIR")) {
         p.push("Kum Serçesi'nin motorları uğulduyor. Sena kokpite atlıyor, düğmelere ezbere dokunuyor. \"İki dakika!\" diye bağırıyor. \"Motorlar ısınmadan kalkarsak pistin sonunda yere çakılırız!\"");
-        p.push("Hangarın büyük kapısı dışarıdan yumruklanıyor gibi titriyor. Sonra titreme duruyor. Kapının ortasında, metalin içinden kızıl bir ışık beliriyor ve yavaşça aşağı iniyor. Biri kapıyı kesiyor.");
+        p.push("Hangarın büyük kapısı dışarıdan yumruklanıyor gibi titriyor. Sonra titreme duruyor. Sonra kapının ortasına ağır, düzenli darbeler inmeye başlıyor. Her darbede metal biraz daha içeri bükülüyor. Biri kapıyı zorluyor.");
       } else if (s.hedef === "gemi") {
         p.push("Kum Serçesi kalkamaz. Sena hangarın yan penceresinden iniş pistine bakıyor. Pistte, rampası hâlâ açık, Engizitör'ün mekiği duruyor.");
         p.push("\"O gemi,\" diyor. \"Onunla gideriz. Ben her şeyi uçururum.\" Servis kapısını aralıyorsunuz. Avlu projektör ışığıyla bembeyaz.");
@@ -869,7 +869,7 @@ const S = {
       else if (s.hedef === "orrin") p.push("Hangarın servis kapısına üç adım kalmışken kapı kendiliğinden açılıyor.");
       p.push(tapinak
         ? "Merdivenin son basamağında duruyor. Uzun, gri saçlı, siyah paltolu. Gözleri kapalı. Kristalin mavi ışığı yüzüne vuruyor ve o bunu hissediyormuş gibi gülümsüyor."
-        : (s.geriDondu ? "Rampanın dibinde duruyor. Uzun, gri saçlı, siyah paltolu. Gözleri kapalı. Ne zaman geldiğini kimse görmedi." : "Karşınızda duruyor. Uzun, gri saçlı, siyah paltolu. Gözleri kapalı. Elinde ince, uzun bir kılıç; namlusu henüz sönük."));
+        : (s.geriDondu ? "Rampanın dibinde duruyor. Uzun, gri saçlı, siyah paltolu. Gözleri kapalı. Ne zaman geldiğini kimse görmedi." : "Karşınızda duruyor. Uzun, gri saçlı, siyah paltolu. Gözleri kapalı. Elinde ince, uzun bir kılıç."));
       p.push({ q: "Kessar'a bir holokron için geldim. Bir çocuk bulacağımı bilmiyordum. Ama hissettim seni, daha kapsülü açtığın an." });
       if (has(s, "ORRIN_ESIR") && !has(s, "ORRIN_KURTARILDI")) p.push({ q: "Yaşlı hurdacı hücresinde. Seni sordu. Ona ne cevap verdiğimi merak ediyor musun?" });
       if (has(s, "YEMIN")) p.push("Cebindeki kırık pipo bir anda ağırlaşıyor. Göğsünde bir şey ısınıyor, küpün ısısından farklı bir şey. Kızgın, karanlık bir şey.");
@@ -897,8 +897,8 @@ const S = {
       p.push("Gözlerini kapatıyorsun. Bu kez yüz gelmiyor; sadece ses. Kulağının dibinde değil, içinde.");
       p.push({ q: "Korkma. Öfke de korku da senin. Ama sen onlardan büyüksün. Bırak ışık geçsin." });
       p.push(has(s, "KRISTAL")
-        ? "Küp açılıyor. Köşelerinden ince mavi çizgiler ayrılıyor ve avucundaki kristale uzanıyor. İkisi birleştiği an ışık bir dalga gibi patlıyor. Engizitör'ün elindeki kızıl kılıç tam o an yanıyor ve dalgaya değdiği yerde cam gibi çatlıyor. Adam geriye savruluyor, sırtı duvara çarpıyor. Gözlerini açıyor. Sarı, şaşkın gözler."
-        : "Küp açılıyor. Köşelerinden mavi bir ışık yükseliyor, aranızda bir duvar gibi duruyor. Engizitör kızıl kılıcını yakıp ışığa vuruyor; her darbede ışık titriyor ama dağılmıyor. Kolların yanıyor. Ne kadar tutabileceğini bilmiyorsun.");
+        ? "Küp açılıyor. Köşelerinden ince mavi çizgiler ayrılıyor ve avucundaki kristale uzanıyor. İkisi birleştiği an ışık bir dalga gibi patlıyor. Engizitör'ün kılıcı dalgaya değdiği yerde cam gibi çatlıyor. Adam geriye savruluyor, sırtı duvara çarpıyor. Gözlerini açıyor. Sarı, şaşkın gözler."
+        : "Küp açılıyor. Köşelerinden mavi bir ışık yükseliyor, aranızda bir duvar gibi duruyor. Engizitör kılıcını çekip ışığa vuruyor; her darbede ışık titriyor ama dağılmıyor. Kolların yanıyor. Ne kadar tutabileceğini bilmiyorsun.");
       p.push(s.hedef === "kristal"
         ? "Tapınağın tavanından taşlar dökülüyor. Merdiven açık. Yukarıda, avlunun öbür ucunda, hangarın kapısında Sena bekliyor olmalı."
         : "Garnizonun her yanından askerler koşuyor ama ışığın içine kimse giremiyor. Sena'nın sesi arkandan geliyor: \"Gel! Şimdi!\"");
@@ -916,7 +916,7 @@ const S = {
     text: (s) => {
       const p = [];
       const serce = has(s, "GEMI_HAZIR");
-      if (s.orrinPlan) p.push("Orrin sana bir kez göz kırpıyor. Sonra, kırk yıllık bir kaçakçının bileğiyle, ağır anahtarı avlunun en büyük projektörüne fırlatıyor. Cam patlıyor, kıvılcımlar yağıyor, avlunun yarısı karanlığa gömülüyor. Engizitör kılıcını yakıyor ama bir anlığına yön arıyor; o bir an size yetiyor. Karanlığın içinden rampaya koşuyorsunuz, Orrin'in kolu omzunda.");
+      if (s.orrinPlan) p.push("Orrin sana bir kez göz kırpıyor. Sonra, kırk yıllık bir kaçakçının bileğiyle, ağır anahtarı avlunun en büyük projektörüne fırlatıyor. Cam patlıyor, kıvılcımlar yağıyor, avlunun yarısı karanlığa gömülüyor. Engizitör kılıcını çekiyor ama bir anlığına yön arıyor; o bir an size yetiyor. Karanlığın içinden rampaya koşuyorsunuz, Orrin'in kolu omzunda.");
       else if (s.kt4Plan) p.push("KT-4 omzundan fırlayıp hangarın duvarındaki yangın panosuna yapışıyor. Bir saniye sonra tavandaki bütün söndürücüler aynı anda patlıyor; avlu beyaz bir köpük bulutuna dönüyor. Engizitör'ün gözleri kapalı ama askerlerinkiler değil. Bulutun içinden körlemesine koşuyorsunuz. KT-4 son anda rampaya atlıyor.");
       else if (s.hedef === "kristal") p.push("Merdivenleri ikişer ikişer çıkıyorsun. Avluyu bir rüzgâr gibi geçiyorsun; askerler hâlâ tapınaktaki ışığa bakıyor. Sena seni hangarın önünde görüyor ve pistteki mekiğe doğru koşmaya başlıyor.");
       else p.push("Arkanı dönüp koşuyorsun. Işık arkanda bir süre daha duruyor, sonra yavaşça sönüyor.");
@@ -983,7 +983,7 @@ const S = {
     title: "Son Işık",
     text: (s) => {
       const p = [];
-      if (s.direkBedel) p.push((kutu(s) ? "Kurşun kutuyu açıp küpü avucuna alıyorsun" : "Küpü cebinden çıkarıyorsun") + " ve Sena'ya dönmeden \"Git!\" diye bağırıyorsun. Küp açılıyor; içinden yükselen mavi ışık " + (has(s, "GEMI_HAZIR") ? "kesilen kapının yarığını" : "servis kapısını") + " bir duvar gibi kapatıyor. Öbür tarafta kızıl bir kılıç yanıyor ve ışığa vurmaya başlıyor.");
+      if (s.direkBedel) p.push((kutu(s) ? "Kurşun kutuyu açıp küpü avucuna alıyorsun" : "Küpü cebinden çıkarıyorsun") + " ve Sena'ya dönmeden \"Git!\" diye bağırıyorsun. Küp açılıyor; içinden yükselen mavi ışık " + (has(s, "GEMI_HAZIR") ? "bükülen kapının aralığını" : "servis kapısını") + " bir duvar gibi kapatıyor. Öbür tarafta Engizitör kılıcını kaldırıp ışığa vurmaya başlıyor.");
       p.push("Işığı tutuyorsun. Kolların yanıyor, sonra yanmayı bırakıyor. Ses içinde hâlâ konuşuyor, ama artık kelimelerle değil.");
       p.push(s.hedef === "kristal"
         ? "KT-4'ü omzundan alıp merdivene doğru itiyorsun. \"Git. Onu bul.\" Bir an duruyor, sonra koşuyor. Az sonra yukarıdan, avlunun öbür ucundan, bir geminin kalktığını duyuyorsun. Sena. Seni bekleyemezdi; sen de bunu istemezdin."
