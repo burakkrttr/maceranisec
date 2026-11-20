@@ -88,6 +88,27 @@ window.KATALOG = {
       adres: "kitaplar/karanlik-koy/index.html",
       sonAnahtari: "karanlik-koy-sonlar",
       sirt: { renk: "#172024", yazi: "#e3a64f", yukseklik: 320, kalinlik: 46, yaziBoyu: 17 }
+    },
+    {
+      id: "fener-en",
+      dil: "en",
+      kaynak: "fener",
+      durum: "yayinda",
+      eklenme: "2026-11-20",
+      seri: "Choose Your Own Adventure",
+      kitapNo: 1,
+      baslik: "The Lighthouse",
+      altBaslik: "Akça Island, October 1962",
+      yazar: "Burak Karatatar",
+      tur: ["Mystery", "Thriller"],
+      okumaSuresi: "25 min",
+      sonSayisi: 8,
+      slogan: "One stormy night. Three strangers. A single light.",
+      tanitim: "You are the new keeper of Akça Island Light. The old keeper vanished two months ago on a stormy night. Tonight there's another storm, a ship will pass at midnight, and three strangers will come to your door. Whether the light burns or goes dark is up to you.",
+      kapak: "kitaplar/fener-en/img/kapak.jpg",
+      adres: "kitaplar/fener-en/index.html",
+      sonAnahtari: "fener-en-sonlar",
+      sirt: { renk: "#1d3338", yazi: "#e9b34f", yukseklik: 320, kalinlik: 50, yaziBoyu: 12 }
     }
   ]
 };

@@ -352,9 +352,11 @@ footer .big em { color: var(--lamp); }
   });
 
   /* sayılar */
-  const endings = live.reduce((n, b) => n + (b.sonSayisi || 0), 0);
-  const soon = books.length - live.length;
-  $("#stats").innerHTML = `<div><b>${live.length}</b><span>Kitap</span></div><div><b>${endings}</b><span>Son</span></div><div id="stat-likes" hidden><b>0</b><span>Beğeni</span></div><div><b>${soon}</b><span>Yakında</span></div>`;
+  /* sayılar: İngilizce baskılar ayrı kitap sayılmaz (aynı hikâyeler) */
+  const trBooks = books.filter((b) => !b.dil || b.dil === "tr"), trLive = trBooks.filter((b) => b.durum === "yayinda");
+  const endings = trLive.reduce((n, b) => n + (b.sonSayisi || 0), 0);
+  const soon = trBooks.length - trLive.length;
+  $("#stats").innerHTML = `<div><b>${trLive.length}</b><span>Kitap</span></div><div><b>${endings}</b><span>Son</span></div><div id="stat-likes" hidden><b>0</b><span>Beğeni</span></div><div><b>${soon}</b><span>Yakında</span></div>`;
   const likeTotals = {};
 
   /* vitrin: en yeni yayındaki kitap */

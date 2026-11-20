@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Lighthouse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<script type="application/json" id="book-meta">
+{
+  "id": "fener-en",
+  "seri": "Choose Your Own Adventure",
+  "kitapNo": 1,
+  "baslik": "The Lighthouse",
+  "altBaslik": "Akça Island, October 1962",
+  "yazar": "Burak Karatatar",
+  "instagram": "https://www.instagram.com/burakkrttr/",
+  "instagramKullanici": "burakkrttr",
+  "slogan": "One stormy night. Three strangers. A single light.",
+  "tur": "Mystery · Thriller",
+  "okumaSuresi": "About 25 minutes",
+  "sonSayisi": 8,
+  "bolumSayisi": 37,
+  "kapak": "img/kapak.jpg",
+  "kapakYedek": "img/acilis.jpg",
+  "dil": "en",
+  "kaynak": "fener",
+  "sonAnahtari": "fener-en-sonlar",
+  "kutuphane": "../../index.html"
+}
+</script>
+<style>
+/* Tek tema bilerek: karanlık bir oda, masada açık bir kitap, arkada fırtınalı pencere.
+   Düzen: masaüstünde iki sayfalı açık kitap (solda levha ve bekçinin kaydı, sağda metin), telefonda tek sayfa. */
+:root {
+  --night: #0c1012;        /* oda, kitabın dışı */
+  --paper: #efe6d1;        /* sayfa */
+  --paper-edge: #e2d6bb;   /* sayfa kenarı, cilt gölgesi */
+  --ink: #2b241d;          /* metin mürekkebi */
+  --faded: #75685a;        /* soluk mürekkep, ikincil metin */
+  --rubric: #8d3a26;       /* kırmızı mürekkep: § numaraları, başharfler, süslemeler */
+  --lamp: #e9b34f;         /* fener ışığı, kapak vurgusu */
+  --display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --body: "EB Garamond", "Iowan Old Style", Georgia, serif;
+  --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --cloth: #3b2520;        /* cilt kumaşı */
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--night); color: var(--ink); font-family: var(--body); overflow: hidden; }
+canvas#sea { position: fixed; inset: 0; width: 100%; height: 100%; display: block; opacity: 0.42; }
+.vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(12,16,18,0) 30%, rgba(12,16,18,0.85) 100%); }
+
+/* üst şerit */
+.top {
+  background: linear-gradient(var(--night) 55%, rgba(12,16,18,0));
+  position: fixed; top: 0; left: 0; right: 0; z-index: 4;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 12px clamp(16px, 3vw, 36px);
+  font-family: var(--display); color: #cfc4ad;
+}
+.top .series { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; }
+.top .series b { color: var(--lamp); font-weight: 600; }
+.top nav { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.link {
+  font-family: var(--display); font-size: 17px; font-weight: 600; letter-spacing: 0.06em;
+  background: none; border: 0; color: #cfc4ad; cursor: pointer; padding: 6px 10px; border-radius: 2px;
+}
+.link:hover { color: var(--lamp); }
+a.link { text-decoration: none; }
+.link:focus-visible, .choice:focus-visible, .btn:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
+.confirm { display: none; gap: 4px; align-items: center; font-style: italic; color: #cfc4ad; font-size: 16px; }
+.confirm.show { display: inline-flex; }
+
+main { position: relative; z-index: 2; height: 100%; overflow-y: auto; padding: 64px clamp(10px, 3vw, 40px) 40px; }
+
+/* ---------- açık kitap ---------- */
+.book {
+  max-width: 1120px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  background: var(--paper);
+  border-radius: 3px 6px 6px 3px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.25), 0 6px 0 -2px #d9ccad, 0 10px 0 -4px #cdbf9e;
+  position: relative;
+}
+.book::before { /* cilt */
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 70px; transform: translateX(-50%); pointer-events: none;
+  background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(80,60,30,0.10) 38%, rgba(40,28,10,0.28) 50%, rgba(80,60,30,0.10) 62%, rgba(0,0,0,0) 100%);
+}
+.leaf {
+  position: relative; padding: 46px clamp(26px, 4vw, 58px) 54px;
+  background-image:
+    radial-gradient(rgba(120,95,55,0.07) 1px, transparent 1px),
+    radial-gradient(rgba(120,95,55,0.05) 1px, transparent 1px);
+  background-size: 7px 7px, 11px 11px; background-position: 0 0, 3px 5px;
+  min-height: min(760px, calc(100vh - 110px));
+}
+.leaf.left { border-right: 1px solid rgba(120,95,55,0.15); }
+.folio { position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; font-family: var(--display); font-size: 15px; color: var(--faded); letter-spacing: 0.1em; }
+
+/* sol sayfa: levha + kayıt */
+.plate { display: flex; flex-direction: column; gap: 22px; }
+.act-title { text-align: center; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.22em; font-size: 13.6px; color: var(--rubric); }
+.act-title span { display: block; font-size: 30px; letter-spacing: 0.06em; color: var(--ink); font-variant: normal; text-transform: none; font-weight: 600; margin-top: 2px; }
+.ill { margin: 0; padding: 10px; background: #f6efdf; border: 1px solid rgba(80,60,30,0.25); box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px rgba(80,60,30,0.25); }
+.ill img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; filter: sepia(0.18) contrast(1.02); }
+.ill figcaption { text-align: center; font-style: italic; font-size: 16px; color: var(--faded); margin-top: 8px; }
+.log { border-top: 1px solid rgba(80,60,30,0.3); border-bottom: 1px solid rgba(80,60,30,0.3); padding: 14px 4px; display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; gap: 6px; }
+.log div { font-size: 11.2px; color: var(--faded); text-transform: uppercase; letter-spacing: 0.12em; }
+.log b { display: block; font-family: var(--display); font-size: 30px; color: var(--ink); font-weight: 600; letter-spacing: 0.02em; font-variant-numeric: lining-nums tabular-nums; text-transform: none; }
+.margin-note { font-style: italic; font-size: 18px; line-height: 1.55; color: var(--faded); text-align: center; padding: 0 10px; text-wrap: balance; }
+.fleuron { text-align: center; color: var(--rubric); font-size: 22px; letter-spacing: 0.6em; }
+
+/* sağ sayfa: metin */
+.sect { text-align: center; font-family: var(--display); color: var(--rubric); font-size: 22px; font-weight: 600; letter-spacing: 0.08em; }
+.sect::before, .sect::after { content: "❧"; font-size: 16px; margin: 0 12px; position: relative; top: -2px; opacity: 0.8; }
+.sect::before { display: inline-block; transform: scaleX(-1); }
+.leaf h2 { font-family: var(--display); font-weight: 600; font-size: 24px; text-align: center; margin: 6px 0 4px; text-transform: uppercase; letter-spacing: 0.08em; text-wrap: balance; }
+.kind { text-align: center; font-style: italic; color: var(--rubric); font-size: 17px; margin-bottom: 4px; }
+.text { margin-top: 22px; }
+.text p { font-size: 20px; line-height: 1.58; margin: 0 0 12px; text-align: justify; hyphens: auto; -webkit-hyphens: auto; text-indent: 1.4em; }
+.text p.lead, .text p.first { text-indent: 0; }
+.text p.lead::first-letter { float: left; font-family: var(--display); font-weight: 600; color: var(--rubric); font-size: 76px; line-height: 0.82; padding: 6px 8px 0 0; }
+.text p.quote { font-style: italic; text-indent: 0; margin: 4px 1.6em 14px; text-align: left; color: #3d342b; }
+.sub { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; color: var(--rubric); font-size: 13.6px; text-align: center; margin: 26px 0 10px; }
+.fates { list-style: none; padding: 0; margin: 0; }
+.fates li { font-size: 18px; line-height: 1.5; padding: 7px 0; border-bottom: 1px dotted rgba(80,60,30,0.35); }
+.fates b { text-transform: uppercase; letter-spacing: 0.06em; font-size: 15.2px; margin-right: 6px; }
+.the-end { text-align: center; font-family: var(--display); font-size: 40px; letter-spacing: 0.4em; color: var(--ink); margin: 30px 0 4px; padding-left: 0.4em; }
+.missed { list-style: none; padding: 0; margin: 0; }
+.missed li { font-style: italic; color: var(--faded); font-size: 17px; text-align: center; padding: 3px 0; }
+.tally { text-align: center; font-style: italic; color: var(--faded); font-size: 16px; margin-top: 14px; }
+
+/* seçenekler: oyun kitabı yönergesi */
+.choices { margin-top: 26px; border-top: 1px solid rgba(80,60,30,0.3); padding-top: 14px; display: flex; flex-direction: column; }
+.choice {
+  display: flex; align-items: baseline; gap: 10px; width: 100%; text-align: left; cursor: pointer;
+  background: none; border: 0; border-bottom: 1px dotted rgba(80,60,30,0.3); padding: 11px 4px;
+  font-family: var(--body); font-size: 19px; line-height: 1.4; color: var(--ink);
+}
+.choice .ct { flex: 1; font-style: italic; }
+.choice .cn { font-family: var(--display); font-weight: 600; font-size: 20px; color: var(--rubric); white-space: nowrap; font-variant-numeric: lining-nums; }
+.choice:hover .ct { text-decoration: underline; text-decoration-color: var(--rubric); text-underline-offset: 4px; }
+.choice:hover { background: rgba(141,58,38,0.05); }
+
+/* sayfa çevirme */
+@keyframes ink { from { opacity: 0.1; transform: translateX(10px); } to { opacity: 1; transform: none; } }
+
+/* ---------- kapak ---------- */
+.cover-wrap { max-width: 1040px; margin: 0 auto; display: grid; grid-template-columns: minmax(280px, 430px) 1fr; gap: clamp(24px, 4vw, 56px); align-items: center; min-height: calc(100vh - 120px); }
+.cover {
+  container-type: inline-size;
+  position: relative; aspect-ratio: 2 / 3; border-radius: 3px 8px 8px 3px; overflow: hidden;
+  background: #101619 center / cover no-repeat;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.7), inset 6px 0 0 rgba(0,0,0,0.25), inset 9px 0 0 rgba(255,255,255,0.05);
+  color: #f1e7cf; display: flex; flex-direction: column; justify-content: space-between; padding: 30px 26px 26px 34px;
+}
+.cover::before { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(6,10,12,0.78) 0%, rgba(6,10,12,0.05) 38%, rgba(6,10,12,0.05) 62%, rgba(6,10,12,0.85) 100%); }
+.cover > * { position: relative; }
+.cover .band { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.18em; font-size: clamp(9px, 2.7cqi, 12.5px); white-space: nowrap; text-align: center; color: var(--lamp); border-top: 1px solid rgba(233,179,79,0.5); border-bottom: 1px solid rgba(233,179,79,0.5); padding: 6px 0; }
+.cover h1 { font-family: var(--display); font-weight: 600; font-size: clamp(44px, 19cqi, 88px); letter-spacing: 0.16em; text-align: center; margin: 18px 0 0; padding-left: 0.16em; line-height: 1; text-shadow: 0 2px 24px rgba(0,0,0,0.6); }
+.cover .subt { text-align: center; font-style: italic; font-size: clamp(15px, 4.6cqi, 20px); margin-bottom: 10px; color: #e4d8bd; }
+.cover .author { text-align: center; font-family: var(--display); font-size: clamp(14px, 4.8cqi, 20px); letter-spacing: 0.26em; text-transform: uppercase; padding-left: 0.26em; white-space: nowrap; }
+.backcover { color: #e6dcc4; }
+.backcover .slogan { font-family: var(--display); font-size: clamp(28px, 3.2vw, 38px); line-height: 1.2; font-weight: 600; color: #f3e9d2; margin: 0 0 18px; text-wrap: balance; }
+.backcover p { font-size: 19px; line-height: 1.6; margin: 0 0 12px; max-width: 58ch; color: #d6cbb2; }
+.colophon { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; margin: 22px 0; padding: 14px 0; border-top: 1px solid rgba(214,203,178,0.25); border-bottom: 1px solid rgba(214,203,178,0.25); font-size: 17px; }
+.colophon dt { text-transform: uppercase; letter-spacing: 0.14em; color: #a99d86; }
+.colophon dd { margin: 0; color: #efe5cd; }
+.btn {
+  font-family: var(--display); font-size: 22px; font-weight: 600; letter-spacing: 0.1em;
+  background: var(--lamp); color: #1d1608; border: 0; padding: 12px 28px; border-radius: 2px; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(233,179,79,0.25);
+}
+.btn:hover { background: #f2c56a; }
+
+/* ---------- defter ---------- */
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 6; width: min(400px, 92vw);
+  background: var(--paper); color: var(--ink); box-shadow: -20px 0 50px rgba(0,0,0,0.5);
+  transform: translateX(105%); transition: transform .35s ease; padding: 28px 28px 34px; overflow-y: auto;
+}
+.drawer.open { transform: none; }
+.drawer::before { content: ""; position: absolute; top: 0; left: 28px; width: 14px; height: 70px; background: var(--rubric); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%); }
+.drawer h3 { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; color: var(--rubric); font-size: 14.4px; margin: 26px 0 8px; text-align: center; }
+.drawer h3:first-of-type { margin-top: 54px; }
+.drawer ul { list-style: none; padding: 0; margin: 0; }
+.drawer li { font-size: 17px; line-height: 1.5; padding: 8px 0; border-bottom: 1px dotted rgba(80,60,30,0.35); }
+.drawer .empty { color: var(--faded); font-style: italic; }
+.drawer-close { position: absolute; top: 14px; right: 16px; color: var(--ink); }
+
+.toast {
+  position: fixed; left: 50%; top: 58px; z-index: 7; transform: translate(-50%, -10px);
+  font-style: italic; font-size: 18px; color: var(--paper); background: rgba(43,36,29,0.94);
+  padding: 9px 18px; border-radius: 2px; border-left: 3px solid var(--rubric);
+  opacity: 0; transition: opacity .4s, transform .4s; pointer-events: none; max-width: 90vw; text-align: center;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 860px) {
+  .book { grid-template-columns: 1fr; }
+  .book::before { display: none; }
+  .leaf { min-height: 0; padding: 30px 22px 50px; }
+  .leaf.left { border-right: 0; border-bottom: 1px solid rgba(120,95,55,0.2); padding-bottom: 24px; }
+  .plate { position: static; gap: 14px; }
+  .log b { font-size: 24px; }
+  .text p { font-size: 18.5px; text-align: left; }
+  .leaf.left .folio { display: none; }
+  main { padding-top: 92px; }
+  .top .series { font-size: 13px; }
+  .cover-wrap { grid-template-columns: 1fr; justify-items: center; }
+  .cover { width: min(360px, 86vw); }
+  .backcover { text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .turn .leaf.right > *, .turn .leaf.left .plate { animation: none; }
+  .drawer, .toast { transition: none; }
+}
+
+/* ===== kitap havası: cilt, sayfa kalınlığı, kurdele, sayfa başlıkları ===== */
+.binding {
+  max-width: 1150px; margin: 6px auto 30px; position: relative;
+  background: var(--cloth); border-radius: 6px; padding: 12px 14px 14px;
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 4px), repeating-linear-gradient(-45deg, rgba(0,0,0,0.08) 0 2px, transparent 2px 4px);
+  box-shadow: 0 34px 80px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 0 30px rgba(0,0,0,0.5);
+}
+.binding .book { box-shadow: 0 2px 6px rgba(0,0,0,0.35); border-radius: 2px; perspective: 2400px; }
+.edges { position: absolute; top: 16px; bottom: 18px; z-index: 0; border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #efe6d1 0 1px, #cfc1a0 1px 2px); }
+.edges.l { right: calc(100% - 14px); }
+.edges.r { left: calc(100% - 14px); }
+.ribbon { position: absolute; z-index: 3; top: -6px; left: calc(50% + 14px); width: 11px; height: calc(100% + 46px); pointer-events: none;
+  background: linear-gradient(90deg, #6f2a1b, #9b4430 45%, #7a2f1f); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 12px), 0 100%);
+  box-shadow: 2px 0 4px rgba(0,0,0,0.3); opacity: 0.95; }
+.leaf { background-color: var(--paper); }
+.leaf.left { background-image:
+    linear-gradient(90deg, rgba(90,65,30,0.10) 0%, rgba(90,65,30,0) 7%, rgba(90,65,30,0) 84%, rgba(70,50,20,0.16) 100%),
+    radial-gradient(rgba(120,95,55,0.07) 1px, transparent 1px), radial-gradient(rgba(120,95,55,0.05) 1px, transparent 1px); }
+.leaf.right { background-image:
+    linear-gradient(90deg, rgba(70,50,20,0.16) 0%, rgba(90,65,30,0) 16%, rgba(90,65,30,0) 93%, rgba(90,65,30,0.10) 100%),
+    radial-gradient(rgba(120,95,55,0.07) 1px, transparent 1px), radial-gradient(rgba(120,95,55,0.05) 1px, transparent 1px); }
+.leaf { background-size: auto, 7px 7px, 11px 11px; background-position: 0 0, 0 0, 3px 5px; }
+.runhead { position: absolute; top: 20px; left: 0; right: 0; text-align: center; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.26em; font-size: 11.2px; color: var(--faded); }
+.folio { bottom: 20px; text-align: left; padding: 0 clamp(26px, 4vw, 58px); font-variant-numeric: oldstyle-nums; font-size: 16px; }
+.leaf.right .folio { text-align: right; }
+
+/* bekçinin defteri: el yazısı kayıt */
+.ledger { background: #f6eedb; border: 1px solid rgba(80,60,30,0.25); padding: 12px 16px 14px; transform: rotate(-0.6deg);
+  background-image: repeating-linear-gradient(transparent 0 29px, rgba(70,90,120,0.22) 29px 30px); box-shadow: 0 2px 6px rgba(60,40,10,0.12); }
+.ledger .lh { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; font-size: 10.4px; color: var(--rubric); }
+.ledger .lv { font-family: var(--hand); font-size: 25px; line-height: 30px; color: #263a5a; }
+.margin-note.hand { font-family: var(--hand); font-style: normal; font-size: 24px; line-height: 1.25; color: #263a5a; transform: rotate(-1.2deg); }
+.margin-note .lbl { display: block; font-family: var(--body); font-style: italic; font-size: 16px; color: var(--faded); margin-bottom: 6px; }
+
+/* seçenekler: içindekiler gibi noktalı çizgi */
+.choice { border-bottom: 0; padding: 9px 2px; gap: 8px; }
+.choice .ct { flex: 0 1 auto; }
+.choice .lead-dots { flex: 1 1 24px; border-bottom: 2px dotted rgba(80,60,30,0.45); transform: translateY(-5px); min-width: 24px; }
+.choice .cn::before { content: "§ "; font-size: 15px; }
+.choices { border-top: 0; }
+.choices::before { content: "❦"; display: block; text-align: center; color: var(--rubric); font-size: 20px; margin-bottom: 6px; }
+
+/* sayfa çevirme */
+.flip { position: absolute; top: 0; bottom: 0; left: 50%; width: 50%; z-index: 5; transform-origin: left center; transform-style: preserve-3d; pointer-events: none; animation: flip .85s cubic-bezier(.45,.05,.3,1) forwards; }
+.flip .face { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip .face.back { transform: rotateY(180deg); }
+.flip .face::after { content: ""; position: absolute; inset: 0; pointer-events: none; animation: shade .85s ease forwards; }
+@keyframes flip { from { transform: rotateY(0deg); } to { transform: rotateY(-180deg); } }
+@keyframes shade { 0% { background: rgba(40,28,10,0); } 50% { background: rgba(40,28,10,0.28); } 100% { background: rgba(40,28,10,0); } }
+.hide-under { visibility: hidden; }
+.lift { position: absolute; inset: 0; z-index: 5; transform-origin: left center; pointer-events: none; animation: lift .6s ease-in forwards; background: var(--paper); overflow: hidden; }
+@keyframes lift { 0% { transform: perspective(1400px) rotateY(0); opacity: 1; box-shadow: 0 0 0 rgba(0,0,0,0); } 75% { opacity: 1; box-shadow: 20px 0 40px rgba(0,0,0,0.35); } 100% { transform: perspective(1400px) rotateY(-100deg); opacity: 0; } }
+
+@media (max-width: 860px) {
+  .binding { padding: 8px 8px 10px; }
+  .edges, .ribbon { display: none; }
+  .ledger .lv { font-size: 22px; }
+  .runhead { top: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .flip, .lift { display: none; } }
+
+/* ===== karar kartları ===== */
+.choices { margin-top: 30px; gap: 12px; }
+.choices::before { content: none; }
+.decide { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; font-size: 13.6px; color: var(--rubric); }
+.decide::before, .decide::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(141,58,38,0.5)); }
+.decide::after { background: linear-gradient(90deg, rgba(141,58,38,0.5), transparent); }
+.choice {
+  display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 14px;
+  padding: 12px 16px 12px 12px; border: 1px solid rgba(80,60,30,0.22); border-radius: 3px;
+  background: #f7f0de; box-shadow: inset 0 0 0 3px #f7f0de, inset 0 0 0 4px rgba(80,60,30,0.12), 0 1px 2px rgba(60,40,10,0.08);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.choice:hover { background: #f9f3e4; border-color: rgba(141,58,38,0.55); transform: translateY(-2px);
+  box-shadow: inset 0 0 0 3px #f9f3e4, inset 0 0 0 4px rgba(141,58,38,0.25), 0 8px 18px rgba(60,40,10,0.14); }
+.choice .ct { font-style: normal; font-size: 19px; line-height: 1.35; }
+.choice:hover .ct { text-decoration: none; }
+.choice .lead-dots { display: none; }
+.choice .seal {
+  width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 30%, #b45a40, #8d3a26 55%, #6e2a1a);
+  box-shadow: inset 0 0 0 3px rgba(255,235,210,0.18), inset 0 -3px 6px rgba(0,0,0,0.25), 0 2px 3px rgba(60,20,10,0.3);
+  color: #f6e9d0; font-family: var(--display); font-weight: 600; font-size: 19px; font-variant-numeric: lining-nums; letter-spacing: 0.02em;
+}
+.choice .seal.blank { background: radial-gradient(circle at 35% 30%, #a99a80, #85765e 60%, #6b5e49); font-size: 20px; }
+.choice .go { font-style: italic; font-size: 15px; color: var(--rubric); opacity: 0; transform: translateX(-6px); transition: opacity .18s, transform .18s; white-space: nowrap; }
+.choice:hover .go, .choice:focus-visible .go { opacity: 1; transform: none; }
+@media (max-width: 860px) {
+  .choice { grid-template-columns: 44px 1fr; padding: 11px 12px 11px 10px; }
+  .choice .seal { width: 40px; height: 40px; font-size: 17px; }
+  .choice .go { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .choice, .choice .go { transition: none; } .choice:hover { transform: none; } }
+
+/* yumuşatılmış kararlar: durağanken basılı satır, üstüne gelince kart */
+.choices { gap: 0; }
+.choice {
+  background: transparent; border: 0; border-radius: 3px; box-shadow: none;
+  border-bottom: 1px solid rgba(80,60,30,0.18); padding: 12px 14px 12px 6px;
+}
+.choice:last-child { border-bottom: 0; }
+.choice { grid-template-columns: 52px 1fr; }
+.choice .go { display: none; }
+.choice .seal { width: 42px; height: 42px; font-size: 18px; box-shadow: inset 0 0 0 2px rgba(255,235,210,0.16), 0 1px 2px rgba(60,20,10,0.25); transition: transform .18s ease; }
+.choice:hover, .choice:focus-visible {
+  background: #f7f0de; border-bottom-color: transparent; transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(141,58,38,0.35), 0 6px 16px rgba(60,40,10,0.12);
+}
+.choice:hover .seal { transform: rotate(-8deg) scale(1.05); }
+@media (hover: none) {
+  .choice { padding-top: 13px; padding-bottom: 13px; }
+  .choice:active { background: #f7f0de; box-shadow: 0 0 0 1px rgba(141,58,38,0.35); }
+}
+@media (prefers-reduced-motion: reduce) { .choice .seal { transition: none; } .choice:hover .seal { transform: none; } }
+
+.ig { color: var(--lamp); text-decoration: none; border-bottom: 1px solid rgba(233,179,79,0.45); }
+.ig:hover { color: #f2c56a; border-bottom-color: #f2c56a; }
+.leaf .ig { color: var(--rubric); border-bottom-color: rgba(141,58,38,0.4); }
+
+/* Cormorant'ın eski stil "1" rakamı "ı" gibi görünüyor: başlıklarda düz rakam */
+body, .sect, .cover .band, .top .series, .choice .seal, h1, h2 { font-variant-numeric: lining-nums; }
+
+/* The Lighthouse: uzun İngilizce başlık kapağa sığsın */
+.cover h1 { font-size: clamp(28px, 9cqi, 56px); }
+
+</style>
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+</head>
+<body>
+<canvas id="sea" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="series"><b>Choose Your Own Adventure</b> · Book 1 · The Lighthouse</div>
+  <nav>
+    <a class="link" id="lnk-lib" href="#" hidden>Library</a>
+    <button class="link" id="btn-book" type="button">Notebook <span id="note-count"></span></button>
+    <button class="link" id="btn-cover" type="button">Cover</button>
+    <span class="confirm" id="confirm">Your reading will start over. Are you sure?
+      <button class="link" id="btn-yes" type="button">Yes</button>
+      <button class="link" id="btn-no" type="button">No</button>
+    </span>
+  </nav>
+</header>
+
+<main id="main"><div id="view"></div></main>
+
+<aside class="drawer" id="drawer" aria-label="Notebook">
+  <button class="link drawer-close" id="btn-close" type="button">Close</button>
+  <h3>Your pockets</h3>
+  <ul id="items"></ul>
+  <h3>Your notes</h3>
+  <ul id="notes"></ul>
+  <h3>Endings found</h3>
+  <ul id="endings"></ul>
+</aside>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const ENDINGS = [
+  { id: "safak",   title: "Dawn Light" },
+  { id: "liman",   title: "Silent Harbor" },
+  { id: "karanlik",title: "Dark Sea" },
+  { id: "kacis",   title: "Escape" },
+  { id: "bedel",   title: "The Price" },
+  { id: "dalga",   title: "The Seventh Wave" },
+  { id: "teslim",  title: "Surrender" },
+  { id: "suclu",   title: "The Guilty One" }
+];
+
+const IMG = {
+  acilis: "img/acilis.jpg", halil: "img/halil.jpg", kapi: "img/kapi.jpg",
+  oda: "img/oda.jpg", mektup: "img/mektup.jpg", sevket: "img/sevket.jpg",
+  lojman: "img/lojman.jpg", mercek: "img/mercek.jpg", cizim: "img/cizim.jpg",
+  telsiz: "img/telsiz.jpg", lamba: "img/lamba.jpg", safak: "img/safak.jpg"
+};
+
+function rel(s, who, n, msg) {
+  s.r[who] = (s.r[who] || 0) + n;
+  if (msg) toast(msg);
+}
+function note(s, text) { if (!s.notes.includes(text)) s.notes.push(text); }
+function flag(s, k) { s.f[k] = true; }
+function has(s, k) { return !!s.f[k]; }
+
+const S = {
+  a1: {
+    time: "20:00", wind: 6, baro: 748, img: "acilis", imgLabel: "Akça Island and its lighthouse in the storm",
+    title: "The third night",
+    text: () => [
+      "Your third night on Akça Island. You lit the lamp half an hour ago. The lens turns slowly, throwing its beam twenty nautical miles out to sea. As the clock strikes eight, the radio crackles:",
+      { q: "Akça Island Light, this is Ayvalık Harbor. The motor vessel Mehtap will pass the island at midnight. Storm warning in effect. Your light is to burn without interruption until morning." },
+      "Nobody said much when they gave you this job. All you know is this: two months ago, on a stormy night just like this one, the old keeper, Master Rıza, fell into the sea. His body was never found. In the coffeehouses of Ayvalık everyone whispers the same thing: Rıza lived on these rocks for thirty years. Rıza didn't fall.",
+      "Rıza's room is still locked. On its door is a note he nailed up himself:",
+      { q: "The low rock is death. Count to the seventh wave." },
+      "You switch off the radio and turn to the window, and down among the rocks at the foot of the jetty you see something. A hand. Someone in the waves is waving at you."
+    ],
+    choices: [
+      { t: "Run down to the jetty right now", to: "a2" },
+      { t: "Follow the rule: write it in the logbook first, then go down", to: "a2", fx: (s) => {
+        flag(s, "SANDIK_IPUCU"); flag(s, "GEC");
+        note(s, "Three pages from the last week have been torn out of Rıza's official logbook. In the margin: «The real record is in the chest.»");
+      } }
+    ]
+  },
+  a2: {
+    time: "20:10", wind: 7, baro: 746,
+    title: "The jetty",
+    text: (s) => {
+      const p = [];
+      if (has(s, "GEC")) p.push("The logbook rule is Rıza's: whatever you see at sea, write it down first. As you write the time, something catches your eye. Three pages from Rıza's last week have been torn out. In the margin of the last whole page there is a note in tiny letters: «The real record is in the chest.» You shut the logbook and run down the stairs. That half minute feels very long now.");
+      p.push("In the storm the jetty is nothing but a thin strip of planks. The man among the rocks is clinging to a mossy stone with one hand. Every wave drags him a little lower." + (has(s, "GEC") ? " His voice sounds weaker now." : ""));
+      p.push("You see two ways. A thick rope of Rıza's is coiled around the jetty's bollard. Throw it and the man could grab it, but if his arm is hurt he might not hold on. Or you could climb down onto the flat rock half out of the water and pull him in by the hand. Further down still, where the waves break, there is a black rock much closer to him.");
+      return p;
+    },
+    choices: [
+      { t: "Throw him the rope", to: "a4" },
+      { t: "Climb down onto the flat rock and grab his hand", to: "a3" }
+    ]
+  },
+  a3: {
+    time: "20:15", wind: 7, baro: 746,
+    title: "Seven waves",
+    text: () => [
+      "You climb down onto the flat rock. The stone is slick, the foam rises to your knees. The man is two meters away, at the foot of the lowest black rock. Now you can see his face: about forty, bearded, eyes wide open.",
+      "The waves come in a steady rhythm. One, two, three... Six of them look alike. Then, from behind, a deeper, slower roar builds. The note on the door comes back to you."
+    ],
+    choices: [
+      { t: "Wait for the seventh wave, reach out as it pulls back", to: "a4", fx: (s) => { flag(s, "KAYA"); rel(s, "halil", 1, "Halil saw you risk your life for him."); } },
+      { t: "Don't wait, jump onto the black rock", to: "e_dalga", dark: true }
+    ]
+  },
+  e_dalga: {
+    time: "20:16", wind: 7, baro: 746,
+    end: { id: "dalga", kind: "Early ending" },
+    title: "The Seventh Wave",
+    text: () => [
+      "You jump onto the black rock. There is moss under your feet. Just as you reach for the man, the roar behind you turns into a wall. You remember Rıza's note. Too late."
+    ],
+    sabah: "The boat from Ayvalık finds the lighthouse lens standing still. There was no one left to wind the weight back up at midnight. The Mehtap passed a dark island, lost its course and ran aground on a shoal before dawn. No one died, but it was customs officers who unloaded its cargo.",
+    akibet: [
+      ["You", "Your body was found three days later at Kancaburun. The records called it \"an accident on duty.\""],
+      ["The man on the rocks", "He held on to the rocks until morning. When the boat arrived he was gone. No one ever saw him again."],
+      ["The mother and son in the rowboat", "That night they had set out to take shelter on the island. They never reached the west cove; they saw the dark lighthouse and turned back."],
+      ["Master Rıza", "His note is still on the door. The keeper who came after you took it seriously."]
+    ],
+    yil: "Akça Island Light was converted to an automatic lamp. There is no keeper on the island anymore. And Master Rıza's death remained a question nobody asked."
+  },
+  a4: {
+    time: "20:20", wind: 7, baro: 745, img: "halil", imgLabel: "Halil (portrait)",
+    title: "Halil",
+    text: (s) => [
+      has(s, "KAYA")
+        ? "As the seventh wave pounds the rocks and draws back, you catch the man's wrist. For a moment you both slide, then the flat rock is under your feet again. You climb onto the jetty together."
+        : "The rope lands on the man's shoulder on the first throw. He wraps it around his wrist with his good arm and holds on, and you pull with everything you have. By the time he reaches the jetty you can see he hasn't used his left arm at all.",
+      "There is a deep gash in his left forearm. Blood mixes with the rain and runs across the planks. When he gets his breath back he says, \"Halil. I'm a fisherman. My boat hit the rocks at Kancaburun. I was alone.\"",
+      "You carry him to the keeper's house at the foot of the lighthouse and sit him by the stove. His wound is bad, but his eyes aren't on his wound. He is looking at the radio in the corner. Then at you. Then at the radio again.",
+      "Reporting a wreck to the harbor is the keeper's duty. You both know that."
+    ],
+    choices: [
+      { t: "Dress his wound first", to: "a5" },
+      { t: "Do your duty: radio the wreck in to the harbor", to: "a6" }
+    ]
+  },
+  a6: {
+    time: "20:25", wind: 7, baro: 745,
+    title: "The microphone",
+    text: () => [
+      "The moment you pick up the microphone, Halil grabs your wrist with his good hand. His grip is too strong for a wounded man.",
+      "\"If they hear I'm here, someone dies tonight,\" he says quietly. \"Maybe me. Maybe you. Other ears listen to that radio besides the harbor's, keeper.\"",
+      "You can feel his hand trembling. From fear or from blood loss, you can't tell. The Mehtap passes at midnight, and right now the harbor is listening on this frequency."
+    ],
+    choices: [
+      { t: "Report it anyway. Rules are rules.", to: "a5", fx: (s) => {
+        flag(s, "BILDIRDI"); rel(s, "halil", -2, "Halil won't forget this.");
+        note(s, "It wasn't the harbor that answered the radio call, but someone you didn't know: «Keep the survivor with you. Stand by.»");
+      } },
+      { t: "Put the microphone down", to: "a5", fx: (s) => { flag(s, "BIRAKTI"); rel(s, "halil", 1, "Halil saw you break the rule for him."); } }
+    ]
+  },
+  a5: {
+    time: "20:35", wind: 7, baro: 744,
+    title: "The bandage",
+    enter: (s) => { flag(s, "ELLER"); note(s, "Halil's palms have no net calluses. Instead there are fresh rope burns."); },
+    text: (s) => {
+      const p = [];
+      if (has(s, "BILDIRDI")) p.push("\"Ayvalık Harbor, this is Akça Island Light. Wreck at Kancaburun, one survivor.\" Static. Then a voice comes through, not the harbormaster's but that of a man you've never heard: «Understood, lighthouse. Keep the survivor with you. Stand by.» The connection drops. Halil's face is ash gray. \"That wasn't the harbor,\" he says, and nothing more.");
+      if (has(s, "BIRAKTI")) p.push("You put the microphone back. Halil's hand lets go of your wrist. \"Thank you,\" he says. \"I won't forget this.\"");
+      p.push("You clean the wound with boiling water and bandage it. Halil grits his teeth and doesn't make a sound.");
+      p.push("As you tie the bandage, his palms catch your eye. There are none of the net calluses a fisherman's hands should have. Instead, fresh red rope burns run the length of both palms. This man held on to something with all his strength tonight. Or tried not to let it go.");
+      p.push("Halil notices you looking at his hands and makes fists.");
+      return p;
+    },
+    choices: [
+      { t: "\"Those aren't a fisherman's hands.\"", to: "a7", fx: (s) => { flag(s, "SORDU"); note(s, "Halil said he sometimes carries cargo without asking whose it is."); } },
+      { t: "Say nothing, finish the bandage", to: "a7", fx: (s) => rel(s, "halil", 1, "Halil noticed you didn't ask.") }
+    ]
+  },
+  a7: {
+    time: "21:00", wind: 8, baro: 742, img: "kapi", imgLabel: "Nermin and Can at the door",
+    title: "Three short knocks",
+    text: (s) => [
+      has(s, "SORDU")
+        ? "Halil's answer comes after a long silence: \"Fish aren't always plentiful. Sometimes I carry cargo. I don't ask whose it is, either.\" You understand this isn't a confession but a warning: don't ask any more."
+        : "Halil looks at his bandage and says nothing. But in the light of the stove you see his shoulders loosen a little.",
+      "As nine o'clock comes, the wind rises to force eight and the window frames groan. Then there's a knock at the door. Three short knocks. Halil's chair creaks. He is on his feet.",
+      "You open the door to find a soaked woman and a boy of about eight, clutching her hand. On the woman's back is a small leather bag. \"My name is Nermin. This is my son, Can. We tied a rowboat up in the west cove. Please, just for tonight.\"",
+      "The west cove is an inlet hidden behind the rocks, on no map. Even you only noticed it yesterday. This woman found it in the dark, in a storm."
+    ],
+    choices: [
+      { t: "Let them in", to: "a8" },
+      { t: "Ask at the door: \"How do you know about the west cove?\"", to: "a8", fx: (s) => {
+        flag(s, "KOY_SORDU"); rel(s, "nermin", -1, "Nermin won't forget being kept waiting at the door.");
+        note(s, "Nermin knew about the west cove, which isn't on any map. Her husband «works these waters».");
+      } }
+    ]
+  },
+  a8: {
+    time: "21:10", wind: 8, baro: 741,
+    title: "A look",
+    text: (s) => {
+      const p = [];
+      if (has(s, "KOY_SORDU")) p.push("\"My husband works these waters,\" Nermin says after a moment's hesitation. \"He knows the coves by heart. I listened to him, for years. A child is waiting in the cold, keeper.\" She doesn't look at you again as she comes in.");
+      p.push("The moment Nermin crosses the threshold she freezes. Halil is standing by the stove. For an instant their eyes meet. Nermin's hand on her son's shoulder goes rigid. Then they both look away, as if they had never seen each other.");
+      p.push("Can is clinging to his mother's skirt, shivering, his lips blue. He needs dry clothes, a blanket. All of that is in Rıza's locked room. But first you have to decide who will break the silence in this room.");
+      return p;
+    },
+    choices: [
+      { t: "See to Can: warm some milk, sit with him", to: "a9", fx: (s) => {
+        s.via = "can"; rel(s, "can", 1, "Can is starting to warm to you.");
+        note(s, "Can: «My father's ship finds its way by the light. Mom doesn't want him to see it tonight.»");
+      } },
+      { t: "Draw Nermin into the kitchen, talk to her alone", to: "a9", fx: (s) => {
+        s.via = "nermin"; rel(s, "nermin", 1, "Nermin is starting to trust you.");
+        note(s, "Nermin is running from her husband. She doesn't let go of the leather bag for a second.");
+      } },
+      { t: "Ask straight out: \"Do you two know each other?\"", to: "a9", fx: (s) => {
+        s.via = "sor"; flag(s, "TANISIYOR"); rel(s, "halil", -1); rel(s, "nermin", -1, "Halil and Nermin are wary of you now.");
+        note(s, "Halil and Nermin know each other and are hiding it.");
+      } }
+    ]
+  },
+  a9: {
+    time: "21:30", wind: 9, baro: 739, img: "oda", imgLabel: "Master Rıza's room",
+    title: "Rıza's room",
+    enter: (s) => note(s, "Rıza's chart of the Aegean has pencil crosses on it. One is in the west cove of Akça Island."),
+    text: (s) => {
+      const p = [];
+      if (s.via === "can") p.push("You warm the milk and put it in Can's hands. For a while he says nothing, then he points at the spiral staircase up to the light. \"Does the light always turn?\" \"All night.\" \"My father's ship comes by looking at the light too,\" he says. \"Mom doesn't want him to see it tonight.\" When Nermin calls from the kitchen he falls silent at once.");
+      if (s.via === "nermin") p.push("In the kitchen Nermin lowers her voice. \"I'm running from my husband. The man who raised his hand to me has started raising it to my son. No one can know we're here.\" She presses the leather bag to her chest. When you ask what's inside she says, \"Our lives.\" She won't say more.");
+      if (s.via === "sor") p.push("\"No,\" says Halil, far too fast. \"Never seen him,\" says Nermin, at the same moment. Two people telling the same lie at the same time is clearer than the truth. But the question has a price: they're both wary of you now.");
+      p.push("You open Rıza's room for the blankets. The lock is rusty, but it turns. Inside it smells of cigarettes and kerosene. A chart of the Aegean hangs on the wall, marked with small pencil crosses. One sits right at the western tip of Akça Island, in the cove where Nermin tied up her rowboat.");
+      p.push("In the cupboard there are thick sweaters and two blankets. In the corner stands a heavy walnut chest with a carved lid.");
+      if ((s.r.can || 0) >= 1) p.push("Can slips into the room behind you and raps on the chest. \"This has a hollow bottom,\" he says. \"We have a chest like this at home. My dad hides money in it.\"");
+      else if (has(s, "SANDIK_IPUCU")) p.push("The note in the logbook's margin comes back to you: «The real record is in the chest.»");
+      return p;
+    },
+    choices: [
+      { t: "Feel the bottom of the chest", to: "a10", if: (s) => has(s, "SANDIK_IPUCU") || (s.r.can || 0) >= 1 },
+      { t: "Take the blankets and go back to the others", to: "a12" }
+    ]
+  },
+  a10: {
+    time: "21:40", wind: 9, baro: 738, img: "mektup", imgLabel: "Rıza's letter (close-up)",
+    title: "Oilcloth",
+    enter: (s) => { flag(s, "MEKTUP"); toast("Rıza's letter is yours now."); },
+    text: () => [
+      "You lift out the old clothes in the chest. One board in the bottom is newer than the others. You pry it up with your pocketknife, and underneath is an envelope wrapped in oilcloth. On it, in the same handwriting as the note on the door:",
+      { q: "To the keeper who comes after me." },
+      "The envelope is thick, several pages inside. Outside, the wind dies for a moment, then blows harder."
+    ],
+    choices: [
+      { t: "Read it here, right now", to: "a12", fx: (s) => {
+        flag(s, "MEKTUP_YARIM");
+        note(s, "Rıza's letter: «On this island the lights talk at night... Trust no one. Not the smuggler, not the fugitive. Least of all the one in uniform...» You couldn't read the rest.");
+      } },
+      { t: "Pocket it, read it once everyone is asleep", to: "a12" }
+    ]
+  },
+  a12: {
+    time: "21:50", wind: 9, baro: 737, img: "sevket", imgLabel: "Sergeant Şevket (portrait)",
+    title: "The man in uniform",
+    text: (s) => {
+      const p = [];
+      if (has(s, "MEKTUP_YARIM")) {
+        p.push("In the lamplight you open the first page:");
+        p.push({ q: "If you are reading these lines, I have either run or I am gone. On this island the lights talk at night, son. I've written below which light means what. Trust no one. Not the smuggler, not the fugitive. Least of all the one in uniform..." });
+        p.push("At that very moment someone pounds on the outer door. Heavy, commanding blows. You fold the letter and shove it in your pocket.");
+      } else {
+        p.push("You hand out the blankets. Can is dozing by the stove, Nermin leans against the wall with her bag, Halil watches the dark sea from the window. No one speaks." + (has(s, "MEKTUP") ? " The envelope in your pocket presses against your chest." : "") + " It's ten to ten. Then someone pounds on the outer door. Heavy, commanding blows.");
+      }
+      p.push("Without a word, Halil slips into the back room.");
+      p.push("At the door stands a big man, water streaming from his raincoat. A gendarmerie badge on his shoulder, a pistol on his belt. \"Sergeant Şevket, Ayvalık Gendarmerie. My boat got caught in the storm, I tied up in the cove.\"" + (has(s, "BILDIRDI") ? " He pauses for a moment. \"I heard your radio call. You mentioned a survivor.\"" : ""));
+      p.push("His eyes sweep the room over your shoulder. \"I'm looking for a fugitive. Name of Halil, he killed a man. He may have come ashore on this island.\"");
+      return p;
+    },
+    choices: [
+      { t: "Open the door, invite him in", to: "a13" },
+      { t: "Before you open up, look him over from head to toe", to: "a13", fx: (s) => {
+        flag(s, "BOT_KURU"); rel(s, "sevket", 1, "Şevket noticed you sizing him up.");
+        note(s, "Şevket's raincoat is soaked, but his boots are dry and spotless. A man who came in from the sea in a storm wouldn't have boots like that.");
+      } }
+    ]
+  },
+  a13: {
+    time: "21:55", wind: 9, baro: 736,
+    title: "Who else is here",
+    enter: (s) => note(s, "Nermin went white when she saw Şevket. Şevket looked at Nermin's bag a second too long."),
+    text: (s) => [
+      has(s, "BOT_KURU")
+        ? "His raincoat is soaked. But his boots are dry. No mud, no salt stains, as if he'd just stepped out of a warm room. A man who came in from the sea in a storm wouldn't have boots like that. Şevket sees where your gaze has gone and smiles. \"Cold out, keeper.\" He steps inside."
+        : "Şevket comes in and hangs his raincoat on the nail by the stove. He finds the nail without looking for it. As if he's seen this house before.",
+      "Nermin goes white when she sees him. Can hides behind his mother. Şevket ignores them both, but he looks at Nermin's bag a second too long.",
+      "Then he turns to the back room door, then to you. \"Who else is in this house, keeper?\"",
+      "Your answer will decide whose side you're on for the rest of the night."
+    ],
+    choices: [
+      { t: "Tell the truth: \"There's a wounded man in the back room. His name is Halil.\"", to: "act1_end", fx: (s) => { s.via = "verdi"; flag(s, "HALIL_VERILDI"); rel(s, "sevket", -1); rel(s, "halil", -2, "Halil won't forget this."); } },
+      { t: "Stay vague: \"A few people running from the storm. Everyone's tired.\"", to: "act1_end", fx: (s) => { s.via = "belirsiz"; } },
+      { t: "Hide Halil: \"This woman and her son. No one else.\"", to: "act1_end", fx: (s) => { s.via = "sakla"; flag(s, "YALAN"); rel(s, "sevket", has(s, "BILDIRDI") ? 2 : 1); rel(s, "halil", 2, "Halil heard you lie to protect him."); } }
+    ]
+  },
+  act1_end: {
+    time: "22:00", wind: 9, baro: 735,
+    actEnd: true, next: { t: "Go on to Act 2", to: "b1" },
+    title: "The storm arrives",
+    text: (s) => {
+      const p = [];
+      if (s.via === "verdi") p.push("Şevket draws his pistol and walks into the back room. The sound of a struggle, then the click of handcuffs. He cuffs Halil by his good arm to the stovepipe. Halil doesn't even look at you. He says just one thing, to Nermin: \"Don't believe him.\" Nermin says nothing, but her lips tremble.");
+      if (s.via === "belirsiz") p.push("Şevket weighs your answer, then opens the back room door himself. Halil is standing in the dark, waiting. \"I know you,\" says Şevket. \"And I know you, Sergeant,\" says Halil. \"Better than anyone.\" Şevket sits down by the stove without taking his hand off his pistol. \"I'll wait till morning.\"");
+      if (s.via === "sakla") p.push((has(s, "BILDIRDI") ? "\"On the radio you said a survivor, keeper. Now there's no one.\" His voice is soft. The softness frightens you. " : "Şevket studies your face for a long time. ") + "Then he sits down by the stove and warms his hands, but his eyes never leave the back room door. Can opens his mouth to say something; Nermin squeezes his hand and he falls silent. A secret you all share is breathing in the same room.");
+      p.push("Ten o'clock. The storm is over the island now. At midnight the Mehtap will pass, and it will find its way by your light.");
+      p.push("There are three strangers in the keeper's house, and all three are waiting for that ship. One is running from it. One is hiding from it. And one has come to meet it. You don't know yet which is which.");
+      return p;
+    }
+  }
+};
+
+/* ================= ACT 2: SECRETS ================= */
+function afterTalk(s) { return s.talked.length >= 2 ? "act2_end" : "b8"; }
+
+function outcomeText(s) {
+  const o = s.out; s.outShown = o;
+  const T = {
+    h_r: "Halil is silent for a long time. Then he says one word: \"Şevket.\" His voice cracks. \"Rıza told him he was going to Customs. Şevket waited for him on the jetty. I was in the boat, I saw everything. He hit him with an oar, then pushed him into the water. And they told Ziya he fell. I kept quiet. For two months I kept quiet.\" \"Will you say that in a courtroom in the morning?\" you ask. \"If we live to see the morning,\" he says.",
+    h_n: "\"If I tell you, you won't live to see morning,\" says Halil. \"You don't trust me, keeper. And I can't trust you. Not tonight, not without knowing whose side you're on.\" He turns his head to the window. The conversation is over.",
+    n_ver: "Nermin opens the bag, takes out a thick leather-bound ledger and hands it to you. \"Ziya's account book. He writes down what he paid to whom.\" You turn the pages: harbor officials, customs men, a town councillor. At the end of every month, the same line: «Ş. · Akça Island · 500.» You slip the ledger into your inside pocket. Now every name in the ring is in your hands.",
+    n_red: "Nermin presses the bag to her chest. \"This bag is the only thing I have to bargain with, keeper. I don't even know you.\" There's no anger in her eyes, only exhaustion. You understand you won't get more from her.",
+    n_mur: "\"There are nine people on that ship,\" says Nermin, her voice shaking. \"Half of them are Ziya's men. The others... Remzi the cook has a sixteen-year-old son, and he's on board too.\" She is silent for a while. \"I'm a mother too, keeper. I know. But I won't put my son back on that ship.\"",
+    s_dus: "\"I'll think about it,\" you say. Şevket tosses his cigarette into the stove and turns his back on you. \"Think, keeper. You have until midnight.\" His voice is relaxed. He has decided you're harmless.",
+    s_cizme: "The smile on Şevket's face vanishes for a moment, then comes back. \"I've been on the island since noon,\" he says. \"Waited out the storm in Rıza's old fishing hut.\" Then he leans in and lowers his voice: \"A sharp-eyed keeper is a good thing. But one who's too sharp doesn't last long on this island. Rıza was like that.\"",
+    s_riza: "\"Everyone knew him,\" says Şevket. \"Stubborn old man. Anyone could see he'd end up falling into the sea.\" He takes a deep drag on his cigarette. The man who said a moment ago that Halil killed Rıza is now saying he fell. You don't let on that you noticed."
+  };
+  let t = T[o] || "";
+  if (s.halilMektup && o === "h_r") t = "Halil reads the letter twice. When he recognizes Rıza's handwriting, the hand holding the paper starts to shake. " + t;
+  if (s.halilMektup && o === "h_n") t = "Halil reads the letter, then folds it carefully and hands it back to you. \"Don't show this to anyone,\" he says. " + t;
+  return t;
+}
+
+const ACT2 = {
+  b1: {
+    act: 2, time: "22:05", wind: 10, baro: 733, img: (s) => s.via === "verdi" ? "lojman" : null, imgLabel: "The keeper's house, toward midnight",
+    title: "The clockwork weight",
+    text: (s) => {
+      const p = [];
+      if (s.via === "verdi") p.push("Halil is cuffed to the stovepipe, head bowed. Şevket puts the key to the cuffs in his waistcoat pocket, buttons it, and sits down by the stove, an arm's length from Halil.");
+      if (s.via === "belirsiz") p.push("Şevket and Halil sit at opposite ends of the room. Neither of them sleeps. One has his hand near his pistol, the other near the poker by the hearth.");
+      if (s.via === "sakla") p.push("The back room door is ajar. Twice Şevket gets up to close it, and both times you get there first. You don't know how long this game can last.");
+      p.push("Can has fallen asleep on his mother's lap. Nermin hasn't. Her bag is in her lap, her eyes on the door.");
+      p.push("The weight of the clockwork that turns the lens has to be wound to the top of the tower every two hours. If it isn't, the lens stops, the light stands still, and no ship at sea can recognize this island. Time to climb the tower. Up there, for a few minutes, you'll be alone.");
+      return p;
+    },
+    choices: [
+      { t: "Climb the tower. Read Rıza's letter up there, alone", to: "b2", if: (s) => has(s, "MEKTUP") },
+      { t: "Climb the tower, wind the weight", to: "b3" }
+    ]
+  },
+  b2: {
+    act: 2, time: "22:15", wind: 10, baro: 733, img: "mercek", imgLabel: "Rıza's letter in the lamp room",
+    title: "The light talks",
+    enter: (s) => {
+      flag(s, "KOD"); flag(s, "KANAL6"); flag(s, "UYARILDI");
+      note(s, "Signal code: from the sea, long-short-long = «Is the coast clear?» Lowering the curtain three times short = «Clear, come in.» Twice long = «Gendarmes here, turn back.»");
+      note(s, "Rıza: «Keep the radio by you. Call the Customs Guard on channel 6, trust Captain Nazmi.»");
+    },
+    text: (s) => {
+      const p = [ "You haul the weight up its chain to the top and lock it. The lens starts turning slowly again. In the warmth of the lamp you open the envelope." + (has(s, "MEKTUP_YARIM") ? " You skip the first page, which you've already read." : "") ];
+      p.push({ q: "The Mehtap calls at this island every month. They ask from the sea with a lantern: long, short, long. That means «Is the coast clear?» The lighthouse answers. Lower the heavy curtain in front of the lamp three times short and it means «Clear, come in.» Twice long and it means «Gendarmes here, turn back.» They tried to teach me this, son, and they offered me money too. I wrote it all down, and I was going to go to Customs." });
+      p.push({ q: "Keep the radio by you. Don't call the harbor; call the Customs Guard on channel 6. The only man you can trust there is Captain Nazmi. If you are reading this letter, they have silenced me. Whoever did it, under his uniform he is the same man." });
+      p.push("As you fold the letter, you see a light in the dark off the west of the island. Long. Short. Long. That's no ship. It's a lookout boat that comes ahead of the ship. Someone is asking the island: is the coast clear?");
+      p.push("You don't answer. It's too early. But you have to decide now where to keep the letter. You remember how Şevket looked at you downstairs. There's no telling whom he'll search tonight.");
+      return p;
+    },
+    choices: [
+      { t: "Hide the letter behind the lens's brass housing", to: "b4", fx: (s) => { flag(s, "MEKTUP_SAKLI"); toast("The letter is safe in the tower."); } },
+      { t: "Keep the letter on you, you might need it", to: "b4" }
+    ]
+  },
+  b3: {
+    act: 2, time: "22:15", wind: 10, baro: 733,
+    title: "Long, short, long",
+    enter: (s) => note(s, "Off the west of the island, a light at sea: long, short, long. Someone is asking the island something."),
+    text: () => [
+      "You haul the weight up its chain to the top and lock it. The lens starts turning slowly again.",
+      "As you look down from the window, you see a light in the dark off the west of the island. Long. Short. Long. A pause, then again: long, short, long. That's no ship, it's far too small. A boat. Someone is asking this island something.",
+      "In front of the lamp hangs a heavy curtain, used to cut off the light. It's right at hand."
+    ],
+    choices: [
+      { t: "Try something: lower the curtain once and raise it", to: "b4", fx: (s) => { flag(s, "GARIP_CEVAP"); rel(s, "sevket", 1, "Someone downstairs saw the tower light flicker."); } },
+      { t: "Touch nothing, go back down", to: "b4" }
+    ]
+  },
+  b4: {
+    act: 2, time: "22:30", wind: 10, baro: 732,
+    title: "An hour and a half to midnight",
+    text: (s) => {
+      const p = [];
+      if (has(s, "GARIP_CEVAP") && !has(s, "B4_SEEN")) p.push("You lower the curtain and raise it. The light at sea pauses for a moment, then goes out and doesn't come on again. When you get downstairs, Şevket is looking at you: \"The light flickered, keeper. Something wrong?\" \"The wind,\" you say.");
+      if (has(s, "KOD") && !has(s, "B4_SEEN")) p.push(has(s, "MEKTUP_SAKLI")
+        ? "You wedge the letter into the gap between the lens's brass housing and the wall. No one who doesn't climb the tower will find it. But you're not carrying it anymore either."
+        : "You fold the letter and tuck it inside your shirt, against your chest. On the way down the stairs you hear the paper rustle with every step. Even as you pass Şevket.");
+      if (has(s, "KORUNDU") && !has(s, "KORUNDU_SHOWN")) { p.push("You open the back of the radio and pull out the output valve. A small, warm glass tube. You put it in your pocket. Now no one can talk on this radio. Not even you, until the valve goes back in."); flag(s, "KORUNDU_SHOWN"); }
+      flag(s, "B4_SEEN");
+      p.push("An hour and a half to midnight. There isn't time to talk to everyone. Every conversation takes time, and to be alone with one of them you have to leave the others alone together.");
+      p.push("You have time for two conversations. Who will you start with?");
+      return p;
+    },
+    choices: [
+      { t: "Pull the radio's valve and pocket it", to: "b4", if: (s) => has(s, "UYARILDI") && !has(s, "KORUNDU"), fx: (s) => flag(s, "KORUNDU") },
+      { t: "Talk to Halil", to: "b5" },
+      { t: "Talk to Nermin", to: "b6" },
+      { t: "Talk to Şevket", to: "b7" }
+    ]
+  },
+  b8: {
+    act: 2, time: "23:15", wind: 10, baro: 731,
+    title: "Time for one more conversation",
+    text: (s) => {
+      const p = [ outcomeText(s) ];
+      if (has(s, "KORUNDU") && !has(s, "KORUNDU_SHOWN")) { p.push("On your way back from the conversation you open the back of the radio and pull out the output valve. A small, warm glass tube. You put it in your pocket. Now no one can talk on this radio. Not even you, until the valve goes back in."); flag(s, "KORUNDU_SHOWN"); }
+      p.push("It's a quarter past eleven. The wind won't let up. You have time for one more conversation.");
+      return p;
+    },
+    choices: [
+      { t: "Pull the radio's valve and pocket it", to: "b8", if: (s) => has(s, "UYARILDI") && !has(s, "KORUNDU"), fx: (s) => flag(s, "KORUNDU") },
+      { t: "Talk to Halil", to: "b5", if: (s) => !s.talked.includes("halil") },
+      { t: "Talk to Nermin", to: "b6", if: (s) => !s.talked.includes("nermin") },
+      { t: "Talk to Şevket", to: "b7", if: (s) => !s.talked.includes("sevket") }
+    ]
+  },
+  b5: {
+    act: 2, time: (s) => s.talked.length > 1 ? "23:20" : "22:35", wind: 10, baro: 732,
+    title: "Halil",
+    enter: (s) => { s.talked.push("halil"); flag(s, "UYARILDI"); note(s, "Halil: «I'm Ziya Bey's boat captain. Master Rıza didn't fall. Keep Şevket away from the radio.»"); },
+    text: (s) => {
+      const p = [];
+      if (s.via === "verdi") p.push("When Şevket steps outside for firewood, you crouch down next to Halil. You have a few minutes.");
+      else if (s.via === "sakla") p.push("You go into the back room on the pretext of bringing food. Halil is sitting in the dark, on the edge of the bed.");
+      else p.push("You call Halil into the stairwell to help you oil the weight's chain. Şevket watches you go but doesn't get up.");
+      p.push("This time Halil doesn't lie. \"I'm the boat captain for Ziya Bey, the Mehtap's owner. Eight years now. I was the one who took the Mehtap through these rocks. I quit two days ago. Sank my own boat, too, so they'd think I was dead.\"");
+      p.push("\"Why did you quit?\" \"Because two months ago, here, on this jetty, I saw something.\" He falls silent. \"Master Rıza didn't fall.\"");
+      p.push("Then he lowers his voice even further. \"Keep Şevket away from the radio. He's the one who'll be signaling Ziya tonight.\"");
+      return p;
+    },
+    choices: [
+      { t: "Show him Rıza's letter", to: afterTalk, if: (s) => has(s, "MEKTUP") && !has(s, "MEKTUP_SAKLI"), fx: (s) => { s.halilMektup = true; rel(s, "halil", 2, "Halil saw that you trust him."); s.out = (s.r.halil >= 2) ? "h_r" : "h_n"; if (s.out === "h_r") { flag(s, "RIZA_GERCEK"); note(s, "Halil saw it: Şevket killed Rıza. Hit him with an oar and pushed him into the water."); } } },
+      { t: "\"Who killed Rıza, Halil?\"", to: afterTalk, fx: (s) => { s.out = (s.r.halil >= 2) ? "h_r" : "h_n"; if (s.out === "h_r") { flag(s, "RIZA_GERCEK"); note(s, "Halil saw it: Şevket killed Rıza. Hit him with an oar and pushed him into the water."); } } }
+    ]
+  },
+  b6: {
+    act: 2, time: (s) => s.talked.length > 1 ? "23:20" : "22:35", wind: 10, baro: 732,
+    title: "Nermin",
+    enter: (s) => { s.talked.push("nermin"); note(s, "Nermin is Captain Ziya's wife. The Mehtap is Ziya's ship. Nermin wants the light put out at midnight."); },
+    text: () => [
+      "You call Nermin into the kitchen on the pretext of making coffee. She wraps Can in a blanket and leaves him by the stove, but keeps the kitchen door ajar so she can see her son.",
+      "\"My husband's name is Ziya,\" she says at last. \"Captain Ziya. The Mehtap is his ship. The ship that passes this island at midnight is coming for me.\"",
+      "She points to the bag. \"Inside is Ziya's account book, and a little money. A new life for me and Can. If Ziya finds me here tonight, he'll take my son, and no one will ever see me again.\"",
+      "She fixes her eyes on you. \"Put out the light at midnight. Without the light the Mehtap can't get through these rocks, it'll turn back. If I win one night, I'll cross to Lesbos. Just one night.\""
+    ],
+    choices: [
+      { t: "\"Give me the ledger. It's safer with me.\"", to: afterTalk, fx: (s) => {
+        if ((s.r.nermin || 0) >= 1 || (s.r.can || 0) >= 1) { s.out = "n_ver"; flag(s, "DEFTER"); toast("Ziya's ledger is yours now."); note(s, "In Ziya's ledger, the same line every month: «Ş. · Akça Island · 500.»"); }
+        else { s.out = "n_red"; rel(s, "nermin", -1, "Nermin didn't hand you her bag."); }
+      } },
+      { t: "\"If I put out the light, the people on board could die.\"", to: afterTalk, fx: (s) => { s.out = "n_mur"; flag(s, "MURETTEBAT"); note(s, "There are nine people on the Mehtap. The cook Remzi's sixteen-year-old son is on board too."); } }
+    ]
+  },
+  b7: {
+    act: 2, time: (s) => s.talked.length > 1 ? "23:20" : "22:35", wind: 10, baro: 732,
+    title: "Şevket",
+    enter: (s) => { s.talked.push("sevket"); note(s, "Şevket's offer: bring him Nermin's bag and «Ziya Bey won't forget you»."); },
+    text: () => [
+      "You sit down by the stove, next to Şevket. He holds out his cigarette case to you. Even when you don't take one, he smiles.",
+      "\"I've been after Halil for two months,\" he says. \"He killed Master Rıza. He was a smuggler, and Rıza had caught him.\" He nods toward the kitchen. \"As for that woman: her husband, Ziya Bey, is an honest shipowner. She stole his money from the house and ran, and took the boy with her. In the eyes of the law, that's kidnapping.\"",
+      "He lowers his voice. \"In the morning I'll take them all to Ayvalık on my boat. You keep your light burning and stay out of the rest. But bring me that bag, and Ziya Bey won't forget you. Ever wondered how many winters you'll last on this island on a keeper's pay?\""
+    ],
+    choices: [
+      { t: "Agree: you'll bring him the bag", to: "e_teslim", dark: true },
+      { t: "\"You came in from the sea in a storm. Why are your boots dry?\"", to: afterTalk, if: (s) => has(s, "BOT_KURU"), fx: (s) => { s.out = "s_cizme"; rel(s, "sevket", 2, "Şevket now sees you as a threat."); note(s, "Şevket has been on the island since noon, waiting in Rıza's old fishing hut."); } },
+      { t: "\"Did you know Master Rıza well?\"", to: afterTalk, if: (s) => !has(s, "BOT_KURU"), fx: (s) => { s.out = "s_riza"; note(s, "Şevket first said Halil killed Rıza, then said «anyone could see he'd end up falling into the sea»."); } },
+      { t: "\"I'll think about it.\"", to: afterTalk, fx: (s) => { s.out = "s_dus"; rel(s, "sevket", -1); } }
+    ]
+  },
+  e_teslim: {
+    act: 2, time: "23:40", wind: 10, baro: 731,
+    end: { id: "teslim", kind: "Early ending" },
+    title: "Surrender",
+    text: () => [
+      "\"Deal,\" you say. Şevket tosses his cigarette into the stove and puts his hand on your shoulder.",
+      "In the kitchen, while Nermin dozes with her head against the wall, you slide the bag off her shoulder. It feels light. You give it to Şevket. He doesn't even look inside.",
+      "At midnight the Mehtap comes into the west cove. A big man steps onto the beach. You know who he is from Nermin's scream."
+    ],
+    sabah: "The Mehtap leaves the cove at dawn. On deck, clinging to the rail, are a woman and a small boy. The lighthouse keeps turning, as long as you keep winding it.",
+    akibet: (s) => [
+      ["You", "At the end of the month a thick envelope arrived at your address in Ayvalık. Inside was money and a single line: «Keep the light burning.»"],
+      ["Halil", "Şevket put him on his boat. They never reached Ayvalık. The records say \"fugitive, jumped overboard while escaping.\""],
+      ["Nermin", "Ziya shut her away in his mansion in İzmir. No one ever saw her in the street again."],
+      ["Can", "Ten years later he became first mate on his father's ship."],
+      ["Master Rıza", has(s, "MEKTUP_SAKLI") ? "His letter stayed behind the lens. You never opened it again." : has(s, "MEKTUP") ? "His letter stayed in your pocket. You never opened it again." : "No one ever found the letter at the bottom of the chest."]
+    ],
+    yil: "Şevket was made senior sergeant. Every month he stops by the lighthouse, drinks your coffee, and leaves an envelope on the table before he goes."
+  },
+  act2_end: {
+    act: 2, time: "00:00", wind: 11, baro: 729, img: (s) => s.talked.includes("nermin") ? null : "cizim", imgLabel: "Can's drawing",
+    actEnd: true, next: { t: "Go on to Act 3", to: "c1" },
+    title: "Midnight",
+    enter: (s) => {
+      if (!s.talked.includes("sevket") && !has(s, "KORUNDU")) { flag(s, "TELSIZ_BOZUK"); note(s, "One of the radio's valves has been pulled. Someone silenced the radio."); }
+    },
+    text: (s) => {
+      const p = [ outcomeText(s) ];
+      if (!s.talked.includes("halil")) p.push(s.via === "verdi"
+        ? "You never got Halil alone. As you pass him he rattles his cuffs and whispers: \"Keep Şevket away from the radio.\" You don't know if it's too late."
+        : "You never got to talk to Halil. As you pass him, he only whispers: \"Keep Şevket away from the radio.\" You don't know if it's too late.");
+      if (!s.talked.includes("nermin")) p.push("You ran out of time to talk to Nermin. Can comes over and presses a crumpled sheet of paper into your hand: a drawing of a ship with a huge cross over it. \"Mom drew this,\" he says. \"Then she cried.\"");
+      if (!s.talked.includes("sevket")) p.push("You never talked to Şevket. All this time he's been sitting not by the stove but by the radio. Now he gets up and wipes his hands on his trousers. \"Old radio, this, keeper.\"");
+      p.push("Midnight. Wind force eleven. The storm is at its peak.");
+      if (has(s, "TELSIZ_BOZUK")) {
+        p.push("You switch on the radio. Nothing, not even static. You pull off the back cover and see it: one of the valves is missing. Someone has silenced the radio. Now you can't call the harbor or Customs.");
+        p.push("But through the window you can see it: in the dark, beyond the rocks, a ship's lights are drawing closer.");
+      } else {
+        if (has(s, "KORUNDU")) p.push("You put the valve from your pocket back in. The radio warms up and starts to crackle.");
+        p.push("A deep, calm voice comes over the radio: «Akça Island Light, this is the Mehtap. We are coming into the cove. Keep your light burning.» The look on Nermin's face tells you whose voice it is.");
+      }
+      p.push("Nermin steps in front of you. \"Put out that light. Please. For my son.\" Şevket stands up, his hand on his pistol. \"The light stays on, keeper. That's your duty.\"");
+      p.push(s.via === "verdi" ? "Rattling his cuffs, Halil shouts: \"Don't listen to either of them!\"" : "Halil stands in the doorway, his voice low but clear: \"Don't listen to either of them.\"");
+      if (has(s, "KOD")) p.push((has(s, "MEKTUP_SAKLI") ? "You think of the letter you left upstairs, behind the lens." : "You think of the letter in your pocket.") + " Besides putting it out or keeping it lit, there is one more way: the curtain.");
+      p.push("You're at the foot of the stairs up to the tower. Above you, the lamp is turning.");
+      return p;
+    }
+  }
+};
+Object.assign(S, ACT2);
+
+/* ================= ACT 3: THE HEIGHT OF THE STORM ================= */
+function decideDon(s) {
+  if (!has(s, "GUMRUK")) return "e_suclu";
+  if (has(s, "DEFTER") && (has(s, "RIZA_GERCEK") || has(s, "MEKTUP"))) return "e_safak";
+  return "e_bedel";
+}
+function donOpener(s) {
+  if (s.line === "riza") {
+    const parts = ["You killed Rıza."];
+    if (has(s, "RIZA_GERCEK")) parts.push("Halil saw it. You hit him with an oar, then pushed him into the water.");
+    if (has(s, "DEFTER")) parts.push("Your name is in Ziya's ledger. Five hundred a month.");
+    if (has(s, "MEKTUP")) parts.push("Rıza wrote it down too: the man in uniform.");
+    return "\"" + parts.join(" ") + "\"";
+  }
+  if (s.line === "mektup") {
+    const parts = ["You killed Rıza."];
+    if (has(s, "RIZA_GERCEK")) parts.push("Halil saw it.");
+    if (has(s, "DEFTER")) parts.push("Your name is in Ziya's ledger too.");
+    return "You reach behind the lens's brass housing and pull out the folded paper. Şevket's eyes lock onto it. The thing he's been searching for all night was one step away from him. In the lamplight you read: «Whoever did it, under his uniform he is the same man.» Then you look up. \"" + parts.join(" ") + "\"";
+  }
+  if (s.line === "gumruk") return "\"Customs is on the way, Sergeant,\" you say. \"I talked to Captain Nazmi. It's over.\"";
+  return "You say nothing. You don't take your eyes off him. The lens turns, the light sweeps across both your faces and moves on.";
+}
+function halilFree(s) { return s.via !== "verdi"; }
+
+const ACT3 = {
+  c1: {
+    act: 3, time: "00:05", wind: 11, baro: 728,
+    title: "Şevket in the tower",
+    text: (s) => {
+      const p = [ "Şevket doesn't wait for you. \"I'll go up, keeper,\" he says, heading for the spiral stairs. \"I'll see to that light. You stay down here and keep an eye on your guests.\" His footsteps climb the steps and fade away." ];
+      if (!halilFree(s)) p.push("Halil is still cuffed to the stovepipe. The key is in Şevket's waistcoat pocket. Upstairs, with Şevket.");
+      p.push("For a moment it's just you in the keeper's house: you, Nermin, Can and Halil. No one speaks. Everyone is looking at you.");
+      if (!has(s, "TELSIZ_BOZUK") && has(s, "KANAL6")) p.push("The radio in the corner is warmed up and working. The channel from Rıza's letter is on your mind: 6.");
+      else if (has(s, "TELSIZ_BOZUK")) p.push("The radio sits silent in the corner. Just a box now.");
+      p.push("Nermin whispers: \"The rowboat's still in the cove. If we go now, while he's upstairs...\"");
+      p.push("From above, from the lamp room, comes Şevket's voice: \"Keeper! Get up here. The lookout boat's asking again.\"");
+      return p;
+    },
+    choices: [
+      { t: "Switch the radio to channel 6, call the Customs Guard", to: "c1g", if: (s) => has(s, "KANAL6") && !has(s, "TELSIZ_BOZUK") },
+      { t: "Take Nermin and Can, run for the rowboat in the west cove", to: "e_kacis", dark: true },
+      { t: "Follow Şevket up the tower", to: "c2" }
+    ]
+  },
+  c1g: {
+    act: 3, time: "00:10", wind: 11, baro: 728, img: "telsiz", imgLabel: "Channel six",
+    title: "Channel six",
+    enter: (s) => { flag(s, "GUMRUK"); rel(s, "sevket", 1); note(s, "Captain Nazmi: «We're an hour away. Keep the ship away from the island. Nobody plays the hero.»"); },
+    text: () => [
+      "You switch to channel 6. Upstairs you can hear Şevket's footsteps. You keep your voice low: \"Customs Guard, this is Akça Island Light. I'm calling for Captain Nazmi.\"",
+      "Static. Then a tired, hard voice: \"Nazmi. Go ahead.\"",
+      "You tell him quickly: the Mehtap, Ziya, Master Rıza. There's a long silence. \"We've been waiting two months to hear from Master Rıza,\" says Nazmi. \"We're an hour away by boat, maybe more in this weather. Keep the ship away from the island. Nobody plays the hero.\"",
+      "As the connection drops, Şevket calls down from above: \"Keeper! Who are you talking to?\""
+    ],
+    choices: [
+      { t: "Climb the tower", to: "c2" },
+      { t: "Take Nermin and Can, run for the rowboat in the west cove", to: "e_kacis", dark: true }
+    ]
+  },
+  c2: {
+    act: 3, time: "00:15", wind: 11, baro: 727, img: "lamba", imgLabel: "The lamp room",
+    title: "The lamp room",
+    text: (s) => {
+      const p = [ "The lamp room is like a glass cage hanging inside the storm. The lens turns slowly. With every turn the light sweeps across the foaming sea and moves on." ];
+      p.push(has(s, "GUMRUK")
+        ? "Şevket is at the glass. \"Who were you talking to on the radio, keeper?\" You don't answer. He doesn't press. But he's no longer holding his pistol loosely."
+        : "Şevket is at the glass, pistol in hand but held loosely. He stands not like a hunter but like a keeper. In your place.");
+      p.push("Out at sea, off the west of the island, the lookout boat's light blinks: long, short, long. Behind it, in the dark, bigger, slower lights: the Mehtap.");
+      p.push("Şevket points to the curtain. \"Answer it. Three short. Coast clear.\" He smiles. \"Rıza knew this too. He was stubborn about it.\"");
+      if (!has(s, "KOD")) p.push("You're not quite sure which signal Şevket means. But you know very well what «clear» means tonight.");
+      p.push("Under one hand is the curtain cord. By the other, the lamp's fuel valve.");
+      return p;
+    },
+    choices: [
+      { t: "Do as he says: lower the curtain three times short", to: "c_liman" },
+      { t: "Close the valve, put out the lamp", to: "c_karanlik", dark: true },
+      { t: "Lower the curtain twice long: «Gendarmes here, turn back.»", to: "c_don", if: (s) => has(s, "KOD") }
+    ]
+  },
+  c_don: {
+    act: 3, time: "00:20", wind: 11, baro: 727,
+    title: "Two long",
+    text: (s) => [
+      "You lower the curtain. Long. You raise it. Once more: long.",
+      "The smile on Şevket's face freezes. He knows the code too. Out at sea the lookout boat's light pauses for a moment, then goes out. Behind it the Mehtap's big lights swing slowly around, move away from the rocks, and draw back toward the open sea.",
+      "Şevket's pistol is pointed at you now. \"Do you know what you've done, keeper?\" His voice is low. \"Rıza stood right here too. Right in front of this curtain.\"",
+      ...(has(s, "MEKTUP_SAKLI") ? ["You glance at the lens's brass housing. Rıza's letter is one step away from you, right under Şevket's nose. He has no idea."] : [])
+    ],
+    choices: [
+      { t: "Take the letter out from behind the lens and read it to him", to: decideDon, if: (s) => has(s, "MEKTUP_SAKLI"), fx: (s) => { s.line = "mektup"; } },
+      { t: "Throw the truth in his face: \"You killed Rıza.\"", to: decideDon, if: (s) => (has(s, "RIZA_GERCEK") || has(s, "DEFTER") || has(s, "MEKTUP")) && !has(s, "MEKTUP_SAKLI"), fx: (s) => { s.line = "riza"; } },
+      { t: "\"Customs is on the way, Sergeant. It's over.\"", to: decideDon, if: (s) => has(s, "GUMRUK"), fx: (s) => { s.line = "gumruk"; } },
+      { t: "Say nothing. Don't take your eyes off him.", to: decideDon, fx: (s) => { s.line = "sessiz"; } }
+    ]
+  },
+  c_liman: {
+    act: 3, time: "00:55", wind: 10, baro: 728,
+    title: "Clear, come in",
+    text: (s) => {
+      const p = [
+        "You lower the curtain three times, short. Şevket nods. \"Smart keeper.\" Out at sea the lookout boat answers. Behind it, the Mehtap's lights turn toward the cove.",
+        "Toward one o'clock the Mehtap comes into the west cove. Lanterns on the beach, crates, shouting. Then three men appear, climbing the slope. The one in front is big and calm. From the way Nermin looks out of the window and shrinks back, you know who he is: Ziya."
+      ];
+      if (has(s, "GUMRUK")) p.push("Still no sign of the Customs boat.");
+      p.push("Before they reach the house, you have maybe two minutes to decide what to do with Nermin and Can.");
+      return p;
+    },
+    choices: [
+      { t: "Hide them in the cupboard under the lens room in the tower", to: (s) => (s.r.sevket || 0) >= 2 ? "e_teslim2" : "e_liman", fx: (s) => { s.line = "sakla"; } },
+      { t: "Hand them over to Ziya", to: "e_teslim2", dark: true, fx: (s) => { s.line = "ver"; } }
+    ]
+  },
+  c_karanlik: {
+    act: 3, time: "00:30", wind: 11, baro: 727,
+    title: "Darkness",
+    text: (s) => {
+      const p = [
+        "You close the valve. The flame flickers, shrinks, goes out. The lens keeps turning, but there's no light left for it to carry.",
+        "Şevket lunges at you, and you struggle inside the glass cage. He shoves you against the railing, opens the valve again, strikes a match. But the mantle has cooled, the flame won't catch. \"What have you done!\"",
+        "Out at sea the Mehtap's lights walk toward the rocks like a blind animal."
+      ];
+      if (has(s, "MURETTEBAT")) p.push("You think of Remzi the cook. And of his sixteen-year-old son.");
+      p.push("At half past twelve a sound comes from the rocks. Metal grinding on stone. Then screams.");
+      return p;
+    },
+    choices: [
+      { t: "Take the rope, go down to the rocks", to: "e_karanlik", fx: (s) => flag(s, "KURTARMA") },
+      { t: "Stay in the tower. What's done is done.", to: "e_karanlik" }
+    ]
+  },
+
+  /* ----------- ENDINGS ----------- */
+  e_safak: {
+    act: 3, time: "05:50", wind: 5, baro: 741, img: "safak", imgLabel: "Dawn",
+    end: { id: "safak", kind: "Best ending" },
+    title: "Dawn Light",
+    text: (s) => [
+      donOpener(s),
+      s.line === "sessiz" ? "Şevket's eyes slide to the corner of the leather ledger sticking out of your pocket. Then Halil's voice rises from below: \"I saw you, Şevket! On the jetty! I'll say it in court!\"" : "Halil's voice rises from below: \"I saw you, Şevket! On the jetty! I'll say it in court!\"",
+      "For a moment Şevket's pistol trembles. You can see him working out the cost of putting a second murder on top of the first. Then he lowers the pistol and runs for the stairs. Below, a door slams. A dark shape running through the storm toward the cove."
+    ],
+    sabah: "At dawn the gray Customs Guard boat comes into the cove. Captain Nazmi's men stopped the Mehtap off Ayvalık. In the hold: forty crates of contraband cigarettes, and Captain Ziya. Şevket's boat couldn't get away from the island in the storm. They find him on the rocks, soaked and alone.",
+    akibet: (s) => [
+      ["You", (s.line === "mektup" ? "You handed Rıza's letter to Captain Nazmi yourself. " : has(s, "MEKTUP_SAKLI") ? "In the morning you climbed the tower, took Rıza's letter from behind the lens and handed it to Captain Nazmi yourself. " : "") + "You didn't leave the lighthouse. In your own hand, you added a line to Rıza's logbook: «Master Rıza, killed at his post.»"],
+      ["Halil", "He testified in court. He served two years for smuggling. The first thing he did when he got out was come to the island and set up a gravestone for Master Rıza."],
+      ["Nermin and Can", "The ledger brought down the whole ring. Nermin and Can started a new life in a small house in Karşıyaka, in İzmir."],
+      ["Şevket", "He got a heavy prison sentence for killing Master Rıza."],
+      ["Ziya", "He was tried alongside every name in the ledger."],
+      ["Master Rıza", "His body was never found. But his name was cleared."]
+    ],
+    yil: "Every year, on that night in October, a postcard arrives from Can. It always has the same picture: a lighthouse, and next to it a single word in a child's handwriting. «Thanks.»"
+  },
+  e_bedel: {
+    act: 3, time: "05:50", wind: 5, baro: 741,
+    end: { id: "bedel", kind: "Ending" },
+    title: "The Price",
+    text: (s) => [
+      donOpener(s),
+      "\"You have no proof, keeper,\" says Şevket. \"In the morning, my word is what counts.\" He runs down the stairs. From below comes Nermin's scream.",
+      "You go after him. Şevket has one arm wrapped around Can's throat, his pistol at the boy's temple, and he's backing toward the door. " + (halilFree(s) ? "Halil throws himself at him." : "Halil wrenches the stovepipe loose and throws himself at him, cuffs and all.") + " A gunshot. Can runs to his mother. Halil crumples to the floor. Şevket vanishes into the storm.",
+      "You take Halil's head in your lap. \"Şevket killed Rıza,\" he says, loud enough for Nermin to hear. \"I saw it. Write it down, keeper. Write it in the logbook.\" Then he goes quiet."
+    ],
+    sabah: "At dawn the Customs Guard boat comes into the cove. They stopped the Mehtap offshore. Şevket's boat couldn't get off the island in the storm. They find him on the rocks. His pistol is still in his hand, the magazine empty.",
+    akibet: (s) => [
+      ["Halil", "You buried him on the top of the island. On the gravestone you wrote only his name: Halil."],
+      ["Şevket", "On Halil's last words and the testimony of you and Nermin, he was tried for two murders."],
+      ["Nermin and Can", "They were saved. But for years after that night, Can couldn't sleep in the dark."],
+      ["Ziya", has(s, "DEFTER") ? "With the ledger, the whole ring collapsed. Ziya spent many years in prison." : "Without the ledger he could only be tried for smuggling. Three years later he was free."],
+      ["You", "You stayed at the lighthouse. As Halil asked, you wrote that night into the logbook, line by line."]
+    ],
+    yil: "In the coffeehouses of Ayvalık they whisper something else now: on Akça Island, a smuggler died saving a child."
+  },
+  e_suclu: {
+    act: 3, time: "05:50", wind: 5, baro: 741,
+    end: { id: "suclu", kind: "Ending" },
+    title: "The Guilty One",
+    text: (s) => {
+      const p = [ donOpener(s) ];
+      p.push("Şevket laughs. A short, tired laugh. \"You turned the ship back. So now what? Nobody's coming, keeper." + (has(s, "TELSIZ_BOZUK") ? " Even your radio's gone quiet." : "") + " When morning comes, whose word do you think counts? A lighthouse keeper's, or a gendarmerie sergeant's?\"");
+      p.push("You feel the cold of the handcuff on your wrist. He cuffs you to the iron railing of the lamp room.");
+      if (has(s, "MEKTUP") && !has(s, "MEKTUP_SAKLI")) p.push("He searches your pockets. He finds Rıza's letter and holds it to the lamp's flame without reading it." + (has(s, "DEFTER") ? " Then the ledger too." : ""));
+      else if (has(s, "DEFTER")) p.push("He searches your pockets. He finds Ziya's ledger, tears out the pages one by one and holds them to the lamp's flame.");
+      return p;
+    },
+    sabah: "At dawn Şevket's boat takes you and Halil to Ayvalık. Şevket's report reads: «The lighthouse keeper, in collusion with smugglers, gave false signals to ships and harbored the fugitive Halil.»",
+    akibet: (s) => [
+      ["You", "You were tried for aiding smugglers and abuse of office. Your lawyer could do nothing against the report of a gendarmerie sergeant." + (has(s, "MEKTUP_SAKLI") ? " But the letter is still in the tower, behind the lens's brass housing. One day someone will find it." : "")],
+      ["Halil", "He never reached Ayvalık. The report says \"fugitive, fell into the sea while escaping.\""],
+      ["Nermin and Can", "Because the Mehtap turned back, they were safe that night. A week later they crossed to Lesbos."],
+      ["Şevket", "He received a commendation for his report."],
+      ["Master Rıza", "In the records, his death is still an accident."]
+    ],
+    yil: "You can't see the sea from the prison window. But every night at midnight, when you close your eyes, you see a light turning."
+  },
+  e_liman: {
+    act: 3, time: "05:50", wind: 5, baro: 741,
+    end: { id: "liman", kind: "Ending" },
+    title: "Silent Harbor",
+    text: () => [
+      "You squeeze Nermin and Can into the narrow cupboard under the lens room. You squeeze Can's hand and close the door.",
+      "Ziya searches the house step by step. Şevket goes with him, but he doesn't look once at the stairs up to the tower. In the end Ziya sits down by the stove and drinks your coffee. \"If my wife comes here,\" he says, \"you'll let me know, won't you, keeper?\" You nod.",
+      "As they leave, Şevket takes Halil by the arm and leads him down the slope."
+    ],
+    sabah: (s) => "The Mehtap unloads its cargo and leaves before dawn. On the beach, only the marks of the crates remain." + (has(s, "GUMRUK") ? " The Customs boat comes into the cove after sunrise. Captain Nazmi looks at the empty beach, then at you, for a long time. He doesn't ask anything." : ""),
+    akibet: (s) => [
+      ["Nermin and Can", "When the storm died down, they crossed to Lesbos in their rowboat. No one ever saw them in these waters again."],
+      ["Halil", "Şevket put him on his boat. Two days later the records said \"fugitive, fell into the sea while escaping.\""],
+      ["Şevket", "At the end of the month he stopped by the lighthouse and left a thick envelope on your table. You didn't turn it down."],
+      ["You", "You stayed at the lighthouse. The Mehtap kept calling every month. And every time, you lowered the curtain three times."],
+      ["Master Rıza", has(s, "MEKTUP_SAKLI") ? "One night you climbed the tower, took his letter from behind the lens and burned it in the stove." : has(s, "MEKTUP") ? "One night you burned his letter in the stove." : "His letter stayed at the bottom of the chest."]
+    ],
+    yil: "You saved Nermin and Can. But Akça Island Light belongs to Ziya now."
+  },
+  e_teslim2: {
+    act: 3, time: "05:50", wind: 5, baro: 741,
+    end: { id: "teslim", kind: "Ending" },
+    title: "Surrender",
+    text: (s) => s.line === "ver" ? [
+      "You open the door for Ziya yourself. You point to the kitchen. Nermin doesn't even look at you. She picks Can up and walks out on her own.",
+      "Ziya takes a wad of money from his pocket and leaves it on the table. \"Smart keeper,\" he says. The very words Şevket said in the tower a little while ago."
+    ] : [
+      "You squeeze Nermin and Can into the narrow cupboard under the lens room.",
+      "Ziya searches the house step by step. After a while Şevket, without looking at you, nods toward the tower. You hear footsteps climbing the stairs, then the cupboard door, then Can crying.",
+      "On his way down, Ziya stops beside you and touches your shoulder. \"Next time,\" he says, \"find a better place.\""
+    ],
+    sabah: "The Mehtap leaves the cove at dawn. On deck, clinging to the rail, are a woman and a small boy.",
+    akibet: (s) => [
+      ["Nermin", "Ziya shut her away in his mansion in İzmir. No one ever saw her in the street again."],
+      ["Can", "Ten years later he became first mate on his father's ship."],
+      ["Halil", "Şevket put him on his boat. They never reached Ayvalık."],
+      ["You", s.line === "ver" ? "With Ziya's money you bought a house in Ayvalık. You never managed to sleep in it." : "You stayed at the lighthouse. Şevket stops by every month, and neither of you ever mentions that night."],
+      ["Master Rıza", "In the records, his death stayed an accident."]
+    ],
+    yil: "The Mehtap still calls every month. Every time, the light is burning."
+  },
+  e_karanlik: {
+    act: 3, time: "05:50", wind: 5, baro: 741,
+    end: { id: "karanlik", kind: "Ending" },
+    title: "Dark Sea",
+    text: (s) => has(s, "KURTARMA") ? [
+      "You throw the rope over your shoulder and go down the stairs. " + (halilFree(s) && (s.r.halil || 0) >= 1 ? "Halil follows you, despite his wounded arm." : "No one follows you."),
+      "On the rocks, in the foam, you see a hand. You throw the rope. It catches. You pull with everything you have. At the end of your arm is a shivering boy of about sixteen."
+    ] : [
+      "You stay in the tower. Şevket walks past you and down the stairs without looking at you.",
+      "The sounds from the rocks go on for a while. Then there's only the storm."
+    ],
+    sabah: (s) => "When the storm dies down, the wreck of the Mehtap lies on the western rocks of Akça Island. Of the nine people on board, " + (has(s, "KURTARMA") ? "four" : "five") + " are dead. Captain Ziya too.",
+    akibet: (s) => {
+      const a = [
+        ["Nermin and Can", "They stayed free. Nermin didn't go to Ziya's funeral. A week later they crossed to Lesbos."],
+        ["You", "The inquiry called it \"negligence by the lighthouse keeper.\" You were dismissed and put on trial. Şevket wrote a report blaming the storm and saved you. You know why he saved you: now you'll keep quiet too."],
+        ["Halil", (s.r.halil || 0) >= 1 ? "In the morning he left the island in the rowboat. Before he went he shook your hand, but didn't say a word." : "At dawn he took the rowboat and left. You never found out what became of him."]
+      ];
+      if (has(s, "KURTARMA")) a.push(["Remzi's son", "He held on to your rope and lived. His father didn't."]);
+      else if (has(s, "MURETTEBAT")) a.push(["Remzi the cook", "He was among the dead, along with his sixteen-year-old son."]);
+      return a;
+    },
+    yil: "You never heard from Nermin again. But on every stormy night you hear that sound from the rocks again."
+  },
+  e_kacis: {
+    act: 3, time: "05:50", wind: 6, baro: 740,
+    end: { id: "kacis", kind: "Ending" },
+    title: "Escape",
+    text: (s) => {
+      const p = [ "You take Nermin's hand. You lift Can onto your back." ];
+      if (!halilFree(s)) p.push("Halil rattles his cuffs. The key is upstairs, with Şevket. \"Go,\" he says. \"Go, keeper.\"");
+      else if ((s.r.halil || 0) >= 1) p.push("Halil opens the door and goes out ahead of you. \"I know the cove. I'll row.\"");
+      else p.push("Halil shakes his head. \"My business is here.\" He stays by the stove.");
+      p.push("You go down the slope slipping and falling. The rowboat is in the cove, rocking among the waves. Behind you, the lighthouse keeps turning because you left it lit. And by your light, the Mehtap comes into the cove.");
+      return p;
+    },
+    sabah: (s) => "At dawn you come ashore on the rocky coast of Lesbos. Behind you, on the horizon, Akça Island Light is still turning." + (has(s, "GUMRUK") ? " That morning the Customs Guard came into the cove and caught the Mehtap unloading. Şevket was there too." : ""),
+    akibet: (s) => [
+      ["Nermin and Can", "From Lesbos they went to Athens, and from there to Marseille. Ziya never found them."],
+      ["You", "You were wanted as a runaway keeper. For ten years you couldn't go back to Turkey."],
+      ["Halil", !halilFree(s) ? "In the morning Şevket put him on his boat. They never reached Ayvalık." : ((s.r.halil || 0) >= 1 ? "He came with you. He found work on a fishing boat in Lesbos. This time he really is catching fish." : "He stayed on the island. You never found out what became of him.")],
+      ["Master Rıza", has(s, "MEKTUP") && !has(s, "MEKTUP_SAKLI") ? "His letter was in your pocket. The truth left the country with you." : "The truth stayed on the island."]
+    ],
+    yil: (s) => has(s, "MEKTUP") && !has(s, "MEKTUP_SAKLI") ? "You still keep Rıza's letter. One day you'll go back and give it to Captain Nazmi. Maybe." : "Some nights you look east from the hills of Lesbos. Every ten seconds, a light turns on the horizon."
+  }
+};
+Object.assign(S, ACT3);
+
+/* THE LIGHTHOUSE (Fener, English edition): book-specific settings used by the engine */
+const BOOK = {
+  start: "a1",
+  rel: { halil: 0, nermin: 0, can: 0, sevket: 0 },
+  acts: { 1: ["Act One", "Before the Storm"], 2: ["Act Two", "Secrets"], 3: ["Act Three", "The Height of the Storm"] },
+  coverText: [
+    "October 1962. You are the new keeper of Akça Island Light. The old keeper, Master Rıza, vanished two months ago on a stormy night, and everyone in Ayvalık whispers that he didn't fall.",
+    "Tonight there's another storm. At midnight a ship will pass, and three strangers will come to your door. Each of them has a secret. Whether the light burns or goes dark is up to you.",
+    "This book isn't read from start to finish. At the end of every section you decide, and the story changes direction with your choices."
+  ],
+  missedTitle: "What you missed tonight",
+  rule: ["Master Rıza's rule:", "Whatever you see at sea, write it down first."],
+  ledger: (sec, time) => ({ title: "Logbook", html: `Time ${time} · Wind force ${sec.wind}<br>Barometer ${sec.baro} mmHg` }),
+  atmos: (sec) => Math.min(1, (sec.wind - 4) / 6),
+  items: (s) => {
+    const list = [];
+    if (has(s, "MEKTUP")) list.push(has(s, "MEKTUP_SAKLI") ? "Rıza's letter (hidden in the tower)" : has(s, "KOD") ? "Rıza's letter (read)" : has(s, "MEKTUP_YARIM") ? "Rıza's letter (first page read)" : "Rıza's letter (unopened)");
+    if (has(s, "DEFTER")) list.push("Ziya's ledger");
+    if (has(s, "KORUNDU") && !has(s, "TELSIZ_BOZUK")) list.push("The radio's output valve");
+    list.push("Pocketknife");
+    return list;
+  },
+  hints: (s, act) => {
+    const m = [];
+    if (act === 1) {
+      if (!has(s, "MEKTUP")) m.push("The chest in Rıza's room was deeper than it looked.");
+      if (!has(s, "BOT_KURU")) m.push("You didn't look Şevket over carefully enough at the door.");
+      if ((s.r.can || 0) < 1) m.push("Can had things to tell you. You didn't listen to him.");
+      if (has(s, "BILDIRDI")) m.push("That voice on the radio wasn't the harbor. You didn't listen to Halil's warning.");
+    } else {
+      if (!has(s, "KOD")) m.push(has(s, "MEKTUP") ? "You never found out what was on the second page of Rıza's letter." : "Rıza's letter would have been very useful to you tonight.");
+      if (!has(s, "RIZA_GERCEK")) m.push("You never heard who killed Rıza.");
+      if (!has(s, "DEFTER")) m.push("You never saw the ledger in Nermin's bag.");
+      if (has(s, "TELSIZ_BOZUK")) m.push("You left Şevket alone with the radio.");
+    }
+    return m;
+  }
+};
+
+
+/* ---------------- Kitap motoru ---------------- */
+const META = JSON.parse(document.getElementById("book-meta").textContent);
+const ACTS = BOOK.acts;
+/* Arayüz dili: meta.json'da "dil": "en" olan kitaplar İngilizce arayüzle açılır. */
+const DIL = META.dil || "tr";
+const UI = {
+  tr: { kapagi: (t) => `${t} kitabının kapağı`, kitap: "Kitap", yazar: "Yazar", tur: "Tür", okuma: "Okuma", sonlar: "Sonlar",
+        farkliSon: (n) => `${n} farklı son`, buldugun: (f, n) => ` · bulduğun: ${f} / ${n}`, basla: "Okumaya başla",
+        sonYazdigin: "Defterine son yazdığın:", sabah: "Sabah", akibet: "Kimin başına ne geldi", yil: "Bir yıl sonra", son: "SON",
+        bulunan: (f, n) => `Bulduğun sonlar: ${f} / ${n}`, takip: "Yazarı takip et:", kacirdiklar: "Bu gece kaçırdıkların",
+        perdeSonu: (a) => `${a}nin sonu`, kapatmadan: "Kitabı kapatmadan önce", geceDevam: "Gece devam ediyor", neYapacaksin: "Ne yapacaksın?",
+        bolum: (n) => `Bölüm ${n}`, kapagaDon: "kapağa dön", sayfayaGit: "sayfaya git", bastan: "Geceyi baştan yaşa", KapagaDon: "Kapağa dön",
+        bosDefter: "Henüz bir şey yazmadın." },
+  en: { kapagi: (t) => `Cover of ${t}`, kitap: "Book", yazar: "Author", tur: "Genre", okuma: "Reading time", sonlar: "Endings",
+        farkliSon: (n) => `${n} different endings`, buldugun: (f, n) => ` · found: ${f} / ${n}`, basla: "Start reading",
+        sonYazdigin: "Last thing you wrote down:", sabah: "Morning", akibet: "What became of them", yil: "A year later", son: "THE END",
+        bulunan: (f, n) => `Endings found: ${f} / ${n}`, takip: "Follow the author:", kacirdiklar: "What you missed tonight",
+        perdeSonu: (a) => `End of the ${a}`, kapatmadan: "Before you close the book", geceDevam: "The night goes on", neYapacaksin: "What will you do?",
+        bolum: (n) => `Section ${n}`, kapagaDon: "back to cover", sayfayaGit: "turn to section", bastan: "Live the night again", KapagaDon: "Back to cover",
+        bosDefter: "You haven't written anything down yet." }
+}[DIL];
+const END_KEY = META.sonAnahtari || (META.id + "-sonlar");
+const fresh = () => ({ sec: BOOK.start, f: {}, r: Object.assign({}, BOOK.rel), notes: [], talked: [], num: null, steps: 0 });
+let state = Object.assign(fresh(), { sec: "cover" });
+const val = (v) => (typeof v === "function" ? v(state) : v);
+const $ = (id) => document.getElementById(id);
+const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/* § numaraları: başlangıç 1, gerisi sabit tohumla karıştırılmış (klasik oyun kitabı gibi) */
+const NUM = (() => {
+  let seed = 1962;
+  const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const keys = [];
+  Object.keys(S).forEach((k) => {
+    keys.push(k);
+    (S[k].choices || []).forEach((c, i) => keys.push(k + "#" + i));
+    if (S[k].next) keys.push(k + "#next");
+  });
+  const pool = []; for (let n = 2; n <= 240; n++) pool.push(n);
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const map = { a1: 1 }; let p = 0;
+  keys.forEach((k) => { if (k !== "a1") map[k] = pool[p++]; });
+  return map;
+})();
+
+let MUTE = false, toastTimer = null;
+function toast(msg) {
+  if (MUTE) return;
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
+}
+function loadEndings() { try { return JSON.parse(localStorage.getItem(END_KEY) || "[]"); } catch (e) { return []; } }
+function saveEnding(id) {
+  const list = loadEndings();
+  if (!list.includes(id)) { list.push(id); try { localStorage.setItem(END_KEY, JSON.stringify(list)); } catch (e) {} }
+}
+
+const missedHints = (s, act) => (BOOK.hints ? BOOK.hints(s, act) : []).slice(0, 3);
+
+/* ---------- kapak ---------- */
+function renderCover() {
+  const found = loadEndings().length;
+  $("view").innerHTML = `
+  <section class="cover-wrap">
+    <div class="cover" style="background-image:url('${META.kapak}'),url('${META.kapakYedek}')" role="img" aria-label="${esc(UI.kapagi(META.baslik))}">
+      <div>
+        <div class="band">${esc(META.seri)} · ${UI.kitap} ${META.kitapNo}</div>
+        <h1>${esc(META.baslik.toLocaleUpperCase(DIL))}</h1>
+      </div>
+      <div><div class="subt">${esc(META.altBaslik)}</div><div class="author">${esc(META.yazar)}</div></div>
+    </div>
+    <div class="backcover">
+      <p class="slogan">${esc(META.slogan)}</p>
+      ${BOOK.coverText.map((p) => `<p>${esc(p)}</p>`).join("")}
+      <dl class="colophon">
+        <dt>${UI.yazar}</dt><dd>${esc(META.yazar)} · <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></dd>
+        <dt>${UI.tur}</dt><dd>${esc(META.tur)}</dd>
+        <dt>${UI.okuma}</dt><dd>${esc(META.okumaSuresi)}</dd>
+        <dt>${UI.sonlar}</dt><dd>${UI.farkliSon(META.sonSayisi)}${found ? UI.buldugun(found, META.sonSayisi) : ""}</dd>
+      </dl>
+      <button class="btn" id="btn-start" type="button">${UI.basla}</button>
+    </div>
+  </section>`;
+  $("btn-start").addEventListener("click", () => { state = fresh(); render(true); });
+}
+
+/* ---------- sayfa ---------- */
+function choiceNum(secId, c, i) { return NUM[secId + "#" + i]; }
+
+function renderPage(turn) {
+  const sec = S[state.sec];
+  const act = val(sec.act) || 1;
+  const time = val(sec.time);
+  const num = state.num || NUM[state.sec];
+
+  // sol sayfa
+  let left = `<div class="plate"><div class="act-title">${ACTS[act][0]}<span>${ACTS[act][1]}</span></div>`;
+  const imgKey = val(sec.img);
+  const imgLabel = val(sec.imgLabel) || "";
+  const hasImg = !!(imgKey && IMG[imgKey]);
+  if (hasImg) left += `<figure class="ill"><img src="${IMG[imgKey]}" alt="${esc(imgLabel)}"><figcaption>${esc(imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
+  const lg = BOOK.ledger(sec, time);
+  left += `<div class="ledger" aria-label="${esc(lg.title)}"><div class="lh">${esc(lg.title)}</div><div class="lv">${lg.html}</div></div>`;
+  if (!hasImg) {
+    const last = state.notes[state.notes.length - 1];
+    left += `<div class="fleuron">✦ ✦ ✦</div>`;
+    left += last ? `<div class="margin-note hand"><span class="lbl">${UI.sonYazdigin}</span>${esc(last)}</div>` : `<div class="margin-note hand"><span class="lbl">${esc(BOOK.rule[0])}</span>${esc(BOOK.rule[1])}</div>`;
+  }
+  const page = 2 * state.steps + 6;
+  left = `<div class="runhead">${esc(META.baslik)}</div>` + left + `</div><div class="folio">${page}</div>`;
+
+  // sağ sayfa
+  let right = `<div class="runhead">${ACTS[act][1]}</div><div class="sect">§ ${num}</div>`;
+  if (sec.end) right += `<div class="kind">${esc(val(sec.end.kind))}</div>`;
+  if (sec.actEnd) right += `<div class="kind">${UI.perdeSonu(ACTS[act][0])}</div>`;
+  right += `<h2>${esc(sec.title)}</h2><div class="text">`;
+  let leadDone = false;
+  sec.text(state).forEach((para) => {
+    if (typeof para === "object") right += `<p class="quote">«${esc(para.q)}»</p>`;
+    else {
+      const cap = !leadDone && /^[A-Za-zÇĞİÖŞÜçğıöşü]/.test(para);
+      right += `<p class="${cap ? "lead" : (!leadDone ? "first" : "")}">${esc(para)}</p>`; leadDone = true;
+    }
+  });
+  right += `</div>`;
+
+  if (sec.end) {
+    right += `<div class="sub">${UI.sabah}</div><div class="text"><p class="first">${esc(val(sec.sabah))}</p></div>`;
+    right += `<div class="sub">${UI.akibet}</div><ul class="fates">`;
+    val(sec.akibet).forEach(([w, t]) => { right += `<li><b>${esc(w)}.</b> ${esc(t)}</li>`; });
+    right += `</ul><div class="sub">${UI.yil}</div><div class="text"><p class="first">${esc(val(sec.yil))}</p></div>`;
+    right += `<div class="the-end">${UI.son}</div>`;
+    saveEnding(sec.end.id);
+    right += `<div class="tally">${UI.bulunan(loadEndings().length, META.sonSayisi)}</div>`;
+    right += `<div class="tally">${UI.takip} <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></div>`;
+  }
+  if (sec.actEnd) {
+    const hints = missedHints(state, act);
+    if (hints.length) {
+      right += `<div class="sub">${esc(BOOK.missedTitle || UI.kacirdiklar)}</div><ul class="missed">`;
+      hints.forEach((h) => { right += `<li>${esc(h)}</li>`; });
+      right += `</ul>`;
+    }
+  }
+
+  right += `<div class="choices" id="choices"></div><div class="folio">${page + 1}</div>`;
+
+  const read = Math.min(14, 3 + Math.round(state.steps * 0.8)), rest = Math.max(3, 16 - read);
+  $("view").innerHTML = `<div class="binding"><div class="edges l" style="width:${read}px"></div><div class="edges r" style="width:${rest}px"></div><article class="book" id="book"><div class="leaf left" id="leaf-l">${left}</div><div class="leaf right" id="leaf-r">${right}</div></article><div class="ribbon"></div></div>`;
+
+  const box = $("choices");
+  const dh = document.createElement("div"); dh.className = "decide";
+  dh.textContent = sec.end ? UI.kapatmadan : sec.actEnd ? ((typeof BOOK.actEndHead === "function" ? BOOK.actEndHead(sec) : BOOK.actEndHead) || UI.geceDevam) : UI.neYapacaksin;
+  box.appendChild(dh);
+  const addBtn = (text, n, onClick, id) => {
+    const b = document.createElement("button");
+    b.className = "choice"; b.type = "button"; if (id) b.id = id;
+    b.innerHTML = (n == null ? `<span class="seal blank" aria-hidden="true">❧</span>` : `<span class="seal" aria-label="${UI.bolum(n)}">${n}</span>`)
+      + `<span class="ct">${esc(text)}</span><span class="go" aria-hidden="true">${n == null ? UI.kapagaDon : UI.sayfayaGit}</span>`;
+    b.addEventListener("click", onClick);
+    box.appendChild(b);
+  };
+  if (sec.end || sec.actEnd) {
+    if (sec.next) addBtn(sec.next.t, NUM[state.sec + "#next"], () => go(sec.next, NUM[state.sec + "#next"]), "c-next");
+    if (sec.end) {
+      addBtn(BOOK.againText || UI.bastan, 1, () => { state = fresh(); render(true); }, "c-again");
+      addBtn(UI.KapagaDon, null, () => { state = Object.assign(fresh(), { sec: "cover" }); render(); }, "c-cover");
+    }
+  } else {
+    sec.choices.forEach((c, i) => {
+      if (c.if && !c.if(state)) return;
+      const n = choiceNum(state.sec, c, i);
+      addBtn(c.t, n, () => go(c, n), "c-" + i);
+    });
+  }
+}
+
+function go(choice, shownNum) {
+  const oldRight = $("leaf-r") ? $("leaf-r").innerHTML : null;
+  const oldLeft = $("leaf-l") ? $("leaf-l").innerHTML : null;
+  const oldBook = $("book") ? $("book").innerHTML : null;
+  state.steps = (state.steps || 0) + 1;
+  if (choice.fx) choice.fx(state);
+  state.sec = typeof choice.to === "function" ? choice.to(state) : choice.to;
+  state.num = shownNum || null;
+  const next = S[state.sec];
+  if (next.enter) next.enter(state);
+  render(true);
+  flipFrom(oldRight, oldBook, oldLeft);
+  if (next.end && window.ATM) ATM.flash = 1;
+}
+
+function flipFrom(oldRight, oldBook, oldLeft) {
+  const book = $("book");
+  if (!book || !oldRight || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const twoPage = getComputedStyle(book).gridTemplateColumns.split(" ").length > 1;
+  if (twoPage) {
+    const newLeft = $("leaf-l");
+    const fl = document.createElement("div");
+    fl.className = "flip";
+    fl.innerHTML = `<div class="face front leaf right">${oldRight}</div><div class="face back leaf left">${newLeft.innerHTML}</div>`;
+    // çevrilen sayfa üstünü örtene kadar altta eski sol sayfa görünür, gerçek kitaptaki gibi
+    const newLeftHTML = newLeft.innerHTML;
+    if (oldLeft) newLeft.innerHTML = oldLeft; else newLeft.classList.add("hide-under");
+    book.appendChild(fl);
+    setTimeout(() => { newLeft.innerHTML = newLeftHTML; newLeft.classList.remove("hide-under"); fl.remove(); }, 860);
+  } else {
+    const lf = document.createElement("div");
+    lf.className = "lift book";
+    lf.innerHTML = oldBook;
+    lf.style.display = "block";
+    book.appendChild(lf);
+    setTimeout(() => lf.remove(), 620);
+  }
+}
+
+function render(turn) {
+  const onCover = state.sec === "cover";
+  ["btn-book", "btn-cover"].forEach((id) => { $(id).style.visibility = onCover ? "hidden" : "visible"; });
+  if (window.ATM) ATM.target = onCover ? (BOOK.coverAtmos ?? 0.6) : BOOK.atmos(S[state.sec]);
+  if (window.ATM && !onCover && BOOK.hour) ATM.hour = BOOK.hour(S[state.sec], val(S[state.sec].time));
+  if (onCover) renderCover(); else renderPage(turn);
+  renderDrawer();
+  $("main").scrollTop = 0;
+}
+
+function renderDrawer() {
+  const items = $("items"); items.innerHTML = "";
+  BOOK.items(state).forEach((x) => { const li = document.createElement("li"); li.textContent = x; items.appendChild(li); });
+
+  const notes = $("notes"); notes.innerHTML = "";
+  if (!state.notes.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = UI.bosDefter; notes.appendChild(li); }
+  state.notes.forEach((n) => { const li = document.createElement("li"); li.textContent = n; notes.appendChild(li); });
+  $("note-count").textContent = state.notes.length ? "(" + state.notes.length + ")" : "";
+
+  const ends = $("endings"); ends.innerHTML = "";
+  const found = loadEndings();
+  ENDINGS.forEach((e) => {
+    const li = document.createElement("li");
+    li.textContent = found.includes(e.id) ? e.title : "· · ·";
+    if (!found.includes(e.id)) li.className = "empty";
+    ends.appendChild(li);
+  });
+}
+
+if (META.kutuphane) { const l = $("lnk-lib"); l.href = META.kutuphane; l.hidden = false; }
+$("btn-book").addEventListener("click", () => $("drawer").classList.add("open"));
+$("btn-close").addEventListener("click", () => $("drawer").classList.remove("open"));
+$("btn-cover").addEventListener("click", () => { $("confirm").classList.add("show"); $("btn-cover").style.display = "none"; });
+const closeConfirm = () => { $("confirm").classList.remove("show"); $("btn-cover").style.display = ""; };
+$("btn-no").addEventListener("click", closeConfirm);
+$("btn-yes").addEventListener("click", () => { closeConfirm(); state = Object.assign(fresh(), { sec: "cover" }); render(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("drawer").classList.remove("open"); });
+
+
+/* ---------------- Fırtına sahnesi ---------------- */
+const storm = { level: 0.2, target: 0.2, flash: 0 };
+window.ATM = storm;
+(function scene() {
+  const cv = $("sea"), ctx = cv.getContext("2d");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, dpr, drops = [];
+  function size() {
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drops = Array.from({ length: 260 }, () => ({ x: Math.random() * W, y: Math.random() * H, l: 8 + Math.random() * 18, v: 9 + Math.random() * 8 }));
+  }
+  window.addEventListener("resize", size); size();
+
+  function frame(t) {
+    const time = t / 1000;
+    storm.level += (storm.target - storm.level) * 0.01;
+    const L = storm.level;
+    const lx = W > 720 ? W * 0.78 : W * 0.82, horizon = H * 0.62;
+
+    const sky = ctx.createLinearGradient(0, 0, 0, horizon);
+    sky.addColorStop(0, "#05090b"); sky.addColorStop(1, `rgb(${20 + 10 * (1 - L)},${32 + 8 * (1 - L)},${38})`);
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, horizon + 2);
+
+    // bulut kümeleri
+    for (let i = 0; i < 6; i++) {
+      const cx = ((i * 260 + time * (8 + 22 * L)) % (W + 400)) - 200, cy = 60 + (i % 3) * 55;
+      const g = ctx.createRadialGradient(cx, cy, 10, cx, cy, 260);
+      g.addColorStop(0, `rgba(40,55,62,${0.25 + 0.25 * L})`); g.addColorStop(1, "rgba(40,55,62,0)");
+      ctx.fillStyle = g; ctx.fillRect(cx - 260, cy - 260, 520, 520);
+    }
+
+    // şimşek
+    if (!reduce && Math.random() < 0.0025 * L * L) storm.flash = 0.9;
+    if (storm.flash > 0) {
+      ctx.fillStyle = `rgba(200,215,225,${storm.flash * 0.35})`; ctx.fillRect(0, 0, W, H);
+      storm.flash *= 0.86; if (storm.flash < 0.02) storm.flash = 0;
+    }
+
+    // deniz
+    const sea = ctx.createLinearGradient(0, horizon, 0, H);
+    sea.addColorStop(0, "#0d1a1f"); sea.addColorStop(1, "#04080a");
+    ctx.fillStyle = sea; ctx.fillRect(0, horizon, W, H - horizon);
+    for (let k = 0; k < 7; k++) {
+      const y0 = horizon + 6 + k * k * 7, amp = (2 + k * 1.6) * (0.5 + L), sp = 0.6 + k * 0.15;
+      ctx.beginPath(); ctx.moveTo(0, H);
+      for (let x = 0; x <= W; x += 12) ctx.lineTo(x, y0 + Math.sin(x * 0.012 + time * sp + k) * amp + Math.sin(x * 0.031 - time * sp * 1.3) * amp * 0.5);
+      ctx.lineTo(W, H); ctx.closePath();
+      ctx.fillStyle = `rgba(${14 + k * 2},${28 + k * 2},${34 + k * 2},${0.35})`; ctx.fill();
+    }
+
+    // kaya ve kule
+    ctx.fillStyle = "#06090a";
+    ctx.beginPath(); ctx.moveTo(lx - 140, horizon + 30); ctx.quadraticCurveTo(lx - 60, horizon - 40, lx, horizon - 46);
+    ctx.quadraticCurveTo(lx + 70, horizon - 40, lx + 150, horizon + 30); ctx.closePath(); ctx.fill();
+    const tw = 26, th = Math.min(220, H * 0.3), top = horizon - 46 - th;
+    ctx.beginPath(); ctx.moveTo(lx - tw, horizon - 44); ctx.lineTo(lx - tw * 0.62, top); ctx.lineTo(lx + tw * 0.62, top); ctx.lineTo(lx + tw, horizon - 44); ctx.closePath();
+    ctx.fillStyle = "#0b1012"; ctx.fill();
+    ctx.fillStyle = "#121a1d"; ctx.fillRect(lx - tw * 0.8, top - 6, tw * 1.6, 6);
+    ctx.fillRect(lx - tw * 0.45, top - 26, tw * 0.9, 20);
+    ctx.beginPath(); ctx.moveTo(lx - tw * 0.55, top - 26); ctx.lineTo(lx, top - 42); ctx.lineTo(lx + tw * 0.55, top - 26); ctx.fill();
+
+    // dönen ışık huzmesi
+    const lampY = top - 16;
+    const ang = reduce ? 0.6 : time * 0.55;
+    const dir = Math.cos(ang), reach = W * 1.1, spread = 0.07;
+    const vis = Math.abs(dir);
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    const sx = dir >= 0 ? 1 : -1;
+    const grd = ctx.createLinearGradient(lx, lampY, lx + sx * reach, lampY);
+    grd.addColorStop(0, `rgba(240,182,74,${0.55 * vis})`); grd.addColorStop(1, "rgba(240,182,74,0)");
+    ctx.fillStyle = grd;
+    ctx.beginPath(); ctx.moveTo(lx, lampY);
+    ctx.lineTo(lx + sx * reach, lampY - reach * spread * (0.3 + vis));
+    ctx.lineTo(lx + sx * reach, lampY + reach * spread * (0.3 + vis));
+    ctx.closePath(); ctx.fill();
+    const glow = ctx.createRadialGradient(lx, lampY, 0, lx, lampY, 60);
+    glow.addColorStop(0, "rgba(255,215,140,0.9)"); glow.addColorStop(1, "rgba(240,182,74,0)");
+    ctx.fillStyle = glow; ctx.fillRect(lx - 60, lampY - 60, 120, 120);
+    ctx.restore();
+
+    // yağmur
+    ctx.strokeStyle = `rgba(170,190,200,${0.12 + 0.25 * L})`; ctx.lineWidth = 1;
+    ctx.beginPath();
+    const n = Math.floor(drops.length * (0.3 + 0.7 * L)), slant = 3 + 6 * L;
+    for (let i = 0; i < n; i++) {
+      const d = drops[i];
+      ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - slant, d.y + d.l);
+      if (!reduce) { d.y += d.v * (0.8 + L); d.x -= slant * 0.4; if (d.y > H) { d.y = -20; d.x = Math.random() * (W + 100); } }
+    }
+    ctx.stroke();
+
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  if (reduce) { frame(0); window.addEventListener("resize", () => frame(0)); }
+  else requestAnimationFrame(frame);
+})();
+
+
+/* ---------------- Başlat ---------------- */
+function start(data) {
+  if (data && data.sec && (data.sec === "cover" || S[data.sec])) state = Object.assign(fresh(), data);
+  else if (location.hash === "#oku") state = fresh();
+  render();
+}
+window.claude?.hot?.snapshot?.(() => state);
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>
