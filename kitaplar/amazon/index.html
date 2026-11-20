@@ -950,6 +950,11 @@ const S = {
     enter: (s) => { if ((s.r.tomas || 0) >= 2) { flag(s, "DEFTER"); note(s, "Tomás'ın uçuş defteri: Ouro Verde için taşıdığı «makine parçası» sandıklarının tarihleri ve ağırlıkları. Hepsi cıva."); } },
     text: (s) => {
       const p = [];
+      p.push(s.tasiyan === "yaku"
+        ? "Yaku kutuyu sırtına bağlayıp ormanın karanlık kısmına dalıyor. Bir an sonra onu göremiyorsun bile. Kiliseye vardığınızda kapının dışında, ağaçların gölgesinde çömelmiş bekliyor. Kutu sırtında, pistten kimsenin göremeyeceği yerde."
+        : s.tasiyan === "tomas"
+        ? "Tomás kutuyu göğsüne bastırmış. Kırık bacağıyla kiliseye kadar ona omuz veriyorsun. Bir kez tökezliyor, dizinin üstüne düşüyor, ama kutuyu bırakmıyor."
+        : "Kutuyu sen taşıyorsun. Kırmızı toprakta her adımda biraz daha ağırlaşıyor. Pistteki adamlardan biri kiliseye doğru dönse, seni kutuyla birlikte görecek.");
       p.push("Kilisenin çatısı çoktan çökmüş. Sıraların yerinde eğrelti otları var, sunağın üstüne bir incir ağacı kök salmış. Tomás'ı duvarın dibine oturtuyorsunuz.");
       p.push("Kırık bir pencereden pist görünüyor. Beyaz Cessna'nın motoru ısınıyor. Pistin tam ortasına, enlemesine, bir yakıt tankeri park edilmiş. Kenarlarda tüfekli üç adam yürüyor. Dantas pistin ortasında, kollarını kavuşturmuş, gökyüzüne bakıyor.");
       p.push("Gökyüzünde, bulutların altında, çift motorlu bir uçak tur atıyor. Kanadında büyük harflerle yazıyor: POLÍCIA FEDERAL. Ama inemiyor. Tanker pistin yolunu kesiyor.");
@@ -1035,7 +1040,7 @@ const S = {
       { t: "Kutuyu Aline'e kendin uzat", to: (s) => has(s, "TOMAS_BEDEL") ? "e_bedel" : "e_temizsu" },
       { t: "Kutuyu Yaku versin. Köyünün adına konuşsun.", to: "e_nehir", if: (s) => (s.r.yaku || 0) >= 0, fx: (s) => { s.nehir = "pist"; } },
       { t: "Kutuyu Tomás versin. Bu onun yolculuğuydu.", to: "e_temizsu", if: (s) => !has(s, "TOMAS_BEDEL") && (s.r.yaku || 0) < 0, fx: (s) => { flag(s, "TOMAS_VERDI"); } },
-      { t: "Kutuyu önce Tomás'ın yanına götür", to: "e_bedel", if: (s) => has(s, "TOMAS_BEDEL") && (s.r.yaku || 0) < 0 }
+      { t: "Kutuyu önce Tomás'ın yanına götür", to: "e_bedel", if: (s) => has(s, "TOMAS_BEDEL") && (s.r.yaku || 0) < 0, fx: (s) => { s.bedelYol = "tomas"; } }
     ]
   },
   e_temizsu: {
@@ -1077,7 +1082,9 @@ const S = {
     title: "Bedel",
     text: (s) => {
       const p = [];
-      p.push(kutuEle(s) + "Kutuyu Aline'e uzatıyorsun. Aline onu alıyor, ama gözleri senin arkanda, pistin kırmızı toprağında. Neye baktığını biliyorsun.");
+      p.push(s.bedelYol === "tomas"
+        ? kutuEle(s) + "Kutuyu Aline'e vermeden önce pistin kenarına, Tomás'ın yanına yürüyorsun. Diz çöküp kutuyu bir an onun göğsüne bırakıyorsun. Bu onun yolculuğuydu. Aline arkanda durup bekliyor. Sonra kalkıp kutuyu ona uzatıyorsun."
+        : kutuEle(s) + "Kutuyu Aline'e uzatıyorsun. Aline onu alıyor, ama gözleri senin arkanda, pistin kırmızı toprağında. Neye baktığını biliyorsun.");
       if (has(s, "KUTU_ACIK")) p.push("Kırık mührü ancak çok sonra fark ediyor. Hiçbir şey sormuyor. Savcı sormuyor değil: küçük defterine bir satır ekliyor.");
       p.push((s.dantas === "oyala" ? "Tomás'ı tankerin kabininde buluyorlar. " : "Tomás'ı pistin kenarında buluyorlar. ") + (has(s, "DEFTER") ? "Uçuş defterini Aline'e sen veriyorsun. " : "") + "Aline yanına diz çöküp uzun süre kalkmıyor.");
       p.push("Örnekler sağlam, tam zamanında geldi. Kanıt, Tomás'ın hayatına mal oldu.");

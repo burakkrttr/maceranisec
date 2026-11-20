@@ -671,7 +671,10 @@ function outcomeText(s) {
     s_cizme: "Şevket'in yüzündeki gülümseme bir an kayboluyor, sonra geri geliyor. \"Öğleden beri adadayım,\" diyor. \"Rıza'nın eski balıkçı kulübesinde bekledim fırtınanın geçmesini.\" Sonra eğilip sesini alçaltıyor: \"Gözü keskin bir bekçi iyidir. Ama fazla keskin olanı bu adada uzun yaşamaz. Rıza da öyleydi.\"",
     s_riza: "\"Herkes tanırdı,\" diyor Şevket. \"İnatçı ihtiyardı. Denize düşeceği belliydi zaten.\" Sigarasından derin bir nefes çekiyor. Az önce Rıza'yı Halil'in öldürdüğünü söyleyen adam, şimdi düştüğünü söylüyor. Bunu fark ettiğini belli etmiyorsun."
   };
-  return T[o] || "";
+  let t = T[o] || "";
+  if (s.halilMektup && o === "h_r") t = "Halil mektubu iki kez okuyor. Rıza'nın el yazısını tanıyınca kâğıdı tutan eli titriyor. " + t;
+  if (s.halilMektup && o === "h_n") t = "Halil mektubu okuyor, sonra özenle katlayıp sana geri veriyor. \"Bunu kimseye gösterme,\" diyor. " + t;
+  return t;
 }
 
 const ACT2 = {
@@ -733,6 +736,9 @@ const ACT2 = {
     text: (s) => {
       const p = [];
       if (has(s, "GARIP_CEVAP") && !has(s, "B4_SEEN")) p.push("Perdeyi indirip kaldırıyorsun. Denizdeki ışık bir an duraklıyor, sonra sönüyor ve bir daha yanmıyor. Aşağı indiğinde Şevket sana bakıyor: \"Işık titredi, bekçi. Bir sorun mu var?\" \"Rüzgar,\" diyorsun.");
+      if (has(s, "KOD") && !has(s, "B4_SEEN")) p.push(has(s, "MEKTUP_SAKLI")
+        ? "Mektubu merceğin pirinç kasasıyla duvar arasındaki aralığa sıkıştırıyorsun. Kuleye çıkmayan kimse bulamaz. Ama artık sen de yanında taşımıyorsun."
+        : "Mektubu katlayıp gömleğinin içine, göğsüne yerleştiriyorsun. Merdivenden inerken kâğıdın hışırtısı her adımda kulağına geliyor. Şevket'in yanından geçerken bile.");
       if (has(s, "KORUNDU") && !has(s, "KORUNDU_SHOWN")) { p.push("Telsizin arka kapağını açıp çıkış lambasını söküyorsun. Küçük, sıcak bir cam tüp. Cebine koyuyorsun. Artık kimse bu telsizle konuşamaz. Sen bile, lamba yerine takılana kadar."); flag(s, "KORUNDU_SHOWN"); }
       flag(s, "B4_SEEN");
       p.push("Gece yarısına bir buçuk saat var. Herkesle konuşmaya vaktin yok. Her konuşma zaman alıyor, ve biriyle baş başa kalmak için ötekileri birbirleriyle yalnız bırakman gerekiyor.");
@@ -777,7 +783,7 @@ const ACT2 = {
       return p;
     },
     choices: [
-      { t: "Rıza'nın mektubunu ona göster", to: afterTalk, if: (s) => has(s, "MEKTUP") && !has(s, "MEKTUP_SAKLI"), fx: (s) => { rel(s, "halil", 2, "Halil, ona güvendiğini gördü."); s.out = (s.r.halil >= 2) ? "h_r" : "h_n"; if (s.out === "h_r") { flag(s, "RIZA_GERCEK"); note(s, "Halil gördü: Rıza'yı Şevket öldürdü. Kürekle vurup suya itti."); } } },
+      { t: "Rıza'nın mektubunu ona göster", to: afterTalk, if: (s) => has(s, "MEKTUP") && !has(s, "MEKTUP_SAKLI"), fx: (s) => { s.halilMektup = true; rel(s, "halil", 2, "Halil, ona güvendiğini gördü."); s.out = (s.r.halil >= 2) ? "h_r" : "h_n"; if (s.out === "h_r") { flag(s, "RIZA_GERCEK"); note(s, "Halil gördü: Rıza'yı Şevket öldürdü. Kürekle vurup suya itti."); } } },
       { t: "\"Rıza'yı kim öldürdü, Halil?\"", to: afterTalk, fx: (s) => { s.out = (s.r.halil >= 2) ? "h_r" : "h_n"; if (s.out === "h_r") { flag(s, "RIZA_GERCEK"); note(s, "Halil gördü: Rıza'yı Şevket öldürdü. Kürekle vurup suya itti."); } } }
     ]
   },
