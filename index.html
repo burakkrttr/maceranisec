@@ -135,7 +135,14 @@ section { position: relative; }
 .case::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(600px 260px at 50% 0%, rgba(233,179,79,0.14), transparent 70%); }
 .row { display: flex; align-items: flex-end; justify-content: center; gap: 6px; min-height: 360px; padding: 0 20px; perspective: 1400px; position: relative; z-index: 1; width: max-content; min-width: 100%; }
 .shelf-label { position: relative; z-index: 2; width: max-content; margin: 0 auto 14px; font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase; color: #2a1a10; background: linear-gradient(#e9c27a, #b98a3e); padding: 4px 16px 3px 19px; border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.4); }
-#shelf-en { padding-top: 46px; }
+#shelf-en { padding-top: 46px; scroll-margin-top: 90px; }
+#nav-en { color: var(--lamp); }
+.en-pill { display: inline-flex; align-items: center; gap: 12px; margin-top: 26px; padding: 9px 20px 9px 10px; border-radius: 40px; text-decoration: none;
+  color: var(--paper); font-family: var(--display); font-weight: 600; font-size: 19px; letter-spacing: 0.04em;
+  background: rgba(233,179,79,0.10); box-shadow: inset 0 0 0 1px rgba(233,179,79,0.55); transition: background .2s, transform .2s; }
+.en-pill:hover { background: rgba(233,179,79,0.2); transform: translateY(-2px); }
+.en-pill b { font-size: 13px; letter-spacing: 0.2em; background: var(--lamp); color: #1a1209; padding: 5px 10px; border-radius: 30px; }
+.en-pill i { font-style: italic; color: var(--lamp); }
 .plank { height: 34px; margin: 0 -30px; position: relative; z-index: 0; background: linear-gradient(#5a3a22, #3b2618 45%, #2a1a10); box-shadow: 0 14px 24px rgba(0,0,0,0.6), inset 0 2px 0 rgba(255,220,170,0.15); }
 .bookend { width: 18px; height: 150px; align-self: flex-end; margin: 0 14px; border-radius: 3px 3px 0 0; background: linear-gradient(90deg, #8a6a3c, #c9a063 50%, #7a5a30); box-shadow: 4px 0 10px rgba(0,0,0,0.5); }
 .deco { align-self: flex-end; margin: 0 18px; }
@@ -217,7 +224,10 @@ footer .big em { color: var(--lamp); }
 .opener .flash { position: absolute; inset: 0; background: #efe6d1; opacity: 0; }
 
 @media (max-width: 860px) {
-  .nav ul li:not(:last-child) { display: none; }
+  .nav ul li:not(.keep) { display: none; }
+  .en-pill { font-size: 16px; white-space: nowrap; gap: 8px; padding-right: 14px; }
+  .nav ul { font-size: 15px; gap: 14px; }
+  .nav .logo { white-space: nowrap; }
   .feat { grid-template-columns: 1fr; }
   .tilt { max-width: 320px; margin: 0 auto; }
   .steps { grid-template-columns: 1fr; }
@@ -227,6 +237,10 @@ footer .big em { color: var(--lamp); }
   .old, .deco { display: none; }
   .row { padding: 0 6px; }
   .bk.peek { transform: translateZ(30px) translateY(-10px) rotateY(-70deg); }
+}
+@media (max-width: 420px) {
+  .nav .logo { font-size: 16px; }
+  .en-pill { font-size: 15px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -246,7 +260,8 @@ footer .big em { color: var(--lamp); }
       <li><a href="#vitrin">Yeni gelen</a></li>
       <li><a href="#raf">Raflar</a></li>
       <li><a href="#nasil">Nasıl okunur?</a></li>
-      <li><a id="nav-ig" href="#" target="_blank" rel="noopener">Instagram</a></li>
+      <li class="keep" id="nav-en-li" hidden><a id="nav-en" href="#shelf-en" lang="en">English</a></li>
+      <li class="keep"><a id="nav-ig" href="#" target="_blank" rel="noopener">Instagram</a></li>
     </ul>
   </div>
 </nav>
@@ -264,6 +279,7 @@ footer .big em { color: var(--lamp); }
       <a class="btn" href="#raf">Raflara göz at</a>
       <a class="btn ghost" href="#nasil">Nasıl okunur?</a>
     </div>
+    <a class="en-pill" id="en-pill" href="#shelf-en" lang="en" hidden></a>
     <div class="stats" id="stats"></div>
   </div>
   <div class="cue" aria-hidden="true"></div>
@@ -403,7 +419,14 @@ footer .big em { color: var(--lamp); }
   const dilOf = (b) => b.dil || "tr";
   const kaynakOf = (b) => books.find((x) => x.id === b.kaynak) || b;
   const enBooks = books.filter((b) => dilOf(b) === "en");
-  if (enBooks.length) { $("#shelf-en").hidden = false; $("#lbl-tr").hidden = false; }
+  if (enBooks.length) {
+    $("#shelf-en").hidden = false; $("#lbl-tr").hidden = false; $("#nav-en-li").hidden = false;
+    const enLive = enBooks.filter((b) => b.durum === "yayinda");
+    if (enLive.length) {
+      const pill = $("#en-pill"); pill.hidden = false;
+      pill.innerHTML = `<b>NEW</b>Now in English: <i>${enLive.length === 1 ? esc(enLive[0].baslik) : enLive.length + " books"}</i> →`;
+    }
+  }
   const shelves = [[$("#row"), books.filter((b) => dilOf(b) === "tr")], [$("#row-en"), enBooks]];
   shelves.forEach(([row, list], si) => {
   const oldies = (l) => l.forEach(([w, h, c]) => row.appendChild(deco(`<div class="old" aria-hidden="true" style="width:${w}px;height:${h}px;background:${c}"></div>`)));
