@@ -1242,14 +1242,8 @@ function renderPage(turn) {
     right += `<div class="tally">${UI.bulunan(loadEndings().length, META.sonSayisi)}</div>`;
     right += `<div class="tally">${UI.takip} <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></div>`;
   }
-  if (sec.actEnd) {
-    const hints = missedHints(state, act);
-    if (hints.length) {
-      right += `<div class="sub">${esc(BOOK.missedTitle || UI.kacirdiklar)}</div><ul class="missed">`;
-      hints.forEach((h) => { right += `<li>${esc(h)}</li>`; });
-      right += `</ul>`;
-    }
-  }
+  /* Perde sonundaki "Bu gece kaçırdıkların" kutusu okur isteğiyle kaldırıldı (2026-11-21).
+     Kitaplardaki BOOK.hints verisi duruyor; geri açmak için bu bloğu eski haline getirmek yeterli. */
 
   right += `<div class="choices" id="choices"></div><div class="folio">${page + 1}</div>`;
 

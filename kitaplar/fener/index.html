@@ -1199,6 +1199,24 @@ const BOOK = {
 /* ---------------- Kitap motoru ---------------- */
 const META = JSON.parse(document.getElementById("book-meta").textContent);
 const ACTS = BOOK.acts;
+/* Arayüz dili: meta.json'da "dil": "en" olan kitaplar İngilizce arayüzle açılır. */
+const DIL = META.dil || "tr";
+const UI = {
+  tr: { kapagi: (t) => `${t} kitabının kapağı`, kitap: "Kitap", yazar: "Yazar", tur: "Tür", okuma: "Okuma", sonlar: "Sonlar",
+        farkliSon: (n) => `${n} farklı son`, buldugun: (f, n) => ` · bulduğun: ${f} / ${n}`, basla: "Okumaya başla",
+        sonYazdigin: "Defterine son yazdığın:", sabah: "Sabah", akibet: "Kimin başına ne geldi", yil: "Bir yıl sonra", son: "SON",
+        bulunan: (f, n) => `Bulduğun sonlar: ${f} / ${n}`, takip: "Yazarı takip et:", kacirdiklar: "Bu gece kaçırdıkların",
+        perdeSonu: (a) => `${a}nin sonu`, kapatmadan: "Kitabı kapatmadan önce", geceDevam: "Gece devam ediyor", neYapacaksin: "Ne yapacaksın?",
+        bolum: (n) => `Bölüm ${n}`, kapagaDon: "kapağa dön", sayfayaGit: "sayfaya git", bastan: "Geceyi baştan yaşa", KapagaDon: "Kapağa dön",
+        bosDefter: "Henüz bir şey yazmadın." },
+  en: { kapagi: (t) => `Cover of ${t}`, kitap: "Book", yazar: "Author", tur: "Genre", okuma: "Reading time", sonlar: "Endings",
+        farkliSon: (n) => `${n} different endings`, buldugun: (f, n) => ` · found: ${f} / ${n}`, basla: "Start reading",
+        sonYazdigin: "Last thing you wrote down:", sabah: "Morning", akibet: "What became of them", yil: "A year later", son: "THE END",
+        bulunan: (f, n) => `Endings found: ${f} / ${n}`, takip: "Follow the author:", kacirdiklar: "What you missed tonight",
+        perdeSonu: (a) => `End of the ${a}`, kapatmadan: "Before you close the book", geceDevam: "The night goes on", neYapacaksin: "What will you do?",
+        bolum: (n) => `Section ${n}`, kapagaDon: "back to cover", sayfayaGit: "turn to section", bastan: "Live the night again", KapagaDon: "Back to cover",
+        bosDefter: "You haven't written anything down yet." }
+}[DIL];
 const END_KEY = META.sonAnahtari || (META.id + "-sonlar");
 const fresh = () => ({ sec: BOOK.start, f: {}, r: Object.assign({}, BOOK.rel), notes: [], talked: [], num: null, steps: 0 });
 let state = Object.assign(fresh(), { sec: "cover" });
@@ -1242,10 +1260,10 @@ function renderCover() {
   const found = loadEndings().length;
   $("view").innerHTML = `
   <section class="cover-wrap">
-    <div class="cover" style="background-image:url('${META.kapak}'),url('${META.kapakYedek}')" role="img" aria-label="${esc(META.baslik)} kitabının kapağı">
+    <div class="cover" style="background-image:url('${META.kapak}'),url('${META.kapakYedek}')" role="img" aria-label="${esc(UI.kapagi(META.baslik))}">
       <div>
-        <div class="band">${esc(META.seri)} · Kitap ${META.kitapNo}</div>
-        <h1>${esc(META.baslik.toLocaleUpperCase("tr"))}</h1>
+        <div class="band">${esc(META.seri)} · ${UI.kitap} ${META.kitapNo}</div>
+        <h1>${esc(META.baslik.toLocaleUpperCase(DIL))}</h1>
       </div>
       <div><div class="subt">${esc(META.altBaslik)}</div><div class="author">${esc(META.yazar)}</div></div>
     </div>
@@ -1253,12 +1271,12 @@ function renderCover() {
       <p class="slogan">${esc(META.slogan)}</p>
       ${BOOK.coverText.map((p) => `<p>${esc(p)}</p>`).join("")}
       <dl class="colophon">
-        <dt>Yazar</dt><dd>${esc(META.yazar)} · <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></dd>
-        <dt>Tür</dt><dd>${esc(META.tur)}</dd>
-        <dt>Okuma</dt><dd>${esc(META.okumaSuresi)}</dd>
-        <dt>Sonlar</dt><dd>${META.sonSayisi} farklı son${found ? ` · bulduğun: ${found} / ${META.sonSayisi}` : ""}</dd>
+        <dt>${UI.yazar}</dt><dd>${esc(META.yazar)} · <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></dd>
+        <dt>${UI.tur}</dt><dd>${esc(META.tur)}</dd>
+        <dt>${UI.okuma}</dt><dd>${esc(META.okumaSuresi)}</dd>
+        <dt>${UI.sonlar}</dt><dd>${UI.farkliSon(META.sonSayisi)}${found ? UI.buldugun(found, META.sonSayisi) : ""}</dd>
       </dl>
-      <button class="btn" id="btn-start" type="button">Okumaya başla</button>
+      <button class="btn" id="btn-start" type="button">${UI.basla}</button>
     </div>
   </section>`;
   $("btn-start").addEventListener("click", () => { state = fresh(); render(true); });
@@ -1269,7 +1287,7 @@ function choiceNum(secId, c, i) { return NUM[secId + "#" + i]; }
 
 function renderPage(turn) {
   const sec = S[state.sec];
-  const act = sec.act || 1;
+  const act = val(sec.act) || 1;
   const time = val(sec.time);
   const num = state.num || NUM[state.sec];
 
@@ -1284,7 +1302,7 @@ function renderPage(turn) {
   if (!hasImg) {
     const last = state.notes[state.notes.length - 1];
     left += `<div class="fleuron">✦ ✦ ✦</div>`;
-    left += last ? `<div class="margin-note hand"><span class="lbl">Defterine son yazdığın:</span>${esc(last)}</div>` : `<div class="margin-note hand"><span class="lbl">${esc(BOOK.rule[0])}</span>${esc(BOOK.rule[1])}</div>`;
+    left += last ? `<div class="margin-note hand"><span class="lbl">${UI.sonYazdigin}</span>${esc(last)}</div>` : `<div class="margin-note hand"><span class="lbl">${esc(BOOK.rule[0])}</span>${esc(BOOK.rule[1])}</div>`;
   }
   const page = 2 * state.steps + 6;
   left = `<div class="runhead">${esc(META.baslik)}</div>` + left + `</div><div class="folio">${page}</div>`;
@@ -1292,7 +1310,7 @@ function renderPage(turn) {
   // sağ sayfa
   let right = `<div class="runhead">${ACTS[act][1]}</div><div class="sect">§ ${num}</div>`;
   if (sec.end) right += `<div class="kind">${esc(val(sec.end.kind))}</div>`;
-  if (sec.actEnd) right += `<div class="kind">${ACTS[act][0]}nin sonu</div>`;
+  if (sec.actEnd) right += `<div class="kind">${UI.perdeSonu(ACTS[act][0])}</div>`;
   right += `<h2>${esc(sec.title)}</h2><div class="text">`;
   let leadDone = false;
   sec.text(state).forEach((para) => {
@@ -1305,23 +1323,17 @@ function renderPage(turn) {
   right += `</div>`;
 
   if (sec.end) {
-    right += `<div class="sub">Sabah</div><div class="text"><p class="first">${esc(val(sec.sabah))}</p></div>`;
-    right += `<div class="sub">Kimin başına ne geldi</div><ul class="fates">`;
+    right += `<div class="sub">${UI.sabah}</div><div class="text"><p class="first">${esc(val(sec.sabah))}</p></div>`;
+    right += `<div class="sub">${UI.akibet}</div><ul class="fates">`;
     val(sec.akibet).forEach(([w, t]) => { right += `<li><b>${esc(w)}.</b> ${esc(t)}</li>`; });
-    right += `</ul><div class="sub">Bir yıl sonra</div><div class="text"><p class="first">${esc(val(sec.yil))}</p></div>`;
-    right += `<div class="the-end">SON</div>`;
+    right += `</ul><div class="sub">${UI.yil}</div><div class="text"><p class="first">${esc(val(sec.yil))}</p></div>`;
+    right += `<div class="the-end">${UI.son}</div>`;
     saveEnding(sec.end.id);
-    right += `<div class="tally">Bulduğun sonlar: ${loadEndings().length} / ${META.sonSayisi}</div>`;
-    right += `<div class="tally">Yazarı takip et: <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></div>`;
+    right += `<div class="tally">${UI.bulunan(loadEndings().length, META.sonSayisi)}</div>`;
+    right += `<div class="tally">${UI.takip} <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></div>`;
   }
-  if (sec.actEnd) {
-    const hints = missedHints(state, act);
-    if (hints.length) {
-      right += `<div class="sub">${esc(BOOK.missedTitle || "Bu gece kaçırdıkların")}</div><ul class="missed">`;
-      hints.forEach((h) => { right += `<li>${esc(h)}</li>`; });
-      right += `</ul>`;
-    }
-  }
+  /* Perde sonundaki "Bu gece kaçırdıkların" kutusu okur isteğiyle kaldırıldı (2026-11-21).
+     Kitaplardaki BOOK.hints verisi duruyor; geri açmak için bu bloğu eski haline getirmek yeterli. */
 
   right += `<div class="choices" id="choices"></div><div class="folio">${page + 1}</div>`;
 
@@ -1330,21 +1342,21 @@ function renderPage(turn) {
 
   const box = $("choices");
   const dh = document.createElement("div"); dh.className = "decide";
-  dh.textContent = sec.end ? "Kitabı kapatmadan önce" : sec.actEnd ? ((typeof BOOK.actEndHead === "function" ? BOOK.actEndHead(sec) : BOOK.actEndHead) || "Gece devam ediyor") : "Ne yapacaksın?";
+  dh.textContent = sec.end ? UI.kapatmadan : sec.actEnd ? ((typeof BOOK.actEndHead === "function" ? BOOK.actEndHead(sec) : BOOK.actEndHead) || UI.geceDevam) : UI.neYapacaksin;
   box.appendChild(dh);
   const addBtn = (text, n, onClick, id) => {
     const b = document.createElement("button");
     b.className = "choice"; b.type = "button"; if (id) b.id = id;
-    b.innerHTML = (n == null ? `<span class="seal blank" aria-hidden="true">❧</span>` : `<span class="seal" aria-label="Bölüm ${n}">${n}</span>`)
-      + `<span class="ct">${esc(text)}</span><span class="go" aria-hidden="true">${n == null ? "kapağa dön" : "sayfaya git"}</span>`;
+    b.innerHTML = (n == null ? `<span class="seal blank" aria-hidden="true">❧</span>` : `<span class="seal" aria-label="${UI.bolum(n)}">${n}</span>`)
+      + `<span class="ct">${esc(text)}</span><span class="go" aria-hidden="true">${n == null ? UI.kapagaDon : UI.sayfayaGit}</span>`;
     b.addEventListener("click", onClick);
     box.appendChild(b);
   };
   if (sec.end || sec.actEnd) {
     if (sec.next) addBtn(sec.next.t, NUM[state.sec + "#next"], () => go(sec.next, NUM[state.sec + "#next"]), "c-next");
     if (sec.end) {
-      addBtn(BOOK.againText || "Geceyi baştan yaşa", 1, () => { state = fresh(); render(true); }, "c-again");
-      addBtn("Kapağa dön", null, () => { state = Object.assign(fresh(), { sec: "cover" }); render(); }, "c-cover");
+      addBtn(BOOK.againText || UI.bastan, 1, () => { state = fresh(); render(true); }, "c-again");
+      addBtn(UI.KapagaDon, null, () => { state = Object.assign(fresh(), { sec: "cover" }); render(); }, "c-cover");
     }
   } else {
     sec.choices.forEach((c, i) => {
@@ -1409,7 +1421,7 @@ function renderDrawer() {
   BOOK.items(state).forEach((x) => { const li = document.createElement("li"); li.textContent = x; items.appendChild(li); });
 
   const notes = $("notes"); notes.innerHTML = "";
-  if (!state.notes.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = "Henüz bir şey yazmadın."; notes.appendChild(li); }
+  if (!state.notes.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = UI.bosDefter; notes.appendChild(li); }
   state.notes.forEach((n) => { const li = document.createElement("li"); li.textContent = n; notes.appendChild(li); });
   $("note-count").textContent = state.notes.length ? "(" + state.notes.length + ")" : "";
 
