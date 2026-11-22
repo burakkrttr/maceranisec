@@ -1,0 +1,2540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Dark Village</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<script type="application/json" id="book-meta">
+{
+  "id": "karanlik-koy-en",
+  "seri": "Choose Your Own Adventure",
+  "kitapNo": 4,
+  "baslik": "The Dark Village",
+  "altBaslik": "A Black Sea horror story",
+  "yazar": "Burak Karatatar",
+  "instagram": "https://www.instagram.com/burakkrttr/",
+  "instagramKullanici": "burakkrttr",
+  "slogan": "When the fog comes, open your door to no one.",
+  "tur": "Horror · Thriller",
+  "okumaSuresi": "About 30 minutes",
+  "sonSayisi": 7,
+  "kapak": "img/kapak.jpg",
+  "kapakYedek": "img/koy.jpg",
+  "dil": "en",
+  "kaynak": "karanlik-koy",
+  "sonAnahtari": "karanlik-koy-en-sonlar",
+  "kutuphane": "../../index.html"
+}
+</script>
+<style>
+/* Tek tema bilerek: karanlık bir oda, masada açık bir kitap, arkada fırtınalı pencere.
+   Düzen: masaüstünde iki sayfalı açık kitap (solda levha ve bekçinin kaydı, sağda metin), telefonda tek sayfa. */
+:root {
+  --night: #0c1012;        /* oda, kitabın dışı */
+  --paper: #efe6d1;        /* sayfa */
+  --paper-edge: #e2d6bb;   /* sayfa kenarı, cilt gölgesi */
+  --ink: #2b241d;          /* metin mürekkebi */
+  --faded: #75685a;        /* soluk mürekkep, ikincil metin */
+  --rubric: #8d3a26;       /* kırmızı mürekkep: § numaraları, başharfler, süslemeler */
+  --lamp: #e9b34f;         /* fener ışığı, kapak vurgusu */
+  --display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --body: "EB Garamond", "Iowan Old Style", Georgia, serif;
+  --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --cloth: #3b2520;        /* cilt kumaşı */
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--night); color: var(--ink); font-family: var(--body); overflow: hidden; }
+canvas#sea { position: fixed; inset: 0; width: 100%; height: 100%; display: block; opacity: 0.42; }
+.vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(12,16,18,0) 30%, rgba(12,16,18,0.85) 100%); }
+
+/* üst şerit */
+.top {
+  background: linear-gradient(var(--night) 55%, rgba(12,16,18,0));
+  position: fixed; top: 0; left: 0; right: 0; z-index: 4;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 12px clamp(16px, 3vw, 36px);
+  font-family: var(--display); color: #cfc4ad;
+}
+.top .series { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; }
+.top .series b { color: var(--lamp); font-weight: 600; }
+.top nav { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.link {
+  font-family: var(--display); font-size: 17px; font-weight: 600; letter-spacing: 0.06em;
+  background: none; border: 0; color: #cfc4ad; cursor: pointer; padding: 6px 10px; border-radius: 2px;
+}
+.link:hover { color: var(--lamp); }
+a.link { text-decoration: none; }
+.link:focus-visible, .choice:focus-visible, .btn:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
+.confirm { display: none; gap: 4px; align-items: center; font-style: italic; color: #cfc4ad; font-size: 16px; }
+.confirm.show { display: inline-flex; }
+
+main { position: relative; z-index: 2; height: 100%; overflow-y: auto; padding: 64px clamp(10px, 3vw, 40px) 40px; }
+
+/* ---------- açık kitap ---------- */
+.book {
+  max-width: 1120px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  background: var(--paper);
+  border-radius: 3px 6px 6px 3px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.25), 0 6px 0 -2px #d9ccad, 0 10px 0 -4px #cdbf9e;
+  position: relative;
+}
+.book::before { /* cilt */
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 70px; transform: translateX(-50%); pointer-events: none;
+  background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(80,60,30,0.10) 38%, rgba(40,28,10,0.28) 50%, rgba(80,60,30,0.10) 62%, rgba(0,0,0,0) 100%);
+}
+.leaf {
+  position: relative; padding: 46px clamp(26px, 4vw, 58px) 54px;
+  background-image:
+    radial-gradient(rgba(120,95,55,0.07) 1px, transparent 1px),
+    radial-gradient(rgba(120,95,55,0.05) 1px, transparent 1px);
+  background-size: 7px 7px, 11px 11px; background-position: 0 0, 3px 5px;
+  min-height: min(760px, calc(100vh - 110px));
+}
+.leaf.left { border-right: 1px solid rgba(120,95,55,0.15); }
+.folio { position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; font-family: var(--display); font-size: 15px; color: var(--faded); letter-spacing: 0.1em; }
+
+/* sol sayfa: levha + kayıt */
+.plate { display: flex; flex-direction: column; gap: 22px; }
+.act-title { text-align: center; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.22em; font-size: 13.6px; color: var(--rubric); }
+.act-title span { display: block; font-size: 30px; letter-spacing: 0.06em; color: var(--ink); font-variant: normal; text-transform: none; font-weight: 600; margin-top: 2px; }
+.ill { margin: 0; padding: 10px; background: #f6efdf; border: 1px solid rgba(80,60,30,0.25); box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px rgba(80,60,30,0.25); }
+.ill img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; filter: sepia(0.18) contrast(1.02); }
+.ill figcaption { text-align: center; font-style: italic; font-size: 16px; color: var(--faded); margin-top: 8px; }
+.log { border-top: 1px solid rgba(80,60,30,0.3); border-bottom: 1px solid rgba(80,60,30,0.3); padding: 14px 4px; display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; gap: 6px; }
+.log div { font-size: 11.2px; color: var(--faded); text-transform: uppercase; letter-spacing: 0.12em; }
+.log b { display: block; font-family: var(--display); font-size: 30px; color: var(--ink); font-weight: 600; letter-spacing: 0.02em; font-variant-numeric: lining-nums tabular-nums; text-transform: none; }
+.margin-note { font-style: italic; font-size: 18px; line-height: 1.55; color: var(--faded); text-align: center; padding: 0 10px; text-wrap: balance; }
+.fleuron { text-align: center; color: var(--rubric); font-size: 22px; letter-spacing: 0.6em; }
+
+/* sağ sayfa: metin */
+.sect { text-align: center; font-family: var(--display); color: var(--rubric); font-size: 22px; font-weight: 600; letter-spacing: 0.08em; }
+.sect::before, .sect::after { content: "❧"; font-size: 16px; margin: 0 12px; position: relative; top: -2px; opacity: 0.8; }
+.sect::before { display: inline-block; transform: scaleX(-1); }
+.leaf h2 { font-family: var(--display); font-weight: 600; font-size: 24px; text-align: center; margin: 6px 0 4px; text-transform: uppercase; letter-spacing: 0.08em; text-wrap: balance; }
+.kind { text-align: center; font-style: italic; color: var(--rubric); font-size: 17px; margin-bottom: 4px; }
+.text { margin-top: 22px; }
+.text p { font-size: 20px; line-height: 1.58; margin: 0 0 12px; text-align: justify; hyphens: auto; -webkit-hyphens: auto; text-indent: 1.4em; }
+.text p.lead, .text p.first { text-indent: 0; }
+.text p.lead::first-letter { float: left; font-family: var(--display); font-weight: 600; color: var(--rubric); font-size: 76px; line-height: 0.82; padding: 6px 8px 0 0; }
+.text p.quote { font-style: italic; text-indent: 0; margin: 4px 1.6em 14px; text-align: left; color: #3d342b; }
+.sub { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; color: var(--rubric); font-size: 13.6px; text-align: center; margin: 26px 0 10px; }
+.fates { list-style: none; padding: 0; margin: 0; }
+.fates li { font-size: 18px; line-height: 1.5; padding: 7px 0; border-bottom: 1px dotted rgba(80,60,30,0.35); }
+.fates b { text-transform: uppercase; letter-spacing: 0.06em; font-size: 15.2px; margin-right: 6px; }
+.the-end { text-align: center; font-family: var(--display); font-size: 40px; letter-spacing: 0.4em; color: var(--ink); margin: 30px 0 4px; padding-left: 0.4em; }
+.missed { list-style: none; padding: 0; margin: 0; }
+.missed li { font-style: italic; color: var(--faded); font-size: 17px; text-align: center; padding: 3px 0; }
+.tally { text-align: center; font-style: italic; color: var(--faded); font-size: 16px; margin-top: 14px; }
+
+/* seçenekler: oyun kitabı yönergesi */
+.choices { margin-top: 26px; border-top: 1px solid rgba(80,60,30,0.3); padding-top: 14px; display: flex; flex-direction: column; }
+.choice {
+  display: flex; align-items: baseline; gap: 10px; width: 100%; text-align: left; cursor: pointer;
+  background: none; border: 0; border-bottom: 1px dotted rgba(80,60,30,0.3); padding: 11px 4px;
+  font-family: var(--body); font-size: 19px; line-height: 1.4; color: var(--ink);
+}
+.choice .ct { flex: 1; font-style: italic; }
+.choice .cn { font-family: var(--display); font-weight: 600; font-size: 20px; color: var(--rubric); white-space: nowrap; font-variant-numeric: lining-nums; }
+.choice:hover .ct { text-decoration: underline; text-decoration-color: var(--rubric); text-underline-offset: 4px; }
+.choice:hover { background: rgba(141,58,38,0.05); }
+
+/* sayfa çevirme */
+@keyframes ink { from { opacity: 0.1; transform: translateX(10px); } to { opacity: 1; transform: none; } }
+
+/* ---------- kapak ---------- */
+.cover-wrap { max-width: 1040px; margin: 0 auto; display: grid; grid-template-columns: minmax(280px, 430px) 1fr; gap: clamp(24px, 4vw, 56px); align-items: center; min-height: calc(100vh - 120px); }
+.cover {
+  container-type: inline-size;
+  position: relative; aspect-ratio: 2 / 3; border-radius: 3px 8px 8px 3px; overflow: hidden;
+  background: #101619 center / cover no-repeat;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.7), inset 6px 0 0 rgba(0,0,0,0.25), inset 9px 0 0 rgba(255,255,255,0.05);
+  color: #f1e7cf; display: flex; flex-direction: column; justify-content: space-between; padding: 30px 26px 26px 34px;
+}
+.cover::before { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(6,10,12,0.78) 0%, rgba(6,10,12,0.05) 38%, rgba(6,10,12,0.05) 62%, rgba(6,10,12,0.85) 100%); }
+.cover > * { position: relative; }
+.cover .band { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.18em; font-size: clamp(9px, 2.7cqi, 12.5px); white-space: nowrap; text-align: center; color: var(--lamp); border-top: 1px solid rgba(233,179,79,0.5); border-bottom: 1px solid rgba(233,179,79,0.5); padding: 6px 0; }
+.cover h1 { font-family: var(--display); font-weight: 600; font-size: clamp(44px, 19cqi, 88px); letter-spacing: 0.16em; text-align: center; margin: 18px 0 0; padding-left: 0.16em; line-height: 1; text-shadow: 0 2px 24px rgba(0,0,0,0.6); }
+.cover .subt { text-align: center; font-style: italic; font-size: clamp(15px, 4.6cqi, 20px); margin-bottom: 10px; color: #e4d8bd; }
+.cover .author { text-align: center; font-family: var(--display); font-size: clamp(14px, 4.8cqi, 20px); letter-spacing: 0.26em; text-transform: uppercase; padding-left: 0.26em; white-space: nowrap; }
+.backcover { color: #e6dcc4; }
+.backcover .slogan { font-family: var(--display); font-size: clamp(28px, 3.2vw, 38px); line-height: 1.2; font-weight: 600; color: #f3e9d2; margin: 0 0 18px; text-wrap: balance; }
+.backcover p { font-size: 19px; line-height: 1.6; margin: 0 0 12px; max-width: 58ch; color: #d6cbb2; }
+.colophon { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; margin: 22px 0; padding: 14px 0; border-top: 1px solid rgba(214,203,178,0.25); border-bottom: 1px solid rgba(214,203,178,0.25); font-size: 17px; }
+.colophon dt { text-transform: uppercase; letter-spacing: 0.14em; color: #a99d86; }
+.colophon dd { margin: 0; color: #efe5cd; }
+.btn {
+  font-family: var(--display); font-size: 22px; font-weight: 600; letter-spacing: 0.1em;
+  background: var(--lamp); color: #1d1608; border: 0; padding: 12px 28px; border-radius: 2px; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(233,179,79,0.25);
+}
+.btn:hover { background: #f2c56a; }
+
+/* ---------- defter ---------- */
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 6; width: min(400px, 92vw);
+  background: var(--paper); color: var(--ink); box-shadow: -20px 0 50px rgba(0,0,0,0.5);
+  transform: translateX(105%); transition: transform .35s ease; padding: 28px 28px 34px; overflow-y: auto;
+}
+.drawer.open { transform: none; }
+.drawer::before { content: ""; position: absolute; top: 0; left: 28px; width: 14px; height: 70px; background: var(--rubric); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%); }
+.drawer h3 { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; color: var(--rubric); font-size: 14.4px; margin: 26px 0 8px; text-align: center; }
+.drawer h3:first-of-type { margin-top: 54px; }
+.drawer ul { list-style: none; padding: 0; margin: 0; }
+.drawer li { font-size: 17px; line-height: 1.5; padding: 8px 0; border-bottom: 1px dotted rgba(80,60,30,0.35); }
+.drawer .empty { color: var(--faded); font-style: italic; }
+.drawer-close { position: absolute; top: 14px; right: 16px; color: var(--ink); }
+
+.toast {
+  position: fixed; left: 50%; top: 58px; z-index: 7; transform: translate(-50%, -10px);
+  font-style: italic; font-size: 18px; color: var(--paper); background: rgba(43,36,29,0.94);
+  padding: 9px 18px; border-radius: 2px; border-left: 3px solid var(--rubric);
+  opacity: 0; transition: opacity .4s, transform .4s; pointer-events: none; max-width: 90vw; text-align: center;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 860px) {
+  .book { grid-template-columns: 1fr; }
+  .book::before { display: none; }
+  .leaf { min-height: 0; padding: 30px 22px 50px; }
+  .leaf.left { border-right: 0; border-bottom: 1px solid rgba(120,95,55,0.2); padding-bottom: 24px; }
+  .plate { position: static; gap: 14px; }
+  .log b { font-size: 24px; }
+  .text p { font-size: 18.5px; text-align: left; }
+  .leaf.left .folio { display: none; }
+  main { padding-top: 92px; }
+  .top .series { font-size: 13px; }
+  .cover-wrap { grid-template-columns: 1fr; justify-items: center; }
+  .cover { width: min(360px, 86vw); }
+  .backcover { text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .turn .leaf.right > *, .turn .leaf.left .plate { animation: none; }
+  .drawer, .toast { transition: none; }
+}
+
+/* ===== kitap havası: cilt, sayfa kalınlığı, kurdele, sayfa başlıkları ===== */
+.binding {
+  max-width: 1150px; margin: 6px auto 30px; position: relative;
+  background: var(--cloth); border-radius: 6px; padding: 12px 14px 14px;
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 4px), repeating-linear-gradient(-45deg, rgba(0,0,0,0.08) 0 2px, transparent 2px 4px);
+  box-shadow: 0 34px 80px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 0 30px rgba(0,0,0,0.5);
+}
+.binding .book { box-shadow: 0 2px 6px rgba(0,0,0,0.35); border-radius: 2px; perspective: 2400px; }
+.edges { position: absolute; top: 16px; bottom: 18px; z-index: 0; border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #efe6d1 0 1px, #cfc1a0 1px 2px); }
+.edges.l { right: calc(100% - 14px); }
+.edges.r { left: calc(100% - 14px); }
+.ribbon { position: absolute; z-index: 3; top: -6px; left: calc(50% + 14px); width: 11px; height: calc(100% + 46px); pointer-events: none;
+  background: linear-gradient(90deg, #6f2a1b, #9b4430 45%, #7a2f1f); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 12px), 0 100%);
+  box-shadow: 2px 0 4px rgba(0,0,0,0.3); opacity: 0.95; }
+.leaf { background-color: var(--paper); }
+.leaf.left { background-image:
+    linear-gradient(90deg, rgba(90,65,30,0.10) 0%, rgba(90,65,30,0) 7%, rgba(90,65,30,0) 84%, rgba(70,50,20,0.16) 100%),
+    radial-gradient(rgba(120,95,55,0.07) 1px, transparent 1px), radial-gradient(rgba(120,95,55,0.05) 1px, transparent 1px); }
+.leaf.right { background-image:
+    linear-gradient(90deg, rgba(70,50,20,0.16) 0%, rgba(90,65,30,0) 16%, rgba(90,65,30,0) 93%, rgba(90,65,30,0.10) 100%),
+    radial-gradient(rgba(120,95,55,0.07) 1px, transparent 1px), radial-gradient(rgba(120,95,55,0.05) 1px, transparent 1px); }
+.leaf { background-size: auto, 7px 7px, 11px 11px; background-position: 0 0, 0 0, 3px 5px; }
+.runhead { position: absolute; top: 20px; left: 0; right: 0; text-align: center; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.26em; font-size: 11.2px; color: var(--faded); }
+.folio { bottom: 20px; text-align: left; padding: 0 clamp(26px, 4vw, 58px); font-variant-numeric: oldstyle-nums; font-size: 16px; }
+.leaf.right .folio { text-align: right; }
+
+/* bekçinin defteri: el yazısı kayıt */
+.ledger { background: #f6eedb; border: 1px solid rgba(80,60,30,0.25); padding: 12px 16px 14px; transform: rotate(-0.6deg);
+  background-image: repeating-linear-gradient(transparent 0 29px, rgba(70,90,120,0.22) 29px 30px); box-shadow: 0 2px 6px rgba(60,40,10,0.12); }
+.ledger .lh { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; font-size: 10.4px; color: var(--rubric); }
+.ledger .lv { font-family: var(--hand); font-size: 25px; line-height: 30px; color: #263a5a; }
+.margin-note.hand { font-family: var(--hand); font-style: normal; font-size: 24px; line-height: 1.25; color: #263a5a; transform: rotate(-1.2deg); }
+.margin-note .lbl { display: block; font-family: var(--body); font-style: italic; font-size: 16px; color: var(--faded); margin-bottom: 6px; }
+
+/* seçenekler: içindekiler gibi noktalı çizgi */
+.choice { border-bottom: 0; padding: 9px 2px; gap: 8px; }
+.choice .ct { flex: 0 1 auto; }
+.choice .lead-dots { flex: 1 1 24px; border-bottom: 2px dotted rgba(80,60,30,0.45); transform: translateY(-5px); min-width: 24px; }
+.choice .cn::before { content: "§ "; font-size: 15px; }
+.choices { border-top: 0; }
+.choices::before { content: "❦"; display: block; text-align: center; color: var(--rubric); font-size: 20px; margin-bottom: 6px; }
+
+/* sayfa çevirme */
+.flip { position: absolute; top: 0; bottom: 0; left: 50%; width: 50%; z-index: 5; transform-origin: left center; transform-style: preserve-3d; pointer-events: none; animation: flip .85s cubic-bezier(.45,.05,.3,1) forwards; }
+.flip .face { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip .face.back { transform: rotateY(180deg); }
+.flip .face::after { content: ""; position: absolute; inset: 0; pointer-events: none; animation: shade .85s ease forwards; }
+@keyframes flip { from { transform: rotateY(0deg); } to { transform: rotateY(-180deg); } }
+@keyframes shade { 0% { background: rgba(40,28,10,0); } 50% { background: rgba(40,28,10,0.28); } 100% { background: rgba(40,28,10,0); } }
+.hide-under { visibility: hidden; }
+.lift { position: absolute; inset: 0; z-index: 5; transform-origin: left center; pointer-events: none; animation: lift .6s ease-in forwards; background: var(--paper); overflow: hidden; }
+@keyframes lift { 0% { transform: perspective(1400px) rotateY(0); opacity: 1; box-shadow: 0 0 0 rgba(0,0,0,0); } 75% { opacity: 1; box-shadow: 20px 0 40px rgba(0,0,0,0.35); } 100% { transform: perspective(1400px) rotateY(-100deg); opacity: 0; } }
+
+@media (max-width: 860px) {
+  .binding { padding: 8px 8px 10px; }
+  .edges, .ribbon { display: none; }
+  .ledger .lv { font-size: 22px; }
+  .runhead { top: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .flip, .lift { display: none; } }
+
+/* ===== karar kartları ===== */
+.choices { margin-top: 30px; gap: 12px; }
+.choices::before { content: none; }
+.decide { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; font-size: 13.6px; color: var(--rubric); }
+.decide::before, .decide::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(141,58,38,0.5)); }
+.decide::after { background: linear-gradient(90deg, rgba(141,58,38,0.5), transparent); }
+.choice {
+  display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 14px;
+  padding: 12px 16px 12px 12px; border: 1px solid rgba(80,60,30,0.22); border-radius: 3px;
+  background: #f7f0de; box-shadow: inset 0 0 0 3px #f7f0de, inset 0 0 0 4px rgba(80,60,30,0.12), 0 1px 2px rgba(60,40,10,0.08);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.choice:hover { background: #f9f3e4; border-color: rgba(141,58,38,0.55); transform: translateY(-2px);
+  box-shadow: inset 0 0 0 3px #f9f3e4, inset 0 0 0 4px rgba(141,58,38,0.25), 0 8px 18px rgba(60,40,10,0.14); }
+.choice .ct { font-style: normal; font-size: 19px; line-height: 1.35; }
+.choice:hover .ct { text-decoration: none; }
+.choice .lead-dots { display: none; }
+.choice .seal {
+  width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 30%, #b45a40, #8d3a26 55%, #6e2a1a);
+  box-shadow: inset 0 0 0 3px rgba(255,235,210,0.18), inset 0 -3px 6px rgba(0,0,0,0.25), 0 2px 3px rgba(60,20,10,0.3);
+  color: #f6e9d0; font-family: var(--display); font-weight: 600; font-size: 19px; font-variant-numeric: lining-nums; letter-spacing: 0.02em;
+}
+.choice .seal.blank { background: radial-gradient(circle at 35% 30%, #a99a80, #85765e 60%, #6b5e49); font-size: 20px; }
+.choice .go { font-style: italic; font-size: 15px; color: var(--rubric); opacity: 0; transform: translateX(-6px); transition: opacity .18s, transform .18s; white-space: nowrap; }
+.choice:hover .go, .choice:focus-visible .go { opacity: 1; transform: none; }
+@media (max-width: 860px) {
+  .choice { grid-template-columns: 44px 1fr; padding: 11px 12px 11px 10px; }
+  .choice .seal { width: 40px; height: 40px; font-size: 17px; }
+  .choice .go { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .choice, .choice .go { transition: none; } .choice:hover { transform: none; } }
+
+/* yumuşatılmış kararlar: durağanken basılı satır, üstüne gelince kart */
+.choices { gap: 0; }
+.choice {
+  background: transparent; border: 0; border-radius: 3px; box-shadow: none;
+  border-bottom: 1px solid rgba(80,60,30,0.18); padding: 12px 14px 12px 6px;
+}
+.choice:last-child { border-bottom: 0; }
+.choice { grid-template-columns: 52px 1fr; }
+.choice .go { display: none; }
+.choice .seal { width: 42px; height: 42px; font-size: 18px; box-shadow: inset 0 0 0 2px rgba(255,235,210,0.16), 0 1px 2px rgba(60,20,10,0.25); transition: transform .18s ease; }
+.choice:hover, .choice:focus-visible {
+  background: #f7f0de; border-bottom-color: transparent; transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(141,58,38,0.35), 0 6px 16px rgba(60,40,10,0.12);
+}
+.choice:hover .seal { transform: rotate(-8deg) scale(1.05); }
+@media (hover: none) {
+  .choice { padding-top: 13px; padding-bottom: 13px; }
+  .choice:active { background: #f7f0de; box-shadow: 0 0 0 1px rgba(141,58,38,0.35); }
+}
+@media (prefers-reduced-motion: reduce) { .choice .seal { transition: none; } .choice:hover .seal { transform: none; } }
+
+.ig { color: var(--lamp); text-decoration: none; border-bottom: 1px solid rgba(233,179,79,0.45); }
+.ig:hover { color: #f2c56a; border-bottom-color: #f2c56a; }
+.leaf .ig { color: var(--rubric); border-bottom-color: rgba(141,58,38,0.4); }
+
+/* Cormorant'ın eski stil "1" rakamı "ı" gibi görünüyor: başlıklarda düz rakam */
+body, .sect, .cover .band, .top .series, .choice .seal, h1, h2 { font-variant-numeric: lining-nums; }
+
+/* Karanlık Köy: is kırmızısı mürekkep, ıslak ladin yeşili cilt, gaz lambası amberi, soğuk kâğıt */
+:root {
+  --night: #080b0d;
+  --rubric: #7c2b26;
+  --cloth: #172024;
+  --lamp: #e3a64f;
+  --paper: #ebe6da; --paper-edge: #d6cfbf;
+}
+canvas#sea { opacity: 0.9; }
+.ribbon { background: linear-gradient(90deg, #5a1d19, #7c2b26 45%, #61211c); }
+.choice .seal { background: radial-gradient(circle at 35% 30%, #a8443b, #7c2b26 55%, #4f1a16); }
+.drawer::before { background: var(--rubric); }
+.leaf .ig { color: var(--rubric); }
+p.quote { font-style: italic; }
+.cover h1 { font-size: clamp(32px, 12.5cqi, 60px); letter-spacing: 0.08em; padding-left: 0.08em; }
+
+</style>
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+</head>
+<body>
+<canvas id="sea" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="series"><b>Choose Your Own Adventure</b> · Book 4 · The Dark Village</div>
+  <nav>
+    <a class="link" id="lnk-lib" href="#" hidden>Library</a>
+    <button class="link" id="btn-book" type="button">Notebook <span id="note-count"></span></button>
+    <button class="link" id="btn-cover" type="button">Cover</button>
+    <span class="confirm" id="confirm">Your reading will start over. Are you sure?
+      <button class="link" id="btn-yes" type="button">Yes</button>
+      <button class="link" id="btn-no" type="button">No</button>
+    </span>
+  </nav>
+</header>
+
+<main id="main"><div id="view"></div></main>
+
+<aside class="drawer" id="drawer" aria-label="Notebook">
+  <button class="link drawer-close" id="btn-close" type="button">Close</button>
+  <h3>Your pockets</h3>
+  <ul id="items"></ul>
+  <h3>Your notes</h3>
+  <ul id="notes"></ul>
+  <h3>Endings found</h3>
+  <ul id="endings"></ul>
+</aside>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const ENDINGS = [
+  { id: "safak",    title: "Dawn" },
+  { id: "sis",      title: "Into the Fog" },
+  { id: "bekci",    title: "The New Watchman" },
+  { id: "dolmus",   title: "The Last Minibus" },
+  { id: "degirmen", title: "The Mill Burns" },
+  { id: "muhtar",   title: "The Headman's Secret" },
+  { id: "kapi",     title: "You Opened the Door" }
+];
+
+const IMG = {
+  dolmus: "img/dolmus.jpg", koy: "img/koy.jpg", selim: "img/selim.jpg", okul: "img/okul.jpg",
+  defter: "img/defter.jpg", nazife: "img/nazife.jpg", kapi: "img/kapi.jpg",
+  yol: "img/yol.jpg", kahve: "img/kahve.jpg", ocak: "img/ocak.jpg", degirmen: "img/degirmen.jpg",
+  icerisi: "img/icerisi.jpg", buz: "img/buz.jpg", safak: "img/safak.jpg"
+};
+
+function flag(s, k) { s.f[k] = true; }
+function has(s, k) { return !!s.f[k]; }
+function rel(s, who, d, msg) { s.r[who] = (s.r[who] || 0) + d; if (msg) toast(msg); }
+function note(s, t) { if (!s.notes.includes(t)) s.notes.push(t); }
+
+const S = {
+  /* ================= ACT 1: THE FOG ================= */
+  k1: {
+    act: 1, time: "16:20", sis: 0.05, isi: 6, img: "dolmus", imgLabel: "The last minibus",
+    title: "The Minibus",
+    text: () => [
+      "The minibus stops two kilometers short of the village. The driver, Hasan, an old man who hasn't said a word the whole way, turns to you without switching off the engine: \"You'll have to walk the rest, teacher. I need to get back before the fog comes down.\"",
+      "As he hands you your bag he hesitates for a moment. \"Last winter I brought a teacher up here too.\" He says nothing more.",
+      "In town they had told you only one thing: Kuşkaya's previous teacher, Miss Gülsüm, had quit her post last winter and gone back to the city. Without even leaving a letter. \"The mountain isn't for everyone,\" the district director had said, as if he were making a joke.",
+      "Up ahead, beyond the bend, something white is coming slowly down the slope. Not a cloud. Clouds don't travel this low."
+    ],
+    choices: [
+      { t: "Ask the driver: «Why didn't you take her back?»", to: "k2", fx: (s) => { s.via = "sor"; flag(s, "SOFOR_SORDU"); } },
+      { t: "Don't ask. Take your bag and start walking", to: "k2", fx: (s) => { s.via = "yuru"; } }
+    ]
+  },
+
+  k2: {
+    act: 1, time: "16:50", sis: 0.15, isi: 5, img: "koy", imgLabel: "Kuşkaya",
+    title: "Kuşkaya",
+    text: (s) => {
+      const p = [];
+      if (s.via === "sor") p.push("The driver had looked at you for a long time. \"I was going to,\" he said at last. \"The headman said 'she stays.' So I didn't ask.\" Then he threw the minibus into reverse and left as if fleeing the fog.");
+      else p.push("The minibus backs away and disappears around the bend. The sound of its engine echoes in the valley for a long time, then that stops too.");
+      p.push("When you reach Kuşkaya it isn't even five o'clock yet, but every door is shut. In every window of the wooden houses lined up along the slope an oil lamp is burning, as if they had all been lit at the same moment. Below, on the bank of the stream, stands an old stone mill. Its wheel isn't turning.");
+      p.push("The lace curtain of one house stirs. A small face appears, studies you, then vanishes.");
+      p.push("The only light in the square comes from the coffeehouse. Someone is hurriedly pulling down the shutters.");
+      return p;
+    },
+    choices: [
+      { t: "Wave to the child behind the curtain", to: "k2b", fx: (s) => { flag(s, "SELIM_EL"); rel(s, "selim", 1, "The child behind the curtain saw you."); } },
+      { t: "Make it to the coffeehouse before the shutters come down", to: "k3" },
+      { t: "Don't bother with anyone, go straight to the school", to: "k4" }
+    ]
+  },
+
+  k2b: {
+    act: 1, time: "16:55", sis: 0.18, isi: 5, img: "selim", imgLabel: "The child behind the curtain",
+    title: "Fogged Glass",
+    text: () => [
+      "You raise your hand and wave. For a while the curtain doesn't move. Then it slowly parts.",
+      "A boy of seven or eight. His hair cropped very short, his cheeks red from the cold. He doesn't wave back. He breathes on the glass and, on the fogged pane, writes something with his index finger.",
+      "From your side the letters are backward, but they aren't hard to read:",
+      { q: "DON'T OPEN" },
+      "The writing is too neat for a child. Curling, careful letters. Like a teacher writing on a blackboard.",
+      "A woman appears behind the boy. She pulls him away by the shoulder and closes the curtain. Before closing it she looks at you for a moment. There's no anger in her eyes. There's fear.",
+      "As the glass fogs over again, under the writing, for an instant, a second line appears. Before you can read it, it too is gone."
+    ],
+    choices: [
+      { t: "Knock on the door of the house", to: "k4", fx: (s) => { flag(s, "SELIM_KAPI"); s.via = "selimkapi"; } },
+      { t: "Make it to the coffeehouse before the shutters come down", to: "k3" },
+      { t: "Don't linger, go to the school", to: "k4" }
+    ]
+  },
+
+  k3: {
+    act: 1, time: "17:05", sis: 0.2, isi: 5,
+    title: "The Coffeehouse",
+    enter: (s) => { flag(s, "KAHVE"); flag(s, "MUHTAR"); },
+    text: (s) => [
+      "You duck under the shutter and go in. Inside it smells of the stove's heat and steeped tea. Emin, the coffeehouse keeper, a big, silent man, puts down the cloth in his hand when he sees you. At one of the tables sits a man in a clean coat with a gray mustache.",
+      "\"Welcome, teacher,\" that man says, standing up and holding out his hand. \"Headman Refik. We were expecting you tomorrow, but never mind.\" His voice is soft, his smile just right. He takes a key from his pocket and puts it in your palm. \"The school key. The teacher's quarters are upstairs. Don't go out tonight; there are animals on the mountain.\"",
+      "On the counter stands an old black telephone. The only telephone in the village. When Emin sees you looking at it, he says briefly: \"Out of order.\" Before you ask."
+    ],
+    choices: [
+      { t: "Try the telephone anyway", to: "k4", fx: (s) => { flag(s, "TEL"); s.via = "tel"; } },
+      { t: "Ask the headman: «Why did Miss Gülsüm leave?»", to: "k4", fx: (s) => { flag(s, "GULSUM_SORDU"); s.via = "gulsum"; rel(s, "muhtar", -1); } },
+      { t: "Take the key, say thank you, leave", to: "k4", fx: (s) => { s.via = "cik"; rel(s, "muhtar", 1); } }
+    ]
+  },
+
+  k4: {
+    act: 1, time: "17:40", sis: 0.3, isi: 4, img: "okul", imgLabel: "The village school",
+    title: "The School",
+    enter: (s) => { if (!has(s, "KAHVE")) { flag(s, "YEDEK"); toast("The school's spare key is yours now."); } },
+    text: (s) => {
+      const p = [];
+      if (s.via === "selimkapi") p.push("You knocked on the door. No sound came from inside. Then, from right behind the door, in a whisper, a woman spoke: \"Go away, teacher. After five o'clock no door opens in this village. To anyone.\" You heard another bolt slide shut.");
+      if (s.via === "selimkapi") p.push("You waited in front of the door a while longer. The lamp behind the curtain was turned down, but not out. At last you turned your back on the house and started up the slope. The fog was coming down from above, from where the school stood.");
+      if (s.via === "tel") p.push("When you lifted the receiver, Emin hadn't objected. The line wasn't dead. There was no dial tone and no static, but someone was listening. You heard their breathing. When you put the receiver back, Emin and the headman had looked at each other.");
+      if (s.via === "gulsum") p.push("The headman's smile hadn't slipped for a moment. \"The mountain isn't for everyone,\" he had said, in the same words as the director in town. \"She left. For the city.\"" + (has(s, "SOFOR_SORDU") ? " You remember what the driver said: \"The headman said 'she stays.'\" One of them is lying." : ""));
+      if (!has(s, "KAHVE") && s.via !== "selimkapi") p.push("You cross the square and climb the slope. Behind you the coffeehouse shutter comes all the way down. The fog is coming down from above, from where the school stands.");
+      if (has(s, "KAHVE")) p.push("When you left the coffeehouse the shutter came down right behind you. You were the only one left in the square. As you climbed the slope, the fog was swallowing the roofs one by one.");
+      p.push("The school stands at the very top of the village, a two-story stone building with its back to the slope. Pinned to the door with a thumbtack is a sheet of paper yellowed by rain. The handwriting is neat, a teacher's handwriting:");
+      p.push({ q: "When the fog comes, open your door to no one. Even if it calls you by your name." });
+      p.push(has(s, "KAHVE") ? "You put the key in the lock, but there's no need. The door is already open." : "You have no key; in town they told you «you'll get it from the headman in the village». You try the door handle anyway. It isn't locked. On the inside of the lock, a key hangs on a string: the school's spare key. Someone opened the door before you and left it like that. You put the key in your pocket.");
+      p.push("The one-room classroom is ice cold. You light the oil lamp on the teacher's desk. The light stretches over the desks to the blackboard and stops there.");
+      p.push("On the blackboard, in chalk, in neat handwriting, a date is written: today's date. Under it, a signature: Gülsüm.");
+      if (has(s, "SELIM_EL")) p.push("As you look at the letters, the writing on the fogged glass comes back to you. The same curling letters. The same careful hand.");
+      return p;
+    },
+    choices: [
+      { t: "Search the drawers of the teacher's desk", to: "k5", fx: (s) => { s.via = "cekmece"; } },
+      { t: "Wipe the blackboard at once", to: "k5", fx: (s) => { flag(s, "TAHTA_SILDI"); s.via = "sil"; } },
+      { t: "Go up to your quarters, bolt the door behind you", to: "k6", fx: (s) => { s.via = "lojman"; } }
+    ]
+  },
+
+  k5: {
+    act: 1, time: "18:10", sis: 0.4, isi: 3, img: "defter", imgLabel: "Gülsüm's notebook",
+    title: "The Notebook",
+    enter: (s) => { flag(s, "DEFTER_OKUDU"); },
+    text: (s) => {
+      const p = [];
+      if (s.via === "sil") p.push("You wet the sponge and wipe the blackboard. The chalk comes off easily, but where the signature was, it can still be faintly made out after wiping, as if carved into the board. When you open the desk drawer, you find not what you were looking for, but something else.");
+      p.push("At the very bottom of the drawer, under an attendance register, is a notebook with a brown cover. On the first page: «Gülsüm Aydın, Kuşkaya Primary School.» Between the pages, a dried mountain flower.");
+      p.push("First lesson notes, pupils' names, a recipe. Then, from mid-November, the handwriting changes. The lines grow cramped.");
+      p.push({ q: "When the fog comes down, someone in the village goes missing. The headman says \"animals.\" Granny Nazife says \"the Zemheri has come.\" And Selim, the youngest of them, the boy who always watches from behind the curtain, says \"the man in the mill.\" No one believes him." });
+      p.push({ q: "Last night it came to my door. It knocked three times. It knew my name. It called me in my mother's voice." });
+      p.push("The pages after that are blank. Except the last one. On the last page, in the same neat handwriting, its ink still glossy, a single line:");
+      p.push({ q: "The new teacher has come. Tell them: don't open the door." });
+      return p;
+    },
+    choices: [
+      { t: "Put the notebook in your pocket", to: "k6", fx: (s) => { flag(s, "DEFTER"); note(s, "Gülsüm's notebook: «Selim says the man in the mill. No one believes him.»"); } },
+      { t: "Put the notebook back where you found it", to: "k6", fx: (s) => { note(s, "The last line in Gülsüm's notebook, the ink fresh: «The new teacher has come. Tell them: don't open the door.»"); } }
+    ]
+  },
+
+  k6: {
+    act: 1, time: "18:40", sis: 0.55, isi: 2, img: "nazife", imgLabel: "The woman at the door",
+    title: "The Lamp",
+    text: (s) => {
+      const p = [];
+      if (s.via === "lojman") p.push("The teacher's quarters are above the classroom, a single room: a stove, a bed, a table. You slide the bolt and light the stove. From the window you can see the village; one by one, the lamps blur in the fog.");
+      else p.push("You go up to your quarters and light the stove. From the window you can see the village; one by one, the lamps blur in the fog." + (has(s, "DEFTER") ? " The notebook is in your pocket, heavy as a stone." : ""));
+      p.push("There's a knock at the door. Once. Then a voice: \"Teacher! It's me, open up. The fog's not down yet.\"");
+      p.push("You open the door a crack. On the threshold, holding an oil lamp, stands an old woman in a black headscarf. Her face is deeply lined, her eyes both hard and kind. \"They call me Nazife,\" she says. \"Everyone calls me Granny Nazife.\"");
+      p.push("From the pocket of her apron she takes a handful of coarse salt. \"The Zemheri has come, teacher. The deep winter. It lasts forty days. When the fog comes down, the Karakoncolos roams. It knocks on doors and calls whoever is inside by name. Whoever opens is gone. That's why at five in the evening everyone shuts their door and keeps their lamp burning until morning.\"");
+      p.push("She falls silent for a moment, then lowers her voice: \"Gülsüm opened her door on a night like this. On the day she was to leave, Hasan came with the minibus to fetch her. Gülsüm never came to the minibus. The headman says «she went to the city». Don't you believe him.\"");
+      return p;
+    },
+    choices: [
+      { t: "Let her in, ask your questions", to: "k7", fx: (s) => { flag(s, "NAZIFE_ICERI"); rel(s, "nazife", 1, "Granny Nazife won't forget that you opened your door to her."); } },
+      { t: "Show her the notebook", to: "k7", if: (s) => has(s, "DEFTER"), fx: (s) => { flag(s, "NAZIFE_DEFTER"); rel(s, "nazife", 2, "The color drained from Granny Nazife's face."); } },
+      { t: "Take the salt, close the door", to: "k7", fx: (s) => { flag(s, "TUZ"); } }
+    ]
+  },
+
+  k7: {
+    act: 1, time: "19:40", sis: 0.85, isi: 0, img: "kapi", imgLabel: "Behind the door",
+    title: "Three Knocks",
+    text: (s) => {
+      const p = [];
+      if (has(s, "NAZIFE_ICERI")) p.push("Granny Nazife had sat by the stove for as long as it takes to drink a glass of tea. When she talked about Gülsüm her voice had trembled: \"She used to give lessons in the evenings to Selim, the youngest in the village. She taught that child her handwriting. Now the boy writes in her hand.\" Then she had picked up her lamp and left. At the door she turned and poured a handful of salt along the threshold. \"Don't break this line.\"");
+      if (has(s, "NAZIFE_DEFTER")) p.push("When Granny Nazife looked at the last page of the notebook, her lips had moved. \"This ink is from yesterday,\" she had said. \"This handwriting...\" She hadn't finished the sentence. She gave the notebook back to you, poured a handful of salt along the threshold and walked into the fog.");
+      if (has(s, "TUZ") && !has(s, "NAZIFE_ICERI") && !has(s, "NAZIFE_DEFTER")) p.push("You poured Granny Nazife's salt along the threshold and closed the door. Her footsteps were quickly lost in the fog.");
+      p.push("The fog is pressed against the window now. You can't see the village lamps; only your own lamp's light trembles on the glass. No sound comes from outside. No wind, no dog. As if the mountain were holding its breath.");
+      p.push("Then there's a knock at the door. Three times. Calm, evenly spaced.");
+      p.push("A voice. Familiar. A voice you've known your whole childhood: \"My lamb? It's me, your mother. Open the door, I'm cold.\"");
+      p.push("Your mother is eight hundred kilometers away. You know that. But the voice is her voice.");
+      return p;
+    },
+    choices: [
+      { t: "Open the door", to: "e_kapi" },
+      { t: "Turn down the lamp, hold your breath behind the door", to: "act1_end", fx: (s) => { s.kapi = "sessiz"; } },
+      { t: "Look out the window into the fog", to: "act1_end", fx: (s) => { s.kapi = "pencere"; } },
+      { t: "Trust the salt on the threshold, make no sound", to: "act1_end", if: (s) => has(s, "TUZ") || has(s, "NAZIFE_ICERI") || has(s, "NAZIFE_DEFTER"), fx: (s) => { s.kapi = "tuz"; } }
+    ]
+  },
+
+  act1_end: {
+    act: 1, time: "20:30", sis: 0.9, isi: -1, sonen: 1,
+    actEnd: true, next: { t: "Go on to Act 2", to: "z1" },
+    title: "Zemheri",
+    text: (s) => {
+      const p = [];
+      if (s.kapi === "sessiz") p.push("You turn down the lamp's wick. The room sinks into darkness. On the other side of the door the voice keeps calling for a while, then falls silent. But it doesn't go away. From the creak of the boards you know someone is standing on the threshold, leaning against the door.");
+      if (s.kapi === "pencere") p.push("You wipe the mist off the window and look out. The fog is a solid white wall. Then something moves inside it: a long, thin shadow, taller than a man, backing away from the door. Its head turns toward you. It has no face. Or the fog is that thick.");
+      if (s.kapi === "tuz") p.push("At the foot of the door, above the line of salt on the threshold, the fog stops. It doesn't come in. It curls and draws back as if there were glass there. On the other side of the door the voice calls once more, then falls silent.");
+      p.push("A long silence. Then, from down in the village, from near the mill, a door slams. After that, in the fog, the lamp in one of the houses on the opposite slope goes out.");
+      p.push("There's another knock at the door. This time fast, panicked, with small fists. A thin child's voice:");
+      p.push({ q: "Teacher! Teacher, open up! It's me, Selim! " + (has(s, "SELIM_EL") ? "I'm the one who wrote on the glass! " : "I'm the boy who watched from the curtain! ") + "My mom's gone! They took my mom!" });
+      if (has(s, "SELIM_KAPI")) p.push("You remember the woman who whispered to you from behind her door this afternoon. «To anyone,» she had said. Who did she open it for?");
+      p.push((has(s, "DEFTER") || has(s, "DEFTER_OKUDU") ? "You remember the last line in Gülsüm's notebook: don't open the door. But this is a child's voice. And the other one was your mother's voice." : "You remember the note on the school door: even if it calls you by your name. But this is a child's voice. And the other one was your mother's voice."));
+      return p;
+    }
+  },
+
+  e_kapi: {
+    act: 1, time: "19:41", sis: 1, isi: -1, sonen: 3,
+    end: { id: "kapi", kind: "Early ending" },
+    title: "You Opened the Door",
+    text: (s) => [
+      "You slide back the bolt. Your hand doesn't shake; you'll think about that later, but there won't be a later.",
+      "When the door opens, the fog doesn't pour in. It stays on the threshold, waiting. There's no one in the fog. Not your mother, not anyone.",
+      "Then, very close, right at your ear, the same voice speaks again: \"Come, my lamb.\" And without understanding why it feels so natural, you cross the threshold."
+    ],
+    sabah: (s) => "In the morning, when the fog lifts, the school door is found wide open. In the teacher's quarters the stove is still warm, and on the table" + (has(s, "DEFTER") ? " lies a notebook with a brown cover. Someone has added a new line to its last page." : " the oil lamp has gone out. Someone has added a new line to the last page of the notebook in the drawer."),
+    akibet: (s) => [
+      ["You", "The records say you «quit your post and went back to the city». Just like Gülsüm. The minibus driver said he never took you back. No one listened to him."],
+      ["Gülsüm's notebook", "The new line, in the same neat handwriting: «The new teacher opened it too.»"],
+      has(s, "MUHTAR") ? ["Headman Refik", "He sent word to the district: «the teacher went back to the city». Smiling."] : ["Kuşkaya", "When spring came, a new teacher was assigned to the school. The note on the door is still there."],
+      ["The child behind the curtain", "The next night he watched the school from his window again. The school's lamp never came on again."]
+    ],
+    yil: "The next winter the Zemheri came again. On the school door, next to the yellowed note, a new note had been added, written in a child's hand: «This time really don't open it.»"
+  }
+};
+
+/* ================= ACT 2: ZEMHERI ================= */
+function gecisAyarla(s) {
+  if (!s.ziyaret) s.ziyaret = [];
+  if (!s.yolBitti) { s.gecis = s.yol; s.yolBitti = true; } else s.gecis = "ikinci";
+}
+function gecisMetni(s) {
+  if (s.gecis === "isik") return "When you raised the lamp toward the voices, the fog had parted for an instant. Where the light ended stood something long and thin, two heads taller than a man. When the light touched it, it drew back. The voices stopped at that moment.";
+  if (s.gecis === "el") return "You walked on without letting go of Selim's hand. For a while the voices walked beside you, then fell behind. Selim never once turned his head.";
+  return "You go out into the fog again. This time no one says your names. But you feel something, where the lamplight ends, walking at the same pace as you.";
+}
+function tuzVar(s) { return has(s, "TUZ") || has(s, "NAZIFE_ICERI") || has(s, "NAZIFE_DEFTER"); }
+
+const ACT2 = {
+  z1: {
+    act: 2, time: "20:31", sis: 0.9, isi: -1, sonen: 1,
+    title: "Small Fists",
+    text: (s) => {
+      const p = [];
+      p.push("The fists don't stop. You lean against the door and listen.");
+      p.push("Your mother's voice had knocked three times. Calm, evenly spaced, like someone in no hurry. These knocks have no rhythm at all. A sniffling, out-of-breath child.");
+      p.push(s.kapi === "pencere"
+        ? "You turn to the window. Where the long shadow stood a moment ago, there's now a small dark shape. It holds an oil lamp. A yellow light swaying in the fog."
+        : "Through the gap under the door, a yellow light seeps onto the floorboards. A flickering, swaying light. Whoever is outside is holding a lamp.");
+      p.push("Granny Nazife's words are in your ears: keeps their lamp burning until morning. Would that thing in the fog carry a lamp?");
+      p.push({ q: "Teacher, please! There's something behind me!" });
+      return p;
+    },
+    choices: [
+      { t: "Slide the bolt, open the door", to: "z2", fx: (s) => { s.via = "ac"; } },
+      { t: "Ask without opening: «What did you write on the glass?»", to: "z2", if: (s) => has(s, "SELIM_EL"), fx: (s) => { s.via = "sor1"; rel(s, "selim", 1, "Selim understood that you believed him."); } },
+      { t: "Ask without opening: «What did Miss Gülsüm teach you?»", to: "z2", if: (s) => !has(s, "SELIM_EL"), fx: (s) => { s.via = "sor2"; } },
+      { t: "Don't open. Wait until morning", to: "e_dolmus", fx: (s) => { s.dolmus = "kapi"; } }
+    ]
+  },
+
+  z2: {
+    act: 2, time: "20:35", sis: 0.9, isi: -1, sonen: 1,
+    title: "Selim",
+    enter: (s) => { note(s, "Selim: it took his mother, Fadime, to the mill. It took Gülsüm there too. It holds them until dawn."); },
+    text: (s) => {
+      const p = [];
+      if (s.via === "ac") p.push("You slide the bolt. The moment you open the door a hand's width, a small body dives in and shuts the door with its back for you. He slides the bolt himself, faster than you.");
+      if (s.via === "sor1") p.push("\"What did you write on the glass?\" you ask from behind the door. The fists stop. \"DON'T OPEN,\" says the thin voice, sobbing. \"I wrote DON'T OPEN, teacher. But open for me.\" You slide the bolt.");
+      if (s.via === "sor2") p.push("\"What did Miss Gülsüm teach you?\" you ask from behind the door. The fists stop. \"Writing,\" says the thin voice, sobbing. \"She taught me writing. I write like her.\" You slide the bolt.");
+      p.push(tuzVar(s)
+        ? "The child jumps over the line of salt on the threshold. Nothing happens. The salt doesn't even touch him."
+        : "As the door closes, the fog reaches as far as the threshold, then draws back.");
+      p.push("A boy of seven or eight. His short-cropped hair is wet, his cheeks bright red from the cold. In his hand, an oil lamp half as tall as he is." + (has(s, "SELIM_EL") ? " The child from behind the curtain." : ""));
+      p.push("\"It called with my dad's voice,\" he says, setting the lamp on the table. \"My dad died two winters ago, teacher. My mom knew. She opened it anyway.\" His lips are trembling. \"My mom's name is Fadime. It took her to the mill. It took Miss Gülsüm there too.\"");
+      p.push(has(s, "TAHTA_SILDI")
+        ? "Then he looks at you. \"You wiped the blackboard, didn't you? I wrote it. In Miss Gülsüm's handwriting. The grown-ups don't believe me; I thought they'd believe her.\""
+        : "Then he looks at you. \"Did you see the date on the blackboard? I wrote it. In Miss Gülsüm's handwriting. The grown-ups don't believe me; I thought they'd believe her.\"");
+      p.push("\"I had Miss Gülsüm's spare key. I used it to get in and out of the school. Today I left the door open for you.\"" + (has(s, "YEDEK") ? " You look at the key on the string in your pocket." : ""));
+      if (has(s, "DEFTER_OKUDU")) p.push("\"I wrote the last line in the notebook too. Last night.\"");
+      if (has(s, "SELIM_EL")) p.push("\"Did you see the second line on the glass? I wrote «The mill». My mom saw it and wiped it off. In this village no one says the mill's name.\"");
+      p.push("\"The man in the mill,\" he says. \"Everyone says animals, says the Zemheri. But I saw him. Tall. Very tall. He has no face.\"" + (s.kapi === "pencere" ? " The shadow you saw from the window a moment ago comes back to you." : ""));
+      p.push("He turns up his lamp's wick. \"It holds them until dawn, teacher. At dawn it takes them. It took Miss Gülsüm at dawn too.\"");
+      return p;
+    },
+    choices: [
+      { t: "Go to the coffeehouse, call the gendarmes on the telephone", to: "z_yol", fx: (s) => { s.hedef = "z3"; } },
+      { t: "Go to Granny Nazife. She'll know what to do", to: "z_yol", fx: (s) => { s.hedef = "z4"; } },
+      { t: "There's no time. Go straight down to the mill", to: "z_yol", fx: (s) => { s.hedef = "act2_end"; } },
+      { t: "Bolt the door. At daybreak you and Selim will go down to the mill", to: "e_dolmus", fx: (s) => { s.dolmus = "lojman"; rel(s, "selim", -1); } }
+    ]
+  },
+
+  z_yol: {
+    act: 2, time: "21:00", sis: 1, isi: -2, sonen: 1, img: "yol", imgLabel: "The voice in the fog",
+    title: "Your Name",
+    text: (s) => [
+      (s.hedef === "z3" ? "The coffeehouse is on the square, halfway down the slope." : s.hedef === "z4" ? "Granny Nazife's house is by the fountain, at the other end of the slope." : "The mill is at the very bottom of the village, on the bank of the stream.") + " You take the lamps and go out. The fog is so thick the light ends an arm's length away. Selim's hand is in yours, ice cold. He knows the way: \"Step on the stones, teacher. If you step on the dirt you'll slip.\"",
+      "Halfway there, Selim suddenly stops.",
+      "On your left, from inside the fog, someone says your name. In your mother's voice. The way she used to call you home when you were a child, drawing out the last syllable.",
+      "At the same moment, another voice from the right: \"Selim! Selim, my boy, I'm here!\" Selim's hand tightens in yours. \"My mom,\" he whispers.",
+      "Both voices are coming closer."
+    ],
+    choices: [
+      { t: "Answer your mother's voice", to: "e_sis" },
+      { t: "Raise the lamp toward the voices", to: (s) => s.hedef, fx: (s) => { s.yol = "isik"; flag(s, "ISIK"); note(s, "The thing in the fog draws back from the light."); } },
+      { t: "Hold Selim's hand tight, ignore them, walk on", to: (s) => s.hedef, fx: (s) => { s.yol = "el"; rel(s, "selim", 1, "Selim's hand stayed in yours."); } }
+    ]
+  },
+
+  z3: {
+    act: 2, time: (s) => s.ziyaret && s.ziyaret.length > 1 ? "22:10" : "21:20", sis: 1, isi: -2, sonen: 1, img: "kahve", imgLabel: "The coffeehouse at night",
+    title: "The Black Ledger",
+    enter: (s) => { gecisAyarla(s); s.ziyaret.push("kahve"); flag(s, "KAHVE2"); note(s, "Emin: the telephone line was cut last winter. The headman's black ledger: one person every Zemheri. 1986: Gülsüm. This year: «teacher»."); },
+    text: (s) => {
+      const p = [ gecisMetni(s) ];
+      p.push("The coffeehouse shutters are down. Selim knocks on the shutter: two short, one long. \"Uncle Emin's and my signal.\" After a while the small window above opens a crack and a lamp is held to your faces. Then the shutter creaks halfway up.");
+      p.push(has(s, "KAHVE")
+        ? "Emin, the coffeehouse keeper. The big, silent man from this evening. His eyes are bloodshot."
+        : "Emin, the coffeehouse keeper, a big, silent man, pulls you inside and brings the shutter down at once.");
+      p.push("When Selim tells him, Emin sinks onto a chair. \"Fadime too,\" he says. \"Fadime too.\"");
+      p.push((has(s, "TEL") ? "You look at the telephone on the counter. That breathing from the receiver this evening is still in your ear. " : "You reach for the black telephone on the counter. ") + "\"It's not out of order,\" Emin says before you lift it. \"It's cut. The line was cut last winter. When Miss Gülsüm tried to call the gendarmes, the headman had the cable cut. I cut it.\" Outside the window, the cut end of a cable hanging from a pole is swaying.");
+      p.push("You lift the receiver anyway. The line is cut. But inside the receiver someone is breathing. Then, very close, your mother's voice: «My lamb?» Emin snatches the receiver from your hand and slams it down.");
+      p.push("From the drawer under the counter he takes out a thick book with a black cover. \"The headman's black ledger. He has me keep it. He thinks I can't read.\"");
+      p.push("Each page a year, and next to each year a single line. 1961: a shepherd. 1974: a peddler. 1983: a forest ranger. 1986: Gülsüm Aydın, teacher. At the very bottom, next to this year, a single word in pencil: teacher.");
+      p.push(has(s, "MUHTAR")
+        ? "Headman Refik's soft voice comes back to you: «We were expecting you tomorrow.»" + (has(s, "GULSUM_SORDU") ? " When you asked about Gülsüm, he had said with the same softness: «She left. For the city.»" : "")
+        : "\"Headman Refik's ledger,\" says Emin. \"The man in the clean coat with the gray mustache, always smiling. Every autumn he writes a petition to the district: «Send our village a teacher.»\"");
+      if (has(s, "SOFOR_SORDU")) p.push("The driver Hasan's words come back to you: «The headman said 'she stays.'»");
+      p.push("\"One person every Zemheri,\" says Emin. \"If one goes, the rest survive. It's been like this since the headman's grandfather. So that no one from the village goes, he brings someone from outside.\" His voice cracks. \"This winter you didn't open, teacher. So it went to Fadime's door.\"");
+      p.push("Selim looks at you. He doesn't ask anything. He doesn't need to.");
+      return p;
+    },
+    choices: [
+      { t: "Take the black ledger and go to Granny Nazife", to: "z4", if: (s) => !s.ziyaret.includes("nazife"), fx: (s) => { flag(s, "KARA_DEFTER"); toast("The headman's black ledger is yours now."); } },
+      { t: "Take the black ledger and go down to the mill", to: "act2_end", fx: (s) => { flag(s, "KARA_DEFTER"); toast("The headman's black ledger is yours now."); } },
+      { t: "Leave the ledger with Emin, go straight down to the mill", to: "act2_end" },
+      { t: "Leave Selim with Emin, stay here until morning", to: "e_dolmus", fx: (s) => { s.dolmus = "kahve"; } }
+    ]
+  },
+
+  z4: {
+    act: 2, time: (s) => s.ziyaret && s.ziyaret.length > 1 ? "22:10" : "21:20", sis: 1, isi: -3, sonen: 1, img: "ocak", imgLabel: "Granny Nazife's hearth",
+    title: "By the Hearth",
+    enter: (s) => { gecisAyarla(s); s.ziyaret.push("nazife"); if (has(s, "KARA_DEFTER")) flag(s, "NAZIFE_KOCA"); flag(s, "CARK"); flag(s, "BALTA"); flag(s, "TUZ_CUVAL"); toast("Granny Nazife's axe and a sack of salt are yours now."); note(s, "Granny Nazife: it sleeps while the wheel turns. When the stream freezes, the wheel stops and it wakes. At dawn, either the wheel turns or Fadime goes."); },
+    text: (s) => {
+      const p = [ gecisMetni(s) ];
+      p.push("Granny Nazife's house is by the fountain, the oldest house on the slope. Two lamps burn in its window.");
+      p.push((s.r.nazife || 0) >= 1
+        ? "The moment she hears Selim's voice, the door opens. \"Inside, quick.\" Granny Nazife pulls you in and pours salt on the threshold again."
+        : "You knock on the door. It doesn't open. From behind it comes Granny Nazife's voice: \"Who's there?\" Selim says his name, and you say yours. A long silence. \"Hold your lamp up to the window.\" You hold it up. Only then is the bolt drawn back.");
+      p.push("By the hearth, Selim tells her everything. Granny Nazife works her prayer beads as she listens and doesn't interrupt once.");
+      if (has(s, "NAZIFE_DEFTER")) p.push("\"That last line in the notebook,\" she says at last, looking at Selim. \"That was your writing, wasn't it? I'd guessed.\"");
+      p.push("\"The Karakoncolos is a fairy tale, teacher,\" she says then. \"We tell it so the children will be afraid. The one in the mill is no fairy tale.\" She throws a log on the fire. \"It sleeps while the wheel turns. When the stream freezes, the wheel stops and it wakes. In the old days the village men would go down every night and break the ice, so the wheel would turn. Forty nights, taking turns.\"");
+      p.push("\"And then?\" \"Then Headman Refik's grandfather took charge. «Easier to give one person than to break ice for forty nights,» he said. Since that day no one goes down to break the ice.\"");
+      if (has(s, "KARA_DEFTER")) p.push("You take the black ledger out of your pocket and show her. As Granny Nazife turns the pages, she stops at one place. Her finger rests on a line: 1952. A name. \"My husband,\" is all she says.");
+      p.push("She gets up and brings a long-handled axe and a small sack of salt from behind the door. She presses the axe into your hands: \"For the ice.\" She tucks the sack of salt into your coat pocket with her own hand: \"And this is for thresholds. In front of doors, in front of whatever comes near you.\" Then she looks away. \"At dawn, either the wheel turns or Fadime goes. No one went down to save Gülsüm. I didn't go either.\"");
+      return p;
+    },
+    choices: [
+      { t: "Go to the coffeehouse", to: "z3", if: (s) => !s.ziyaret.includes("kahve") },
+      { t: "Take the axe, go down to the mill", to: "act2_end" },
+      { t: "Ask Granny Nazife to come with you", to: "act2_end", if: (s) => (s.r.nazife || 0) >= 1, fx: (s) => { flag(s, "NAZIFE_GELDI"); rel(s, "nazife", 1, "Granny Nazife picked up her lamp."); } },
+      { t: "Leave Selim with Granny Nazife, stay here until morning", to: "e_dolmus", fx: (s) => { s.dolmus = "nazife"; } }
+    ]
+  },
+
+  act2_end: {
+    act: 2, time: "00:40", sis: 1, isi: -5, sonen: 2, img: "degirmen", imgLabel: "The frozen mill",
+    actEnd: true, next: { t: "Go on to Act 3", to: "s1" },
+    title: "The Mill",
+    enter: (s) => { gecisAyarla(s); },
+    text: (s) => {
+      const p = [];
+      p.push(gecisMetni(s));
+      if (has(s, "NAZIFE_GELDI")) p.push("Granny Nazife walks ahead, her lamp in both hands. She knows this path by heart; a path she hasn't walked in forty years.");
+      p.push("The stream is frozen. Not even the sound of water comes from under the ice. The mill stands in the dark, its stone walls white with frost. The wheel is locked in the ice, unmoving.");
+      if (has(s, "CARK")) p.push("You grip the handle of the axe. It sleeps while the wheel turns.");
+      if (has(s, "ISIK")) p.push("You raise your lamp to chest height. On the path, that thing drew back from the light. As you look at the mill's dark windows, you keep that in mind.");
+      p.push("In front of the mill door, on a stone, someone is sitting. Beside him, an oil lamp. A clean coat, a gray mustache.");
+      p.push(has(s, "MUHTAR")
+        ? "Headman Refik. The soft-voiced man who put the school key in your palm this evening."
+        : "\"Headman Refik,\" Selim whispers." + (has(s, "KAHVE2") ? " The man Emin told you about: the clean coat, the gray mustache, always smiling." : " From the fear in his voice, you understand who this man is."));
+      p.push("\"Welcome, teacher,\" he says, smiling. \"We were expecting you tomorrow, but never mind.\"");
+      if (has(s, "KARA_DEFTER")) p.push("His eye slides to the black ledger in your pocket. His smile doesn't slip for a moment. \"I'm always telling Emin he can't keep that ledger hidden.\"");
+      p.push("\"Fadime's inside,\" he says, pointing to the mill door. \"Still alive. Alive until dawn.\" He stands up and straightens the front of his coat. \"It was promised one person. One person. When one person goes, no one dies for forty nights." + (has(s, "KAHVE2") ? " Emin will have told you: when you didn't open, it took Fadime." : " When you didn't open your door, teacher, it went to Fadime's door.") + " If you go in, Fadime comes out. It's that simple.\"");
+      p.push("Selim's hand trembles in yours. He looks at you.");
+      p.push("At that very moment the mill door opens a hand's width, from inside, by itself. A woman's voice comes from within: «Selim? My boy?»");
+      p.push("Selim pulls his hand from yours and runs to the door.");
+      return p;
+    }
+  },
+
+  e_sis: {
+    act: (s) => s.sisYer === "buz" ? 3 : 2, time: (s) => s.sisYer === "buz" ? "05:41" : "21:01", sis: 1, isi: -2, sonen: 2,
+    end: { id: "sis", kind: "Early ending" },
+    title: "Into the Fog",
+    text: (s) => [
+      ...(s.sisYer === "buz" ? [
+        "You raise the axe one more time. It doesn't come down. Long, cold fingers hold your wrist, gently, like a mother's.",
+        "\"You're tired, my lamb,\" it says right at your ear. It's right. You let go of the axe. Selim's scream comes from very far away."
+      ] : [
+        "\"I'm here,\" you say. Your own voice sounds strange to you.",
+        "Your mother's voice laughs with joy. You take a step, then another. The lamplight narrows. Selim's hand slips out of yours; he shouts something, but his voice comes from very far away."
+      ]),
+      "The fog wraps around you. It isn't cold. It's warm, like a blanket. The last thing you think is this: your mother has never been this close to you."
+    ],
+    sabah: (s) => s.sisYer === "buz" ? "In the morning an axe is found on the ice in front of the mill. The ice has been broken halfway. The wheel isn't turning." : "In the morning, when the fog lifts, a burnt-out oil lamp is found on a stone in the middle of the village path. The door of the teacher's quarters is bolted, the stove still warm.",
+    akibet: (s) => [
+      ["You", "The records say you «quit your post and went back to the city». Just like Gülsüm."],
+      ["Selim", (s.sisYer === "buz" ? "He waited in front of the mill, hugging his lamp." : "He ran to the teacher's quarters, bolted the door and kept his lamp burning until morning.") + " At dawn his mother, Fadime, walked out of the mill. She remembered nothing of the night."],
+      has(s, "MUHTAR") ? ["Headman Refik", "He completed this year's line in his black ledger: teacher. Smiling."] : ["Kuşkaya", "Everyone called Fadime's return a miracle. No one asked about the teacher."]
+    ],
+    yil: "The next autumn Headman Refik wrote another petition to the district: «Send our village a teacher.»"
+  },
+
+  e_dolmus: {
+    act: (s) => s.dolmus === "degirmen" ? 3 : 2, time: "07:10", sis: 0.2, isi: -4, sonen: 2,
+    end: { id: "dolmus", kind: "Ending" },
+    title: "The Last Minibus",
+    text: (s) => {
+      const p = [];
+      if (s.dolmus === "kapi") p.push("You lean your back against the door and slide to the floor. The fists go on a while longer. Then crying. Then nothing. The light seeping under the door flickers a little longer, then goes out. You don't close your eyes until morning.");
+      if (s.dolmus === "lojman") p.push("You sit Selim down by the stove. \"When morning comes,\" you say. Selim doesn't look at you. All night he stares out the window toward the mill, without sleeping.");
+      if (s.dolmus === "kahve") p.push("Emin locks the shutter tight. You lay Selim down on a cushion. Neither of you speaks until morning.");
+      if (s.dolmus === "degirmen") p.push("You pick Selim up and climb the slope. Behind you the headman says nothing; he doesn't even laugh. Selim struggles in your arms, then goes quiet. You bolt the door of the teacher's quarters and wait for morning.");
+      if (s.dolmus === "nazife") p.push("Granny Nazife stokes the hearth. \"No one went down to save Gülsüm either,\" she says once more, to herself. Selim puts his head on her knee and falls asleep.");
+      if (s.dolmus === "kapi") {
+        p.push("As dawn breaks you slide back the bolt. On the threshold stands an oil lamp, burnt out, its glass fogged. A small child's lamp. Nothing else.");
+      } else {
+        p.push("As dawn breaks the fog lifts. You and Selim go down to the mill" + (s.dolmus === "kahve" ? " behind Emin" : s.dolmus === "nazife" ? " behind Granny Nazife" : "") + ". Running. You both know it's too late, but you run anyway.");
+        p.push("The mill door is wide open. There's no one inside. On the threshold, on the ice, lies a flowered headscarf. Selim picks it up and presses it to his chest. He doesn't cry. He doesn't look at you either.");
+      }
+      p.push("From below, near the bend, comes the sound of an engine. Hasan's minibus. You don't ask why he came back.");
+      p.push("You go back to your quarters and take your suitcase. You know you can't stay one more night in this village. You get on the minibus. Hasan doesn't ask anything. He only watches you in the rearview mirror.");
+      return p;
+    },
+    sabah: "As the minibus rounds the bend you look back. The mill wheel is still in the ice, motionless. The village lamps go out one by one. In one window the lamp never comes on at all.",
+    akibet: (s) => [
+      ["You", "You went down to the district and resigned your post. In your letter, as the reason, you wrote a single word: «Fog.»"],
+      ["Selim", s.dolmus === "kapi" ? "In the morning they found him in the school woodshed. He was frozen but alive. He had left his lamp with you. His mother didn't come back." : "His mother, Fadime, didn't come back. Granny Nazife took Selim in."],
+      has(s, "KARA_DEFTER") ? ["The black ledger", "You took the ledger to the gendarmes in the district. The commander leafed through the pages and smiled: «Mountain tales, teacher.» You never saw the ledger again."]
+        : has(s, "MUHTAR") ? ["Headman Refik", "He sent word to the district: «the teacher got scared and ran». Smiling."] : ["Kuşkaya", "For forty nights, no one's door was knocked on again."]
+    ],
+    yil: "The next autumn Headman Refik wrote another petition to the district: «Send our village a teacher.» The petition was granted."
+  }
+};
+Object.assign(S, ACT2);
+
+/* ================= ACT 3: DAWN ================= */
+const ACT3 = {
+  s1: {
+    act: 3, time: "00:41", sis: 1, isi: -5, sonen: 2,
+    title: "My Lamb",
+    text: (s) => [
+      "Selim runs to the door. Through the gap the inside is pitch dark. The voice comes again, tender, patient: «Selim, come, my lamb.»",
+      "My lamb. The word your mother used for you. Behind the door, the same word." + (has(s, "NAZIFE_GELDI") ? " Granny Nazife's lamp is swinging in her hand." : ""),
+      "The headman doesn't move from his spot. He only watches. There are five steps between Selim and the door. Four."
+    ],
+    choices: [
+      { t: "Run after Selim, catch him", to: "s2", fx: (s) => { s.via = "yakala"; } },
+      { t: "Fling a handful of salt in front of the door", to: "s2", if: (s) => has(s, "TUZ_CUVAL"), fx: (s) => { s.via = "tuz"; } },
+      { t: "Hold your lamp into the gap in the door", to: "s2", fx: (s) => { s.via = "isik"; } }
+    ]
+  },
+
+  s2: {
+    act: 3, time: "00:50", sis: 1, isi: -5, sonen: 2, img: "icerisi", imgLabel: "Through the gap in the door",
+    title: "The Miller",
+    enter: (s) => { note(s, "Inside the mill Fadime is lying with her eyes open. The voice isn't hers."); note(s, "The headman: the village didn't build the mill; it's that thing's home. His grandfather called it «the miller»."); },
+    text: (s) => {
+      const p = [];
+      if (s.via === "yakala") p.push((s.r.selim || 0) >= 2
+        ? "\"Selim!\" you shout. Selim stops on the threshold. He turns to look at you and comes back. He believes you."
+        : "You catch Selim on the threshold and wrap him in your arms. He struggles, bites your hand, but you don't let go.");
+      if (s.via === "tuz") p.push("You fling a handful of salt from the sack in front of the door. The door begins to swing shut from inside, as if slammed by a wind; the voice turns into a scream and breaks off. Selim freezes on the threshold.");
+      if (s.via === "isik") p.push("You hold your lamp into the gap. Inside, something draws back from the light, up toward the ceiling, coiling." + (has(s, "ISIK") ? " Like on the path." : "") + " Selim stops on the threshold.");
+      p.push("Through the gap you glimpse the inside for an instant: a woman lying at the foot of the millstone. Her eyes are open. Fadime. Her lips aren't moving. But the voice comes from the dark again: «Selim?»");
+      p.push("The voice isn't hers. Fadime is alive, but she isn't the one speaking.");
+      p.push("\"The man in the mill,\" says the headman, looking at Selim. \"The boy is telling the truth. It has no name. My grandfather called it «the miller». We didn't build this mill, teacher. It was here before the village was founded. We only kept its wheel turning.\"");
+      if (has(s, "NAZIFE_GELDI")) p.push("\"Your grandfather gave it my husband too, Refik,\" says Granny Nazife. The headman doesn't look at her.");
+      if (has(s, "KARA_DEFTER")) p.push("The black ledger in your pocket is heavy as a stone." + (has(s, "NAZIFE_KOCA") && !has(s, "NAZIFE_GELDI") ? " In it is a line that says 1952. Granny Nazife's husband." : ""));
+      p.push("\"Five hours until dawn,\" says the headman. \"Either you go in or Fadime goes. If you think there's a third way, try it.\"");
+      return p;
+    },
+    choices: [
+      { t: "Take the axe, start breaking the ice", to: "s3", if: (s) => has(s, "BALTA") },
+      { t: "Take the black ledger, wake the village", to: "e_muhtar", if: (s) => has(s, "KARA_DEFTER") },
+      { t: "Grab the headman's lamp, set the mill on fire", to: "e_degirmen" },
+      { t: "Turn to the headman: «I'll go in.»", to: "e_bekci" },
+      { t: "Pick up Selim, flee the village", to: "e_dolmus", fx: (s) => { s.dolmus = "degirmen"; } }
+    ]
+  },
+
+  s3: {
+    act: 3, time: "05:40", sis: 0.9, isi: -6, sonen: 3, img: "buz", imgLabel: "The ice",
+    title: "The Ice",
+    text: (s) => {
+      const p = [];
+      p.push("You raise the axe and bring it down on the ice where it's closest to the wheel. The ice rings. A hairline crack opens, nothing more.");
+      p.push("\"Forty men used to break it for forty nights, teacher,\" says the headman, sitting back down on his stone. \"And you'll break it in one night?\" He laughs.");
+      if (has(s, "NAZIFE_GELDI")) p.push("Granny Nazife sets her lamp on the ice beside her. She gathers her skirt, kneels and picks up a stone. \"Not forty nights,\" she says. \"One night. But two people.\"");
+      p.push((s.r.selim || 0) >= 1
+        ? "Selim drags away the pieces you break off with his bare hands. His hands turn purple. He doesn't stop."
+        : "Selim holds his lamp. He doesn't take his eyes off the mill door.");
+      p.push("Hours pass. Your arms are no longer yours. But the crack is growing, and somewhere, for the first time, the sound of water comes from underneath.");
+      p.push("Then the headman's lamp goes out. You see that he put it out with his own hand. He's smiling.");
+      p.push("The mill door swings wide open. Something long and thin comes out, stooping. It has to bend double to pass through the door. When it straightens, its head touches the eaves. It has no face." + (has(s, "ISIK") ? " On the path it drew back from the light." : ""));
+      p.push("It walks toward you. In your mother's voice: \"Let it go now, my lamb. You're tired.\"");
+      return p;
+    },
+    choices: [
+      { t: "Empty the sack of salt in a circle around you", to: "e_safak", if: (s) => has(s, "TUZ_CUVAL"), fx: (s) => { s.koruma = "tuz"; } },
+      { t: "Raise your lamp above your head", to: "e_safak", fx: (s) => { s.koruma = "isik"; } },
+      { t: "Don't stop. Strike one last time", to: (s) => has(s, "NAZIFE_GELDI") ? "e_safak" : "e_sis", fx: (s) => { if (has(s, "NAZIFE_GELDI")) s.koruma = "nazife"; else s.sisYer = "buz"; } }
+    ]
+  },
+
+  e_safak: {
+    act: 3, time: "06:20", sis: 0.3, isi: -4, sonen: 0, img: "safak", imgLabel: "Dawn",
+    end: { id: "safak", kind: (s) => s.koruma === "nazife" ? "Ending at a price" : "Best ending" },
+    title: "Dawn",
+    text: (s) => {
+      const p = [];
+      if (s.koruma === "tuz") p.push("You turn the sack upside down and pour a circle around you: you, Selim" + (has(s, "NAZIFE_GELDI") ? ", Granny Nazife" : "") + " and the breaking ice. The thing stops at the edge of the circle. It bends down. Its faceless face is a hand's width from yours. But it doesn't come in.");
+      if (s.koruma === "isik") p.push("You raise your lamp above your head. Selim raises his lamp too" + (has(s, "NAZIFE_GELDI") ? ", and so does Granny Nazife" : "") + ". The thing stops at the edge of the light, then draws back. One step. Another.");
+      if (s.koruma === "nazife") p.push("As you raise the axe, Granny Nazife stands up. She picks up her lamp and walks slowly toward the thing. \"I'm going to my husband,\" she says, without turning. \"I've kept him waiting forty years.\" The thing bends toward her. The lamp doesn't go out. Granny Nazife walks into the fog, and the fog closes.");
+      p.push("One last blow. The ice splits. The water, with all its pent-up weight, slams into the wheel. The wheel groans, once, twice, then begins to turn.");
+      p.push("The thing stands where it is. Then, very slowly, as if falling asleep, it shrinks and draws back into the mill. The door closes.");
+      p.push("As dawn breaks you go inside. Fadime is at the foot of the millstone, eyes open, breathing. Selim throws himself at her. Fadime says her son's name; this time it's really her saying it.");
+      p.push("Beside the stone stands an old, burnt-out lamp. Two letters are scratched into its glass with the tip of a needle: G. A.");
+      return p;
+    },
+    sabah: "In the morning every door in Kuşkaya opens. The mill wheel is turning; for the first time in forty years, on a Zemheri morning.",
+    akibet: (s) => [
+      ["You", "You stayed in Kuşkaya. All through the Zemheri you were the first to go down every night to break the ice. On the second night there were ten people with you."],
+      ["Selim", "He didn't let go of his mother's hand for a moment. When spring came he sat in the front row of the school. His handwriting is still Miss Gülsüm's."],
+      ["Headman Refik", has(s, "KARA_DEFTER") ? "You read the black ledger aloud in the village square, in front of everyone. That week Headman Refik went down from the village and never came back." : "That morning he went down from the village. He took the black ledger with him."],
+      ["Granny Nazife", s.koruma === "nazife" ? "Her lamp was found on the threshold of the mill, still burning. She herself was never found." : has(s, "NAZIFE_GELDI") ? "For forty nights she went down every night to break the ice. At eighty years old." : "The next night she was the first to pick up her lamp and go down to break the ice."]
+    ],
+    yil: "The next autumn a petition went from Kuşkaya to the district, this time with a long list of signatures: «Let our teacher stay.»"
+  },
+
+  e_bekci: {
+    act: 3, time: "06:20", sis: 0.6, isi: -5, sonen: 2,
+    end: { id: "bekci", kind: "Dark ending" },
+    title: "The New Watchman",
+    text: (s) => [
+      "\"I'll go in,\" you say. For the first time the headman looks at you without smiling. Then he steps aside.",
+      "You give your lamp to Selim." + (has(s, "NAZIFE_GELDI") ? " Granny Nazife takes him by the shoulders and pulls him to her." : "") + " Selim is crying, saying something; you don't hear it.",
+      "You cross the threshold. In the dark someone passes you on the way out; your shoulders brush. A warm shoulder. Fadime.",
+      "The door closes behind you. In the dark something bends down and says your name. Not in your mother's voice this time. In your own voice."
+    ],
+    sabah: "At dawn Fadime walks out of the mill. Selim runs to her. The mill door is closed.",
+    akibet: (s) => [
+      ["You", "The records say you «quit your post and went back to the city». Just like Gülsüm."],
+      ["Selim", "He got his mother back. Every evening he leaves a burning lamp in front of the mill."],
+      ["Headman Refik", has(s, "KARA_DEFTER") ? "He found the black ledger on the threshold that morning. He completed this year's line: teacher." : "He completed this year's line in his black ledger: teacher."]
+    ],
+    yil: "The next Zemheri, when the fog came down, the doors of Kuşkaya were knocked on again. But this time the voice knocking was a teacher's voice, and it always said the same thing: «Don't open.» That winter no one opened. In the village they call it the new watchman."
+  },
+
+  e_muhtar: {
+    act: 3, time: "06:20", sis: 0.5, isi: -5, sonen: 0,
+    end: { id: "muhtar", kind: "Ending" },
+    title: "The Headman's Secret",
+    text: (s) => [
+      "You take the black ledger and climb the slope with Selim." + (has(s, "NAZIFE_GELDI") ? " Granny Nazife stays in front of the mill, her lamp in her hand, facing the headman." : ""),
+      "You don't knock on doors. In this village, at night, no one opens a door that's knocked on. You hold your lamp up to each house's window and read a line from the ledger. That house's line. 1961, a shepherd. 1974, a peddler." + (has(s, "NAZIFE_KOCA") ? " 1952, Granny Nazife's husband." : " 1952, just a man's name. You read that one at the window of the house by the fountain."),
+      "It's nearly two o'clock when the first door opens. Then another. Then all of them.",
+      "From the slope down to the mill, a whole village comes down with lamps in their hands. The fog draws back from the lamps. Headman Refik stands up. For the first time he isn't smiling. \"I protected you,\" he says. No one answers.",
+      "The mill door swings wide open. Something long and thin bends over the threshold, but it doesn't take a single step into the lamplight. The lamps, too, draw back a step. The headman is left alone, between the door and the lamps. No one pushes him. No one makes room for him either.",
+      "Headman Refik looks at the villagers for a moment, then at you. \"One person,\" he says. This time he isn't smiling. Long fingers touch his shoulder, gently. The headman crosses the threshold and the door closes behind him.",
+      "Tonight he pays, himself, the rule he has written in the black ledger for forty years: it was promised one person. It took that person."
+    ],
+    sabah: "At dawn the mill door opens again. Fadime walks out; dazed, frozen, but alive. The promised person had been given; the rest were free. On the threshold stands the headman's lamp, still burning. No one ever sees Headman Refik again.",
+    akibet: (s) => [
+      ["You", "You handed the black ledger over to the gendarmes. A file was opened for every name in the ledger. None of them was ever closed."],
+      ["Selim", "His mother came back at dawn. Selim never asked who did what in front of the mill that night."],
+      ["Kuşkaya", "No one in the village spoke of what happened in front of the mill that night. They still don't."]
+    ],
+    yil: "The thing in the mill didn't die. That winter it never knocked on anyone's door again; it had taken one person, and it was sated for forty nights. The next Zemheri the stream froze again, but for forty nights the village men took turns going down to break the ice. The wheel never stopped, and it never woke again. That was the new headman's first decision."
+  },
+
+  e_degirmen: {
+    act: 3, time: "06:20", sis: 0.4, isi: -4, sonen: 0,
+    end: { id: "degirmen", kind: "Ending" },
+    title: "The Mill Burns",
+    text: (s) => [
+      "You grab the headman's lamp from the foot of the stone. You pull off its reservoir and pour the kerosene over the mill's wooden door. For the first time the headman leaps to his feet: \"Don't!\"",
+      "Selim grabs your arm. \"My mom's inside!\"",
+      "You strike the match.",
+      "The door catches all at once. From inside a scream rises, not a single voice: your mother's voice, Fadime's voice, Selim's name in his father's voice, all at once. The roof caves in. The wheel in the ice tilts over in a shower of sparks." + (has(s, "NAZIFE_GELDI") ? " Granny Nazife closes her eyes and prays." : "")
+    ],
+    sabah: "In the morning all that's left of the mill is blackened stone walls. In the ashes they find no one. Not Fadime, not Gülsüm, not that thing.",
+    akibet: (s) => [
+      ["You", "You stayed at the school until spring. None of the children you taught ever asked about the mill."],
+      ["Selim", "Granny Nazife took him in. He never looked at you again."],
+      ["Headman Refik", "For the first time, facing the fire, he didn't smile. Before spring came he went down from the village."]
+    ],
+    yil: "No one built a new mill in its place. Since that winter no one's door has been knocked on. But some nights, when the fog comes down, the villagers say they hear a wheel turning among the burnt stones."
+  }
+};
+Object.assign(S, ACT3);
+
+/* THE DARK VILLAGE (Karanlık Köy, English edition): book-specific settings */
+const BOOK = {
+  start: "k1",
+  rel: { nazife: 0, selim: 0, muhtar: 0 },
+  acts: { 1: ["Act One", "The Fog"], 2: ["Act Two", "Zemheri"], 3: ["Act Three", "Dawn"] },
+  coverText: [
+    "November 1987. High in the mountains of Artvin, on Turkey's Black Sea coast, a village whose road closes in winter: Kuşkaya.",
+    "You're a young substitute teacher assigned to the village school. You arrive at dusk on the last minibus. The minibus doesn't come back, and that same night the fog comes down from the mountain. On the school door hangs a note in the previous teacher's handwriting.",
+    "This book isn't read from start to finish. At the end of every section you decide, and the story changes direction with your choices."
+  ],
+  missedTitle: "What you missed in this act",
+  actEndHead: (sec) => sec.act === 1 ? "Another knock at the door" : "The fog won't lift",
+  againText: "Return to Kuşkaya",
+  rule: ["The note on the door:", "When the fog comes, open your door to no one. Even if it calls you by your name."],
+  ledger: (sec, time) => {
+    const sis = sec.sis >= 0.8 ? "Thick fog" : sec.sis >= 0.4 ? "Fog coming down" : sec.sis > 0.1 ? "Light mist" : "Clear";
+    return { title: "Kuşkaya", html: `${time} · ${sis}<br>${sec.isi ?? 4} °C` };
+  },
+  atmos: (sec) => { koy.sonen = (typeof sec.sonen === "function" ? sec.sonen(state) : sec.sonen) || 0; return sec.sis ?? 0.2; },
+  hour: (sec, time) => { const [h, m] = time.split(":").map(Number); return h + m / 60; },
+  coverAtmos: 0.55,
+  items: (s) => {
+    const list = ["Suitcase", "Oil lamp"];
+    if (has(s, "KAHVE")) list.push("The school key");
+    else if (has(s, "YEDEK")) list.push("The school's spare key");
+    if (has(s, "DEFTER")) list.push("Gülsüm's notebook");
+    if (has(s, "TUZ_CUVAL")) list.push("A sack of salt");
+    else if (has(s, "TUZ") || has(s, "NAZIFE_ICERI") || has(s, "NAZIFE_DEFTER")) list.push("A handful of salt on the threshold");
+    if (has(s, "KARA_DEFTER")) list.push("The headman's black ledger");
+    if (has(s, "BALTA")) list.push("Long-handled axe");
+    return list;
+  },
+  hints: (s, act) => {
+    const m = [];
+    if (act === 1) {
+      if (!has(s, "DEFTER_OKUDU")) m.push("Someone had left you something in the teacher's desk drawer.");
+      if (!has(s, "SOFOR_SORDU")) m.push("If you'd asked, the driver would have told you about the headman.");
+      if (!has(s, "KAHVE")) m.push("The telephone in the coffeehouse wasn't out of order.");
+      if (!has(s, "NAZIFE_ICERI")) m.push("If Granny Nazife had come in, she would have told you about Gülsüm and Selim.");
+      if (!has(s, "SELIM_EL")) m.push("The child behind the curtain was waiting for a greeting.");
+    }
+    if (act === 2) {
+      if (!has(s, "KAHVE2")) m.push("Emin knew why the telephone didn't work.");
+      if (!has(s, "KARA_DEFTER")) m.push("This year's line had already been written in the headman's black ledger.");
+      if (!has(s, "CARK")) m.push("Granny Nazife knew why the mill wheel mattered.");
+      if (!has(s, "ISIK")) m.push("If you'd raised your lamp toward the voices, you'd have seen what you were facing.");
+    }
+    return m;
+  }
+};
+
+/* The Dark Village sözlüğü: okur bir kelimeye dokununca o kelimenin bu kitaptaki Türkçe anlamı gösterilir.
+   kelimeler: biçim → anlam (parantezde sözlük biçimi). kalıplar: birden çok kelimelik ifadeler. */
+const SOZLUK = {
+"dil": "tr",
+"baslik": "Türkçesi",
+"kelimeler": {
+"a": "bir",
+"about": "hakkında; yaklaşık",
+"above": "üstünde, yukarısında",
+"added": "ekledi (add)",
+"afraid": "korkmuş",
+"after": "sonra; peşinden",
+"afternoon": "öğleden sonra",
+"again": "yine, tekrar",
+"against": "-e karşı; -e dayalı",
+"ago": "önce (iki ay önce)",
+"ahead": "önde, ileride",
+"alive": "hayatta, canlı",
+"all": "bütün, hepsi",
+"alone": "yalnız",
+"along": "boyunca",
+"aloud": "yüksek sesle",
+"already": "zaten, çoktan",
+"always": "her zaman",
+"among": "arasında",
+"an": "bir",
+"and": "ve",
+"anger": "öfke",
+"animals": "hayvanlar (animal)",
+"another": "başka bir; bir tane daha",
+"answers": "cevaplar; cevap verir (answer)",
+"anyone": "herhangi biri; kimse",
+"anything": "herhangi bir şey; hiçbir şey",
+"anyway": "yine de",
+"appears": "belirir (appear)",
+"apron": "önlük",
+"are": "-dir, -ler (be)",
+"aren't": "değil(ler) (are not)",
+"arm": "kol",
+"arms": "kollar (arm)",
+"around": "etrafında; civarında",
+"arrive": "varmak",
+"artvin": "Artvin (Karadeniz'de bir il)",
+"as": "-iken; gibi; olarak",
+"ashes": "küller (ash)",
+"aside": "kenara",
+"ask": "sormak; istemek",
+"asked": "sordu (ask)",
+"asleep": "uykuda",
+"assigned": "atanmış (assign)",
+"at": "-de, -da",
+"attendance": "yoklama",
+"autumn": "güz, sonbahar",
+"away": "uzağa, uzakta",
+"axe": "balta",
+"aydın": "Aydın (Gülsüm'ün soyadı)",
+"back": "geri; sırt; arka",
+"backing": "geri geri giderek (back)",
+"backs": "geri geri gider (back away)",
+"backward": "geriye",
+"bag": "çanta",
+"bank": "kıyı",
+"bare": "çıplak (bare-handed: eldivensiz)",
+"be": "olmak",
+"beads": "tespih (prayer beads)",
+"bed": "yatak",
+"been": "olmuş (be)",
+"before": "önce; önünde",
+"begins": "başlıyor (begin)",
+"behind": "arkasında",
+"believe": "inanmak",
+"believes": "inanıyor (believe)",
+"below": "aşağıda, altında",
+"bend": "viraj",
+"bends": "eğilir; bükülür (bend)",
+"beside": "yanında",
+"between": "arasında",
+"beyond": "ötesinde",
+"big": "büyük, iri",
+"bites": "ısırır (bite)",
+"black": "siyah, kara",
+"blackboard": "kara tahta",
+"blackened": "kararmış (blacken)",
+"blank": "boş",
+"blanket": "battaniye",
+"bloodshot": "kan çanağı",
+"blow": "darbe",
+"blur": "bulanıklaşır (blur)",
+"board": "tahta",
+"boards": "tahtalar (board)",
+"body": "ceset; vücut",
+"bolt": "sürgü; sürgülemek",
+"bolted": "sürgülü (bolt)",
+"book": "defter; kitap",
+"both": "ikisi de, her ikisi",
+"bottom": "dip, alt",
+"boy": "oğlan, çocuk",
+"break": "kırmak; bozmak",
+"breaking": "kırılan (break)",
+"breaks": "kırılır (break)",
+"breath": "nefes",
+"breathes": "nefes alır (breathe)",
+"breathing": "nefes alma (breathe)",
+"briefly": "kısaca",
+"bright": "parlak",
+"bring": "getirmek",
+"brings": "getirir (bring)",
+"broken": "kırık (break)",
+"brought": "getirdi (bring)",
+"brown": "kahverengi",
+"brush": "sürtünür (brush)",
+"build": "yapmak, inşa etmek",
+"building": "bina",
+"built": "kurulu, inşa edilmiş (build)",
+"burn": "yakmak; yanmak",
+"burning": "yanan; yanıyor (burn)",
+"burnt": "yanık (burn)",
+"but": "ama, fakat",
+"by": "tarafından; yanında; ile",
+"cable": "kablo",
+"call": "çağrı; aramak, çağırmak",
+"called": "aradı; denir (call)",
+"calling": "çağırıyor; arıyor (call)",
+"calls": "arar; uğrar (call)",
+"calm": "sakin",
+"came": "geldi (come)",
+"can": "-ebilir (yapabilmek)",
+"can't": "-emez (cannot)",
+"careful": "dikkatli",
+"carry": "taşımak",
+"carved": "oyulmuş (carve)",
+"catch": "yakalamak",
+"catches": "yakalar; takılır (catch)",
+"caves": "çöker (cave in)",
+"ceiling": "tavan",
+"chair": "sandalye",
+"chalk": "tebeşir (white as chalk: bembeyaz)",
+"changes": "değişir (change)",
+"charge": "şarj",
+"cheeks": "yanaklar (cheek)",
+"chest": "göğüs; sandık",
+"child": "çocuk",
+"childhood": "çocukluk",
+"children": "çocuklar (child)",
+"choices": "seçimler",
+"circle": "daire; dönmek",
+"city": "şehir",
+"classroom": "sınıf",
+"clean": "temizlemek; temiz",
+"climb": "tırmanmak, çıkmak",
+"climbed": "çıktı, tırmandı (climb)",
+"close": "kapatmak; yakın",
+"closed": "kapalı (close)",
+"closer": "daha yakın",
+"closes": "kapanır; kapatır (close)",
+"closest": "en yakın (close)",
+"closing": "yaklaşıyor (close in)",
+"cloth": "bez",
+"cloud": "bulut",
+"clouds": "bulutlar (cloud)",
+"coarse": "iri (tuz)",
+"coast": "kıyı, sahil",
+"coat": "palto",
+"coffeehouse": "kahvehane",
+"coiling": "büklüm büklüm (coil)",
+"cold": "soğuk",
+"come": "gelmek",
+"comes": "gelir (come)",
+"coming": "geliyor (come)",
+"commander": "komutan",
+"completed": "tamamladı (complete)",
+"counter": "tezgâh",
+"cover": "kapak",
+"crack": "çatlak; aralık",
+"cracks": "çatlar (crack)",
+"cramped": "sıkışık",
+"creak": "gıcırtı",
+"creaks": "gıcırdar (creak)",
+"cropped": "kısa kesilmiş (crop)",
+"cross": "çarpı işareti; geçmek",
+"crosses": "geçer (cross)",
+"cry": "ağlamak",
+"crying": "ağlama (cry)",
+"curling": "kıvrık (curl)",
+"curls": "kıvrılır (curl)",
+"curtain": "perde",
+"cushion": "minder",
+"cut": "kesik; kesmek",
+"dad": "babam",
+"dark": "karanlık",
+"darkness": "karanlık",
+"date": "tarih",
+"dawn": "şafak",
+"day": "gün",
+"days": "günler",
+"dazed": "şaşkın",
+"dead": "ölü",
+"decide": "karar vermek",
+"decision": "karar",
+"deep": "derin; kalın (ses)",
+"deeply": "derin (deeply lined: kırış kırış)",
+"desk": "masa (öğretmen masası)",
+"desks": "sıralar (desk)",
+"dial": "çevir (dial tone: çevir sesi)",
+"did": "yaptı (do)",
+"didn't": "-medi (did not)",
+"die": "ölmek; dinmek (die down)",
+"died": "öldü (die)",
+"dies": "diner, kesilir (die down)",
+"direction": "yön",
+"director": "müdür",
+"dirt": "toprak",
+"disappears": "gözden kaybolur (disappear)",
+"district": "ilçe",
+"dives": "dalar (dive)",
+"does": "yapar (do)",
+"doesn't": "-mez (does not)",
+"dog": "köpek",
+"don't": "-me, yapma (do not)",
+"door": "kapı",
+"doors": "kapılar (door)",
+"double": "iki büklüm (bend double)",
+"down": "aşağı",
+"drags": "sürükler (drag)",
+"draw": "çekmek; çizmek",
+"drawer": "çekmece",
+"drawing": "resim, çizim",
+"drawn": "çekilir (draw back)",
+"draws": "çeker (draw)",
+"drew": "çizdi (draw)",
+"dried": "kurumuş (dry)",
+"drink": "içmek",
+"driver": "şoför",
+"duck": "eğilmek",
+"dusk": "akşamüstü, alacakaranlık",
+"each": "her biri",
+"ear": "kulak",
+"ears": "kulaklar",
+"easier": "daha kolay (easy)",
+"easily": "kolayca",
+"eaves": "saçak",
+"echoes": "yankılanır (echo)",
+"edge": "kenar",
+"eight": "sekiz",
+"eighty": "seksen",
+"either": "ikisinden biri; ne de (olumsuzda)",
+"else": "başka",
+"emin": "Emin (kahveci)",
+"emin's": "Emin'in",
+"end": "son; bitmek",
+"ended": "bitti (end)",
+"ends": "biter (end)",
+"engine": "motor",
+"even": "bile",
+"evening": "akşam",
+"evenings": "akşamları (evening)",
+"evenly": "eşit aralıkla",
+"ever": "hiç; şimdiye dek",
+"every": "her",
+"everyone": "herkes",
+"everything": "her şey",
+"except": "hariç",
+"expecting": "bekliyorduk (expect)",
+"eye": "göz",
+"eyes": "gözler",
+"face": "yüz",
+"faceless": "yüzü olmayan",
+"faces": "yüzler",
+"facing": "bakan (face)",
+"fadime": "Fadime (Selim'in annesi)",
+"fadime's": "Fadime'nin",
+"faintly": "hafifçe",
+"fairy": "masal (fairy tale)",
+"falling": "düşme (fall)",
+"falls": "düşer (fall)",
+"familiar": "tanıdık",
+"far": "uzak; çok",
+"fast": "hızlı",
+"faster": "daha hızlı (fast)",
+"father": "baba",
+"fear": "korku",
+"feel": "hissetmek",
+"feels": "hissettiriyor (feel)",
+"feet": "ayaklar",
+"fell": "düştü (fall)",
+"fetch": "almaya gelmek",
+"file": "dosya",
+"find": "bulmak",
+"finger": "parmak",
+"fingers": "parmaklar (finger)",
+"finish": "bitirmek",
+"finished": "bitirdi (finish)",
+"fire": "ateş; yangın",
+"first": "ilk; önce",
+"fists": "yumruklar",
+"five": "beş",
+"fleeing": "kaçar gibi (flee)",
+"flickering": "titrek (flicker)",
+"flickers": "titrer (flicker)",
+"fling": "fırlatmak",
+"floor": "yer, döşeme",
+"floorboards": "döşeme tahtaları (floorboard)",
+"flower": "çiçek",
+"flowered": "çiçekli",
+"fog": "sis",
+"fog's": "sisin",
+"fogged": "buğulu (fog)",
+"fogs": "buğulanır (fog over)",
+"foot": "dip (duvarın dibi); ayak",
+"footsteps": "ayak sesleri",
+"for": "için; boyunca",
+"forest": "orman",
+"forty": "kırk",
+"found": "buldu (find)",
+"founded": "kuruldu (found)",
+"fountain": "çeşme",
+"four": "dört",
+"free": "serbest, özgür",
+"freezes": "donakalır (freeze)",
+"from": "-den",
+"front": "ön",
+"frost": "kırağı",
+"froze": "dondu (freeze)",
+"frozen": "donmuş (freeze)",
+"g": "G. (Gülsüm)",
+"gap": "aralık, boşluk",
+"gathers": "toplar (gather)",
+"gave": "verdi (give)",
+"gendarmes": "jandarmalar",
+"gently": "nazikçe",
+"get": "almak; varmak",
+"gets": "olur; kalkar (get)",
+"give": "vermek",
+"given": "verilmişti (give)",
+"glass": "cam",
+"glimpse": "bir anlığına görmek",
+"glossy": "parlak",
+"go": "gitmek",
+"goes": "gider (go)",
+"going": "gidiyor (go)",
+"gone": "gitmiş; ölmüş (go)",
+"got": "var (have got); aldı (get)",
+"grab": "kapmak",
+"grabs": "kapar, yakalar (grab)",
+"grandfather": "dede",
+"granny": "nine (Granny Nazife: Nazife Nine)",
+"granted": "kabul edildi (grant)",
+"gray": "gri, kül rengi",
+"grip": "kavrayış, tutuş",
+"groans": "inler (groan)",
+"grow": "büyür, yetişir (grow)",
+"growing": "büyüyor (grow)",
+"grown": "büyük (grown-ups: büyükler)",
+"guessed": "anlamıştım (guess)",
+"gülsüm": "Gülsüm (önceki öğretmen)",
+"gülsüm's": "Gülsüm'ün",
+"had": "-di (have); vardı",
+"hadn't": "had not: -memişti",
+"hair": "saç",
+"hairline": "kıl kadar (ince)",
+"half": "yarım; yarı",
+"halfway": "yarı yolda; yarıya kadar",
+"hand": "el",
+"handed": "verdi, uzattı (hand)",
+"handful": "bir avuç",
+"handle": "kol (kapı); sap (balta)",
+"handled": "saplı (long-handled: uzun saplı)",
+"hands": "eller",
+"handwriting": "el yazısı",
+"hanging": "asılı (hang)",
+"hangs": "asılı durur (hang)",
+"happened": "oldu (happen)",
+"happens": "olursa, olur (happen)",
+"hard": "sert; zor",
+"has": "-dir; var (have)",
+"hasan": "Hasan (dolmuş şoförü)",
+"hasan's": "Hasan'ın",
+"hasn't": "-memiş (has not)",
+"have": "sahip olmak; -miş olmak",
+"he": "o (erkek)",
+"he's": "o ... (he is/has)",
+"head": "baş, kafa",
+"headman": "muhtar",
+"headman's": "muhtarın",
+"heads": "başlar (head)",
+"headscarf": "yazma, başörtüsü",
+"hear": "duymak",
+"heard": "duydu (hear)",
+"hears": "duyar (hear)",
+"heart": "kalp, yürek",
+"hearth": "ocak",
+"heat": "sıcak, ısı",
+"heavy": "ağır",
+"height": "hiza (chest height: göğüs hizası)",
+"held": "tuttu (hold)",
+"her": "onu, onun (kadın)",
+"here": "burada, buraya",
+"hers": "onunki",
+"herself": "kendini",
+"hesitates": "duraksar (hesitate)",
+"hidden": "gizli, saklı",
+"high": "yüksek",
+"him": "onu, ona (erkek)",
+"himself": "kendisi",
+"his": "onun (erkek)",
+"hold": "tutmak; tutunmak",
+"holding": "tutuyor (hold)",
+"holds": "tutar (hold)",
+"home": "ev",
+"hours": "saatler",
+"house": "ev",
+"houses": "evler (house)",
+"hugging": "sarılarak (hug)",
+"hundred": "yüz (sayı)",
+"hurriedly": "aceleyle",
+"hurry": "acele",
+"husband": "koca, eş",
+"i": "ben",
+"i'd": "I had: -mıştım",
+"i'll": "-eceğim (I will)",
+"i'm": "ben ... (I am)",
+"i've": "-dim, -miş (I have)",
+"ice": "buz",
+"if": "eğer",
+"in": "içinde",
+"index": "işaret (index finger: işaret parmağı)",
+"ink": "mürekkep",
+"inside": "içeride",
+"instant": "an",
+"interrupt": "sözünü kesmek",
+"into": "içine",
+"is": "-dir (be)",
+"isn't": "değil (is not)",
+"it": "o (şey)",
+"it's": "o ... (it is)",
+"its": "onun (şey)",
+"itself": "kendisi, kendiliğinden",
+"joke": "şaka",
+"joy": "sevinç",
+"jumps": "atlar (jump)",
+"just": "sadece; tam; az önce",
+"karakoncolos": "Karakoncolos (Karadeniz efsanelerinde kış yaratığı)",
+"keep": "tutmak; devam ettirmek",
+"keeper": "bekçi (fener bekçisi)",
+"keeps": "tutar; sürer (keep)",
+"kept": "tuttu; sakladı (keep)",
+"kerosene": "gaz yağı",
+"key": "anahtar",
+"kilometers": "kilometre (kilometer)",
+"kind": "tür (that kind of place: öyle bir yer)",
+"knee": "diz",
+"kneels": "diz çöker (kneel)",
+"knew": "biliyordu (know)",
+"knock": "vuruş (kapıya)",
+"knocked": "devrilmiş (knock over)",
+"knocking": "vuran (knock)",
+"knocks": "vuruşlar",
+"know": "bilmek; tanımak",
+"known": "tanımış (know)",
+"knows": "bilir (know)",
+"kuşkaya": "Kuşkaya (köy)",
+"kuşkaya's": "Kuşkaya'nın",
+"lace": "dantel",
+"lamb": "kuzu (my lamb: kuzum)",
+"lamp": "lamba",
+"lamplight": "lamba ışığı",
+"lamps": "lambalar (lamp)",
+"last": "son; dayanmak",
+"lasts": "sürer (last)",
+"late": "geç",
+"later": "sonra",
+"laugh": "gülüş, kahkaha",
+"laughs": "güler (laugh)",
+"lay": "koymak",
+"leafed": "çevirdi (sayfaları) (leaf through)",
+"lean": "yaslanmak",
+"leaning": "yaslanmış (lean)",
+"leaps": "atlar (leap)",
+"leave": "bırakmak; gitmek",
+"leaves": "bırakır; gider (leave)",
+"leaving": "ayrılıyor (leave)",
+"ledger": "defter (black ledger: kara defter)",
+"left": "sol; bıraktı, gitti (leave)",
+"length": "uzunluk (boydan boya)",
+"lesson": "ders",
+"lessons": "dersler (lesson)",
+"let": "izin vermek; bırakmak",
+"letter": "mektup; dilekçe",
+"letters": "harfler",
+"letting": "bırakmadan (let go)",
+"lies": "yalanlar; yatar (lie)",
+"lift": "kaldırmak",
+"lifted": "kaldırdı; kalktı (lift)",
+"lifts": "havalanır; kaldırır (lift)",
+"light": "ışık; yakmak",
+"like": "gibi",
+"line": "çizgi; satır",
+"lined": "kırış kırış (deeply lined)",
+"lines": "çizgiler (line)",
+"lips": "dudaklar",
+"list": "liste",
+"listen": "dinlemek",
+"listened": "dinledi (listen)",
+"listening": "dinliyor (listen)",
+"listens": "dinler (listen)",
+"lit": "yanıyor, yanan (light)",
+"little": "biraz; küçük",
+"lock": "kilit",
+"locked": "kilitli",
+"locks": "kilitler (lock)",
+"log": "defter, kayıt (flight log: uçuş defteri)",
+"long": "uzun",
+"longer": "artık (no longer); daha uzun",
+"look": "bakmak; bakış",
+"looked": "baktı (look)",
+"looking": "bakıyor (look)",
+"looks": "bakar (look)",
+"lost": "kaybetti (lose)",
+"low": "alçak; kısık (ses)",
+"lowers": "indirir (lower)",
+"lying": "yatan (lie)",
+"made": "yaptı (make)",
+"makes": "yapar (make)",
+"making": "yapıyor (make)",
+"man": "adam",
+"match": "kibrit",
+"me": "beni, bana",
+"men": "adamlar",
+"mid": "ortası (mid-November: kasım ortası)",
+"middle": "orta",
+"mill": "değirmen",
+"mill's": "değirmenin",
+"miller": "değirmenci",
+"millstone": "değirmen taşı",
+"mind": "akıl",
+"minibus": "dolmuş",
+"miracle": "mucize",
+"mirror": "ayna",
+"miss": "Hanım (Miss Gülsüm: Gülsüm Hanım)",
+"missing": "eksik, yok",
+"mist": "sis",
+"mom": "annem",
+"moment": "an",
+"more": "daha (fazla)",
+"morning": "sabah",
+"mother": "anne",
+"motionless": "kıpırdamadan",
+"mountain": "dağ",
+"mountains": "dağlar (mountain)",
+"move": "hareket etmek",
+"moved": "uzaklaştı (move off)",
+"moves": "hareket eder; gider (move)",
+"moving": "ilerliyor (move)",
+"mustache": "bıyık",
+"my": "benim",
+"name": "ad, isim",
+"names": "isimler (name)",
+"narrows": "daralır (narrow)",
+"natural": "doğal",
+"nazife": "Nazife (Nazife Nine)",
+"nazife's": "Nazife'nin",
+"near": "yakın",
+"nearly": "neredeyse",
+"neat": "düzgün",
+"need": "ihtiyaç; gerekmek",
+"needle": "iğne",
+"neither": "hiçbiri; ne ... ne",
+"never": "asla, hiç",
+"new": "yeni",
+"next": "sonraki; yanında",
+"night": "gece",
+"nights": "geceler",
+"no": "hayır; hiç",
+"none": "hiçbiri",
+"not": "değil",
+"note": "not",
+"notebook": "defter",
+"notes": "notlar (note)",
+"nothing": "hiçbir şey",
+"november": "kasım",
+"now": "şimdi",
+"o'clock": "saat (... saat)",
+"objected": "itiraz etti (object)",
+"of": "-in (iyelik)",
+"off": "uzağa (move off: uzaklaşmak); kapalı",
+"oil": "yağlamak",
+"old": "yaşlı; eski",
+"oldest": "en eski (old)",
+"on": "üstünde; açık",
+"once": "bir kez; bir zamanlar",
+"one": "bir; biri",
+"only": "sadece; tek",
+"onto": "üstüne",
+"open": "açmak; açık",
+"opened": "açtın (open)",
+"opens": "açar (open)",
+"opposite": "karşı (karşı uçlar)",
+"or": "veya, ya da",
+"order": "emir",
+"other": "diğer",
+"our": "bizim",
+"out": "dışarı",
+"outside": "dışarıda",
+"over": "üstünde; bitti; boyunca",
+"own": "kendi",
+"pace": "hız, adım",
+"page": "sayfa",
+"pages": "sayfalar",
+"palm": "avuç (içi)",
+"pane": "cam",
+"panicked": "panik içinde",
+"paper": "kâğıt",
+"parted": "aralandı (part)",
+"parts": "parçalar (part)",
+"pass": "geçmek",
+"passes": "geçer (pass)",
+"path": "yol",
+"patient": "sabırlı",
+"pays": "öder (pay)",
+"peddler": "seyyar satıcı",
+"pencil": "kurşun kalem",
+"pent": "birikmiş (pent-up)",
+"people": "insanlar, kişi",
+"person": "kişi",
+"petition": "dilekçe",
+"pick": "almak (pick up: kucağa almak)",
+"picked": "açtı (pick up: telefonu açmak)",
+"picks": "alır (pick)",
+"pieces": "parçalar (piece)",
+"pinned": "yere çakılı (pin)",
+"pitch": "zifiri (pitch black: simsiyah)",
+"place": "yer",
+"please": "lütfen",
+"pocket": "cep",
+"pointing": "göstererek (point)",
+"pole": "direk",
+"post": "görev (quit your post: görevini bırakmak)",
+"pour": "dökmek",
+"poured": "döktün (pour)",
+"pours": "döker (pour)",
+"prayer": "dua",
+"prays": "dua eder (pray)",
+"pressed": "ütülü (press)",
+"presses": "bastırır (press)",
+"previous": "önceki",
+"primary": "ilk (primary school: ilkokul)",
+"promised": "söz verilmiş (promise)",
+"protected": "korudun (protect)",
+"pull": "çekmek",
+"pulling": "indiriyor (pull down)",
+"pulls": "çeker (pull)",
+"pupils": "öğrenciler (pupil)",
+"purple": "mor",
+"pushes": "iter (push)",
+"put": "koymak",
+"puts": "koyar (put)",
+"quarters": "lojman (teacher's quarters)",
+"quick": "çabuk",
+"quickly": "çabucak",
+"quiet": "sessiz",
+"quit": "bıraktı (görevini) (quit)",
+"rain": "yağmur",
+"raise": "kaldırmak",
+"raised": "kaldırdı (raise)",
+"raises": "kaldırır (raise)",
+"ran": "koştu (run)",
+"ranger": "memur (forest ranger: orman memuru)",
+"reach": "uzanmak; ulaşmak",
+"read": "okumak; okudu",
+"really": "gerçekten",
+"rearview": "dikiz (rearview mirror: dikiz aynası)",
+"reason": "sebep",
+"receiver": "ahize",
+"recipe": "tarif",
+"records": "kayıtlar",
+"red": "kırmızı",
+"refik": "Refik (muhtar)",
+"refik's": "Refik'in",
+"register": "defter (attendance register: yoklama defteri)",
+"remember": "hatırlamak",
+"remembered": "hatırladı (remember)",
+"reservoir": "hazne",
+"resigned": "istifa ettin (resign)",
+"rest": "geri kalanı",
+"rests": "durur (rest)",
+"return": "dönmek",
+"reverse": "geri vites",
+"rhythm": "ritim",
+"right": "tam; doğru; sağ",
+"rings": "çınlar (ring)",
+"rises": "yükselir (rise)",
+"road": "yol",
+"roams": "dolaşır (roam)",
+"roof": "çatı",
+"roofs": "çatılar (roof)",
+"room": "oda",
+"rounds": "döner (round: viraj)",
+"row": "kürek çekmek",
+"rule": "kural",
+"run": "koşmak",
+"running": "koşan (run)",
+"runs": "koşar; akar (run)",
+"sack": "çuval",
+"said": "dedi (say)",
+"salt": "tuz",
+"same": "aynı",
+"sat": "oturdu (sit)",
+"sated": "doymuş (sate)",
+"save": "kurtarmak",
+"saw": "gördü (see)",
+"say": "söylemek",
+"saying": "söylüyor (say)",
+"says": "der (say)",
+"scared": "korkmuş (scare)",
+"school": "okul",
+"school's": "okulun",
+"scratched": "çizik, çizilmiş (scratch)",
+"scream": "çığlık",
+"sea": "deniz",
+"second": "ikinci; saniye",
+"section": "bölüm",
+"see": "görmek",
+"seeping": "sızan (seep)",
+"seeps": "sızar (seep)",
+"sees": "görür (see)",
+"selim": "Selim (köyün en küçük çocuğu)",
+"selim's": "Selim'in",
+"send": "göndermek",
+"sent": "gönderildi (send)",
+"sentence": "cümle",
+"sets": "koyar, bırakır (set)",
+"setting": "batan (set: güneş)",
+"seven": "yedi",
+"shadow": "gölge",
+"shake": "sarsmak; titremek",
+"shape": "karaltı, şekil",
+"she": "o (kadın)",
+"sheet": "yaprak (kâğıt)",
+"shepherd": "çoban",
+"short": "kısa",
+"shoulder": "omuz",
+"shoulders": "omuzlar",
+"shout": "bağırmak",
+"shouts": "bağırır (shout)",
+"show": "göstermek",
+"shower": "yağmur (shower of sparks: kıvılcım yağmuru)",
+"shrinks": "küçülür (shrink)",
+"shut": "kapattı (shut)",
+"shuts": "kapatır (shut)",
+"shutter": "kepenk",
+"shutters": "kepenkler (shutter)",
+"side": "taraf",
+"signal": "işaret",
+"signature": "imza (energy signature: enerji imzası)",
+"signatures": "imzalar (signature)",
+"silence": "sessizlik",
+"silent": "sessiz",
+"simple": "basit",
+"since": "-den beri",
+"single": "tek",
+"sinks": "çöker, gömülür (sink)",
+"sit": "oturmak",
+"sits": "oturur (sit)",
+"sitting": "oturuyor (sit)",
+"skirt": "etek",
+"slammed": "çakıldı, çarptı (slam)",
+"slams": "çarpar (slam)",
+"sleeping": "uyumadan (sleep)",
+"sleeps": "uyur (sleep)",
+"slide": "kaymak; kaydırmak",
+"slides": "kayar (slide)",
+"slip": "kaymak; sızmak",
+"slipped": "bozuldu, kaydı (slip)",
+"slips": "süzülür (slip)",
+"slope": "yamaç",
+"slowly": "yavaşça",
+"small": "küçük",
+"smells": "kokar (smell)",
+"smile": "gülümseme",
+"smiled": "gülümsedi (smile)",
+"smiling": "gülümseyerek; gülümseyen (smile)",
+"snatches": "kapar (snatch)",
+"sniffling": "burnunu çeken (sniffle)",
+"so": "o kadar; bu yüzden",
+"sobbing": "hıçkırarak (sob)",
+"soft": "yumuşak",
+"softness": "yumuşaklık",
+"solid": "sağlam",
+"some": "biraz; bazı",
+"someone": "biri",
+"something": "bir şey",
+"somewhere": "bir yere, bir yerde",
+"son": "oğul",
+"sound": "ses",
+"sounds": "sesler",
+"spaced": "aralıklı (space)",
+"spare": "yedek",
+"sparks": "kıvılcımlar (spark)",
+"speaking": "konuşuyor (speak)",
+"speaks": "konuşur (speak)",
+"splits": "ikiye ayrılır (split)",
+"spoke": "konuştu (speak)",
+"sponge": "sünger",
+"spot": "nokta, yer",
+"spring": "bahar",
+"square": "meydan",
+"standing": "ayakta duruyor (stand)",
+"stands": "durur (stand)",
+"stares": "bakar (stare)",
+"start": "başlamak",
+"started": "başladı (start)",
+"static": "parazit, cızırtı",
+"stay": "kalmak",
+"stayed": "kaldı (stay)",
+"stays": "kalır (stay)",
+"steeped": "demlenmiş (steep)",
+"step": "adım",
+"steps": "adımlar (step)",
+"still": "hâlâ",
+"stirs": "kıpırdar (stir)",
+"stokes": "harlar (stoke)",
+"stone": "taş",
+"stones": "taşlar (stone)",
+"stood": "durdu (stand)",
+"stooping": "eğilerek (stoop)",
+"stop": "durmak",
+"stopped": "durdu (stop)",
+"stops": "durur (stop)",
+"story": "hikâye; yazı (dergi)",
+"stove": "soba",
+"straightens": "doğrulur (straighten)",
+"strange": "tuhaf",
+"stream": "dere",
+"stretches": "uzanır (stretch)",
+"strike": "çakmak (kibrit)",
+"string": "ip",
+"struggles": "zorlanır (struggle)",
+"studies": "inceler (study)",
+"substitute": "vekil",
+"suddenly": "birden",
+"suitcase": "valiz",
+"survive": "sağ kalmak",
+"swallowing": "yutarak (swallow)",
+"swaying": "sallanan (sway)",
+"swing": "dönmek",
+"swinging": "sallanıyor (swing)",
+"swings": "çevirir (swing)",
+"switching": "kapatmadan (switch off)",
+"syllable": "hece",
+"table": "masa",
+"tables": "masalar (table)",
+"take": "almak",
+"taken": "çekmiş (take)",
+"takes": "alır (take)",
+"taking": "alıyor (take)",
+"tale": "masal",
+"tales": "masallar (tale)",
+"talked": "konuştu (talk)",
+"tall": "uzun boylu",
+"taller": "daha uzun (tall)",
+"taught": "öğretti (teach)",
+"tea": "çay",
+"teach": "öğretmek",
+"teacher": "öğretmen; hocam (hitap)",
+"teacher's": "öğretmenin (teacher's quarters: lojman)",
+"telephone": "telefon",
+"tell": "söylemek, anlatmak",
+"telling": "anlatıyor (tell)",
+"tells": "söyler (tell)",
+"ten": "on",
+"tender": "sevecen",
+"than": "-den (karşılaştırma)",
+"that": "o, şu; ki",
+"that's": "o ... (that is)",
+"the": "(belirli tanımlık)",
+"their": "onların",
+"them": "onları",
+"then": "sonra",
+"there": "orada",
+"there's": "var (there is)",
+"these": "bunlar",
+"they": "onlar",
+"they'd": "onlar -erdi (they would)",
+"thick": "kalın",
+"thin": "ince",
+"thing": "şey",
+"think": "düşünmek",
+"thinks": "sanır (think)",
+"third": "üçüncü",
+"this": "bu",
+"thought": "düşündüm (think)",
+"three": "üç",
+"threshold": "eşik",
+"thresholds": "eşikler (threshold)",
+"threw": "fırlattı (throw)",
+"through": "içinden, arasından",
+"throws": "atar (throw)",
+"thumbtack": "raptiye",
+"tight": "sıkı, sımsıkı",
+"tightens": "kasılır (tighten)",
+"tilts": "yana yatar (tilt)",
+"time": "zaman; vakit",
+"times": "kez, kere",
+"tip": "uç",
+"tired": "yorgun",
+"to": "-e, -a; -mek için",
+"today": "bugün",
+"today's": "bugünün",
+"told": "söyledi (tell)",
+"tomorrow": "yarın",
+"tone": "ses, sinyal",
+"tonight": "bu gece",
+"too": "de, da; çok fazla",
+"took": "aldı (take)",
+"top": "tepe; en üst",
+"touch": "dokunmak",
+"touched": "dokundu (touch)",
+"touches": "dokunur (touch)",
+"toward": "-e doğru",
+"town": "kasaba",
+"travel": "gitmek, ilerlemek",
+"trembled": "titredi (tremble)",
+"trembles": "titrer (tremble)",
+"trembling": "titreyen (tremble)",
+"tried": "denedi; yargılandı (try)",
+"truth": "gerçek, hakikat",
+"try": "denemek, çalışmak",
+"tucks": "sıkıştırır (tuck)",
+"turkey": "Türkiye",
+"turn": "dönmek; çevirmek",
+"turned": "çevirdi; döndü (turn)",
+"turning": "dönen (turn)",
+"turns": "döner; çevirir (turn)",
+"twice": "iki kez",
+"two": "iki",
+"uncle": "amca",
+"under": "altında",
+"underneath": "altında",
+"understand": "anlamak",
+"understanding": "anlamadan (understand)",
+"unmoving": "kımıldamayan",
+"until": "-e kadar",
+"up": "yukarı",
+"ups": "büyükler (grown-ups)",
+"upside": "baş aşağı (upside down: ters)",
+"upstairs": "yukarıda, üst katta",
+"used": "alışkın; kullandı (use)",
+"valley": "vadi",
+"vanishes": "kaybolur (vanish)",
+"very": "çok",
+"village": "köy",
+"villagers": "köylüler (villager)",
+"voice": "ses",
+"voiced": "sesli (soft-voiced: yumuşak sesli)",
+"voices": "sesler (voice)",
+"wait": "beklemek",
+"waited": "bekledi (wait)",
+"waiting": "bekliyor (wait)",
+"wakes": "uyanır (wake)",
+"walk": "yürümek",
+"walked": "yürüdün (walk)",
+"walking": "yürümek (walk)",
+"walks": "yürür (walk)",
+"wall": "duvar",
+"walls": "duvarlar (wall)",
+"warm": "ılık; ısıtmak",
+"was": "-di (be)",
+"wasn't": "değildi (was not)",
+"watched": "izledi (watch)",
+"watches": "izler (watch)",
+"watchman": "bekçi",
+"water": "su",
+"wave": "dalga",
+"way": "yol; biçim",
+"we": "biz",
+"week": "hafta",
+"weight": "ağırlık",
+"welcome": "hoş geldin",
+"went": "gitti (go)",
+"were": "-di(ler) (be)",
+"wet": "ıslak",
+"what": "ne",
+"whatever": "her ne",
+"wheel": "çark (değirmen)",
+"when": "-diğinde, ne zaman",
+"where": "nerede, nereye",
+"while": "-iken",
+"whisper": "fısıldamak",
+"whispered": "fısıldadı (whisper)",
+"whispers": "fısıldar (whisper)",
+"white": "beyaz",
+"who": "kim",
+"who's": "kim ... (who is)",
+"whoever": "her kim",
+"whole": "bütün",
+"whose": "kimin",
+"why": "neden",
+"wick": "fitil",
+"wide": "ardına kadar (açık); geniş",
+"width": "genişlik (a hand's width: bir karış)",
+"will": "-ecek",
+"wind": "rüzgâr; kıvrılmak",
+"window": "pencere",
+"windows": "pencereler (window)",
+"winter": "kış",
+"winters": "kışlar",
+"wipe": "silmek",
+"wiped": "yok edildi (wipe out)",
+"wiping": "sildikten sonra (wipe)",
+"with": "ile",
+"within": "içinde",
+"without": "-meden, -sız",
+"woke": "uyandı (wake)",
+"woman": "kadın",
+"won't": "-meyecek (will not)",
+"wooden": "ahşap",
+"woodshed": "odunluk",
+"word": "söz, kelime",
+"words": "sözler",
+"works": "çalışır (work)",
+"would": "-ırdı; -acaktı",
+"wrap": "sarmak",
+"wraps": "sarar (wrap)",
+"wrist": "bilek",
+"write": "yazmak",
+"writes": "yazar (write)",
+"writing": "yazı",
+"written": "yazılmış (write)",
+"wrote": "yazdın (write)",
+"year": "yıl",
+"years": "yıllar",
+"yellow": "sarı",
+"yellowed": "sararmış (yellow)",
+"yesterday": "dün",
+"yet": "henüz",
+"you": "sen, seni",
+"you'll": "-eceksin (you will)",
+"you're": "sen ... (you are)",
+"you've": "-dın, -mişsin (you have)",
+"young": "genç",
+"youngest": "en genç (young)",
+"your": "senin",
+"yours": "senin(ki)",
+"zemheri": "Zemheri (kışın en soğuk kırk günü)"
+},
+"kaliplar": {
+"black ledger": "kara defter",
+"teacher's quarters": "lojman",
+"oil lamp": "gaz lambası",
+"my lamb": "kuzum",
+"prayer beads": "tespih",
+"dial tone": "çevir sesi",
+"forest ranger": "orman memuru",
+"primary school": "ilkokul",
+"attendance register": "yoklama defteri",
+"index finger": "işaret parmağı",
+"fairy tale": "masal",
+"grown ups": "büyükler",
+"deeply lined": "kırış kırış",
+"hand's width": "bir karış",
+"pent up": "birikmiş",
+"quit her post": "görevini bıraktı",
+"quit your post": "görevini bıraktın",
+"the gendarmes": "jandarma",
+"went down from": "(köyden) indi",
+"went back to": "geri döndü",
+"look away": "bakışlarını kaçırmak",
+"no one": "hiç kimse",
+"at once": "hemen, bir anda",
+"a little": "biraz",
+"too late": "çok geç",
+"turned down": "kısıldı (lamba)",
+"turn down": "kısmak (lamba)",
+"burnt out": "sönmüş",
+"coffeehouse keeper": "kahveci",
+"village men": "köyün erkekleri",
+"stone mill": "taş değirmen",
+"mountain flower": "yayla çiçeği"
+}
+};
+
+
+/* ---------------- Kitap motoru ---------------- */
+const META = JSON.parse(document.getElementById("book-meta").textContent);
+const ACTS = BOOK.acts;
+/* Arayüz dili: meta.json'da "dil": "en" olan kitaplar İngilizce arayüzle açılır. */
+const DIL = META.dil || "tr";
+const UI = {
+  tr: { kapagi: (t) => `${t} kitabının kapağı`, kitap: "Kitap", yazar: "Yazar", tur: "Tür", okuma: "Okuma", sonlar: "Sonlar",
+        farkliSon: (n) => `${n} farklı son`, buldugun: (f, n) => ` · bulduğun: ${f} / ${n}`, basla: "Okumaya başla",
+        sonYazdigin: "Defterine son yazdığın:", sabah: "Sabah", akibet: "Kimin başına ne geldi", yil: "Bir yıl sonra", son: "SON",
+        bulunan: (f, n) => `Bulduğun sonlar: ${f} / ${n}`, takip: "Yazarı takip et:", kacirdiklar: "Bu gece kaçırdıkların",
+        perdeSonu: (a) => `${a}nin sonu`, kapatmadan: "Kitabı kapatmadan önce", geceDevam: "Gece devam ediyor", neYapacaksin: "Ne yapacaksın?",
+        bolum: (n) => `Bölüm ${n}`, kapagaDon: "kapağa dön", sayfayaGit: "sayfaya git", bastan: "Geceyi baştan yaşa", KapagaDon: "Kapağa dön",
+        bosDefter: "Henüz bir şey yazmadın.", sozlukIpucu: "İpucu: anlamını görmek için bir kelimeye dokun." },
+  en: { kapagi: (t) => `Cover of ${t}`, kitap: "Book", yazar: "Author", tur: "Genre", okuma: "Reading time", sonlar: "Endings",
+        farkliSon: (n) => `${n} different endings`, buldugun: (f, n) => ` · found: ${f} / ${n}`, basla: "Start reading",
+        sonYazdigin: "Last thing you wrote down:", sabah: "Morning", akibet: "What became of them", yil: "A year later", son: "THE END",
+        bulunan: (f, n) => `Endings found: ${f} / ${n}`, takip: "Follow the author:", kacirdiklar: "What you missed tonight",
+        perdeSonu: (a) => `End of the ${a}`, kapatmadan: "Before you close the book", geceDevam: "The night goes on", neYapacaksin: "What will you do?",
+        bolum: (n) => `Section ${n}`, kapagaDon: "back to cover", sayfayaGit: "turn to section", bastan: "Live the night again", KapagaDon: "Back to cover",
+        bosDefter: "You haven't written anything down yet.", sozlukIpucu: "Tip: tap any word to see its Turkish meaning." }
+}[DIL];
+const END_KEY = META.sonAnahtari || (META.id + "-sonlar");
+const fresh = () => ({ sec: BOOK.start, f: {}, r: Object.assign({}, BOOK.rel), notes: [], talked: [], num: null, steps: 0 });
+let state = Object.assign(fresh(), { sec: "cover" });
+const val = (v) => (typeof v === "function" ? v(state) : v);
+const $ = (id) => document.getElementById(id);
+const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/* § numaraları: başlangıç 1, gerisi sabit tohumla karıştırılmış (klasik oyun kitabı gibi) */
+const NUM = (() => {
+  let seed = 1962;
+  const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const keys = [];
+  Object.keys(S).forEach((k) => {
+    keys.push(k);
+    (S[k].choices || []).forEach((c, i) => keys.push(k + "#" + i));
+    if (S[k].next) keys.push(k + "#next");
+  });
+  const pool = []; for (let n = 2; n <= 240; n++) pool.push(n);
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const map = { a1: 1 }; let p = 0;
+  keys.forEach((k) => { if (k !== "a1") map[k] = pool[p++]; });
+  return map;
+})();
+
+let MUTE = false, toastTimer = null;
+function toast(msg) {
+  if (MUTE) return;
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
+}
+function loadEndings() { try { return JSON.parse(localStorage.getItem(END_KEY) || "[]"); } catch (e) { return []; } }
+function saveEnding(id) {
+  const list = loadEndings();
+  if (!list.includes(id)) { list.push(id); try { localStorage.setItem(END_KEY, JSON.stringify(list)); } catch (e) {} }
+}
+
+const missedHints = (s, act) => (BOOK.hints ? BOOK.hints(s, act) : []).slice(0, 3);
+
+/* ---------- kapak ---------- */
+function renderCover() {
+  const found = loadEndings().length;
+  $("view").innerHTML = `
+  <section class="cover-wrap">
+    <div class="cover" style="background-image:url('${META.kapak}'),url('${META.kapakYedek}')" role="img" aria-label="${esc(UI.kapagi(META.baslik))}">
+      <div>
+        <div class="band">${esc(META.seri)} · ${UI.kitap} ${META.kitapNo}</div>
+        <h1>${esc(META.baslik.toLocaleUpperCase(DIL))}</h1>
+      </div>
+      <div><div class="subt">${esc(META.altBaslik)}</div><div class="author">${esc(META.yazar)}</div></div>
+    </div>
+    <div class="backcover">
+      <p class="slogan">${esc(META.slogan)}</p>
+      ${BOOK.coverText.map((p) => `<p>${esc(p)}</p>`).join("")}
+      <dl class="colophon">
+        <dt>${UI.yazar}</dt><dd>${esc(META.yazar)} · <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></dd>
+        <dt>${UI.tur}</dt><dd>${esc(META.tur)}</dd>
+        <dt>${UI.okuma}</dt><dd>${esc(META.okumaSuresi)}</dd>
+        <dt>${UI.sonlar}</dt><dd>${UI.farkliSon(META.sonSayisi)}${found ? UI.buldugun(found, META.sonSayisi) : ""}</dd>
+      </dl>
+      ${typeof SOZLUK !== "undefined" ? `<p class="sozluk-ipucu">${esc(UI.sozlukIpucu)}</p>` : ""}
+      <button class="btn" id="btn-start" type="button">${UI.basla}</button>
+    </div>
+  </section>`;
+  $("btn-start").addEventListener("click", () => { state = fresh(); render(true); });
+}
+
+/* ---------- sayfa ---------- */
+function choiceNum(secId, c, i) { return NUM[secId + "#" + i]; }
+
+function renderPage(turn) {
+  const sec = S[state.sec];
+  const act = val(sec.act) || 1;
+  const time = val(sec.time);
+  const num = state.num || NUM[state.sec];
+
+  // sol sayfa
+  let left = `<div class="plate"><div class="act-title">${ACTS[act][0]}<span>${ACTS[act][1]}</span></div>`;
+  const imgKey = val(sec.img);
+  const imgLabel = val(sec.imgLabel) || "";
+  const hasImg = !!(imgKey && IMG[imgKey]);
+  if (hasImg) left += `<figure class="ill"><img src="${IMG[imgKey]}" alt="${esc(imgLabel)}"><figcaption>${esc(imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
+  const lg = BOOK.ledger(sec, time);
+  left += `<div class="ledger" aria-label="${esc(lg.title)}"><div class="lh">${esc(lg.title)}</div><div class="lv">${lg.html}</div></div>`;
+  if (!hasImg) {
+    const last = state.notes[state.notes.length - 1];
+    left += `<div class="fleuron">✦ ✦ ✦</div>`;
+    left += last ? `<div class="margin-note hand"><span class="lbl">${UI.sonYazdigin}</span>${esc(last)}</div>` : `<div class="margin-note hand"><span class="lbl">${esc(BOOK.rule[0])}</span>${esc(BOOK.rule[1])}</div>`;
+  }
+  const page = 2 * state.steps + 6;
+  left = `<div class="runhead">${esc(META.baslik)}</div>` + left + `</div><div class="folio">${page}</div>`;
+
+  // sağ sayfa
+  let right = `<div class="runhead">${ACTS[act][1]}</div><div class="sect">§ ${num}</div>`;
+  if (sec.end) right += `<div class="kind">${esc(val(sec.end.kind))}</div>`;
+  if (sec.actEnd) right += `<div class="kind">${UI.perdeSonu(ACTS[act][0])}</div>`;
+  right += `<h2>${esc(sec.title)}</h2><div class="text">`;
+  let leadDone = false;
+  sec.text(state).forEach((para) => {
+    if (typeof para === "object") right += `<p class="quote">${DIL === "en" ? "“" : "«"}${esc(para.q)}${DIL === "en" ? "”" : "»"}</p>`;
+    else {
+      const cap = !leadDone && /^[A-Za-zÇĞİÖŞÜçğıöşü]/.test(para);
+      right += `<p class="${cap ? "lead" : (!leadDone ? "first" : "")}">${esc(para)}</p>`; leadDone = true;
+    }
+  });
+  right += `</div>`;
+
+  if (sec.end) {
+    right += `<div class="sub">${UI.sabah}</div><div class="text"><p class="first">${esc(val(sec.sabah))}</p></div>`;
+    right += `<div class="sub">${UI.akibet}</div><ul class="fates">`;
+    val(sec.akibet).forEach(([w, t]) => { right += `<li><b>${esc(w)}.</b> ${esc(t)}</li>`; });
+    right += `</ul><div class="sub">${UI.yil}</div><div class="text"><p class="first">${esc(val(sec.yil))}</p></div>`;
+    right += `<div class="the-end">${UI.son}</div>`;
+    saveEnding(sec.end.id);
+    right += `<div class="tally">${UI.bulunan(loadEndings().length, META.sonSayisi)}</div>`;
+    right += `<div class="tally">${UI.takip} <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></div>`;
+  }
+  /* Perde sonundaki "Bu gece kaçırdıkların" kutusu okur isteğiyle kaldırıldı (2026-11-21).
+     Kitaplardaki BOOK.hints verisi duruyor; geri açmak için bu bloğu eski haline getirmek yeterli. */
+
+  right += `<div class="choices" id="choices"></div><div class="folio">${page + 1}</div>`;
+
+  const read = Math.min(14, 3 + Math.round(state.steps * 0.8)), rest = Math.max(3, 16 - read);
+  $("view").innerHTML = `<div class="binding"><div class="edges l" style="width:${read}px"></div><div class="edges r" style="width:${rest}px"></div><article class="book" id="book"><div class="leaf left" id="leaf-l">${left}</div><div class="leaf right" id="leaf-r">${right}</div></article><div class="ribbon"></div></div>`;
+
+  const box = $("choices");
+  const dh = document.createElement("div"); dh.className = "decide";
+  dh.textContent = sec.end ? UI.kapatmadan : sec.actEnd ? ((typeof BOOK.actEndHead === "function" ? BOOK.actEndHead(sec) : BOOK.actEndHead) || UI.geceDevam) : UI.neYapacaksin;
+  box.appendChild(dh);
+  const addBtn = (text, n, onClick, id) => {
+    const b = document.createElement("button");
+    b.className = "choice"; b.type = "button"; if (id) b.id = id;
+    b.innerHTML = (n == null ? `<span class="seal blank" aria-hidden="true">❧</span>` : `<span class="seal" aria-label="${UI.bolum(n)}">${n}</span>`)
+      + `<span class="ct">${esc(text)}</span><span class="go" aria-hidden="true">${n == null ? UI.kapagaDon : UI.sayfayaGit}</span>`;
+    b.addEventListener("click", onClick);
+    box.appendChild(b);
+  };
+  if (sec.end || sec.actEnd) {
+    if (sec.next) addBtn(sec.next.t, NUM[state.sec + "#next"], () => go(sec.next, NUM[state.sec + "#next"]), "c-next");
+    if (sec.end) {
+      addBtn(BOOK.againText || UI.bastan, 1, () => { state = fresh(); render(true); }, "c-again");
+      addBtn(UI.KapagaDon, null, () => { state = Object.assign(fresh(), { sec: "cover" }); render(); }, "c-cover");
+    }
+  } else {
+    sec.choices.forEach((c, i) => {
+      if (c.if && !c.if(state)) return;
+      const n = choiceNum(state.sec, c, i);
+      addBtn(c.t, n, () => go(c, n), "c-" + i);
+    });
+  }
+}
+
+function go(choice, shownNum) {
+  const oldRight = $("leaf-r") ? $("leaf-r").innerHTML : null;
+  const oldLeft = $("leaf-l") ? $("leaf-l").innerHTML : null;
+  const oldBook = $("book") ? $("book").innerHTML : null;
+  state.steps = (state.steps || 0) + 1;
+  if (choice.fx) choice.fx(state);
+  state.sec = typeof choice.to === "function" ? choice.to(state) : choice.to;
+  state.num = shownNum || null;
+  const next = S[state.sec];
+  if (next.enter) next.enter(state);
+  render(true);
+  flipFrom(oldRight, oldBook, oldLeft);
+  if (next.end && window.ATM) ATM.flash = 1;
+}
+
+function flipFrom(oldRight, oldBook, oldLeft) {
+  const book = $("book");
+  if (!book || !oldRight || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const twoPage = getComputedStyle(book).gridTemplateColumns.split(" ").length > 1;
+  if (twoPage) {
+    const newLeft = $("leaf-l");
+    const fl = document.createElement("div");
+    fl.className = "flip";
+    fl.innerHTML = `<div class="face front leaf right">${oldRight}</div><div class="face back leaf left">${newLeft.innerHTML}</div>`;
+    // çevrilen sayfa üstünü örtene kadar altta eski sol sayfa görünür, gerçek kitaptaki gibi
+    const newLeftHTML = newLeft.innerHTML;
+    if (oldLeft) newLeft.innerHTML = oldLeft; else newLeft.classList.add("hide-under");
+    book.appendChild(fl);
+    setTimeout(() => { newLeft.innerHTML = newLeftHTML; newLeft.classList.remove("hide-under"); fl.remove(); }, 860);
+  } else {
+    const lf = document.createElement("div");
+    lf.className = "lift book";
+    lf.innerHTML = oldBook;
+    lf.style.display = "block";
+    book.appendChild(lf);
+    setTimeout(() => lf.remove(), 620);
+  }
+}
+
+function render(turn) {
+  if (window.sozlukKapat) sozlukKapat();
+  const onCover = state.sec === "cover";
+  ["btn-book", "btn-cover"].forEach((id) => { $(id).style.visibility = onCover ? "hidden" : "visible"; });
+  if (window.ATM) ATM.target = onCover ? (BOOK.coverAtmos ?? 0.6) : BOOK.atmos(S[state.sec]);
+  if (window.ATM && !onCover && BOOK.hour) ATM.hour = BOOK.hour(S[state.sec], val(S[state.sec].time));
+  if (onCover) renderCover(); else renderPage(turn);
+  renderDrawer();
+  $("main").scrollTop = 0;
+}
+
+function renderDrawer() {
+  const items = $("items"); items.innerHTML = "";
+  BOOK.items(state).forEach((x) => { const li = document.createElement("li"); li.textContent = x; items.appendChild(li); });
+
+  const notes = $("notes"); notes.innerHTML = "";
+  if (!state.notes.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = UI.bosDefter; notes.appendChild(li); }
+  state.notes.forEach((n) => { const li = document.createElement("li"); li.textContent = n; notes.appendChild(li); });
+  $("note-count").textContent = state.notes.length ? "(" + state.notes.length + ")" : "";
+
+  const ends = $("endings"); ends.innerHTML = "";
+  const found = loadEndings();
+  ENDINGS.forEach((e) => {
+    const li = document.createElement("li");
+    li.textContent = found.includes(e.id) ? e.title : "· · ·";
+    if (!found.includes(e.id)) li.className = "empty";
+    ends.appendChild(li);
+  });
+}
+
+if (META.kutuphane) { const l = $("lnk-lib"); l.href = META.kutuphane; l.hidden = false; }
+$("btn-book").addEventListener("click", () => $("drawer").classList.add("open"));
+$("btn-close").addEventListener("click", () => $("drawer").classList.remove("open"));
+$("btn-cover").addEventListener("click", () => { $("confirm").classList.add("show"); $("btn-cover").style.display = "none"; });
+const closeConfirm = () => { $("confirm").classList.remove("show"); $("btn-cover").style.display = ""; };
+$("btn-no").addEventListener("click", closeConfirm);
+$("btn-yes").addEventListener("click", () => { closeConfirm(); state = Object.assign(fresh(), { sec: "cover" }); render(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("drawer").classList.remove("open"); });
+
+
+/* ---------- Sözlük: bir kelimeye dokununca kitaptaki anlamı (books/<id>/sozluk.js varsa) ---------- */
+if (typeof SOZLUK !== "undefined") (function () {
+  const st = document.createElement("style");
+  st.textContent = `
+  #sozluk { position: fixed; z-index: 60; max-width: 300px; padding: 10px 14px 11px; border-radius: 8px; background: #fbf6ea; color: #2a2118;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35), 0 0 0 1px rgba(120,90,50,.35); font-family: "EB Garamond", Georgia, serif; font-size: 18px; line-height: 1.35;
+    opacity: 0; transform: translateY(4px); transition: opacity .15s, transform .15s; pointer-events: none; }
+  #sozluk.acik { opacity: 1; transform: none; pointer-events: auto; }
+  #sozluk b { font-weight: 600; } #sozluk .an { display: block; margin-top: 2px; }
+  #sozluk .kal { display: block; margin-top: 7px; padding-top: 6px; border-top: 1px solid rgba(120,90,50,.25); font-size: 15px; }
+  #sozluk .dil { display: block; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #8a6a3a; margin-bottom: 3px; }
+  #sozluk-isaret { position: fixed; z-index: 59; border-radius: 3px; background: rgba(233,179,79,.35); pointer-events: none; display: none; }
+  .text p, .quote, .cover-wrap p { -webkit-tap-highlight-color: transparent; }
+  .sozluk-ipucu { font-style: italic; font-size: 15px; opacity: .8; margin: 10px 0 4px; }`;
+  document.head.appendChild(st);
+  const balon = document.createElement("div"); balon.id = "sozluk"; balon.setAttribute("role", "status"); document.body.appendChild(balon);
+  const isaret = document.createElement("div"); isaret.id = "sozluk-isaret"; document.body.appendChild(isaret);
+  const HARF = /[\p{L}'’]/u;
+  const temiz = (w) => w.toLocaleLowerCase("en").replace(/̇/g, "").replace(/’/g, "'").replace(/^'+|'+$/g, "");
+  const kok = (w) => (w.length > 4 ? w.replace(/(ing|ed|s)$/, "") : w);
+  const KAL = {}; Object.keys(SOZLUK.kaliplar || {}).forEach((k) => { KAL[k.split(" ").map(kok).join(" ")] = k; });
+  function anlam(w) { const t = temiz(w); return SOZLUK.kelimeler[t] || (t.endsWith("'s") && SOZLUK.kelimeler[t.slice(0, -2)]) || null; }
+  function kalip(metin, bas, son) {
+    // dokunulan kelimeyi içeren 2-3 kelimelik kalıp var mı
+    const ws = []; const re = /[\p{L}'’]+/gu; let m;
+    while ((m = re.exec(metin))) ws.push({ w: kok(temiz(m[0])), a: m.index, b: m.index + m[0].length });
+    const i = ws.findIndex((x) => x.a === bas); if (i < 0) return null;
+    for (const n of [3, 2]) for (let j = i - n + 1; j <= i; j++) {
+      if (j < 0 || j + n > ws.length) continue;
+      const k = KAL[ws.slice(j, j + n).map((x) => x.w).join(" ")]; if (k) return k;
+    }
+    return null;
+  }
+  function noktadan(x, y) {
+    if (document.caretPositionFromPoint) { const p = document.caretPositionFromPoint(x, y); return p && { node: p.offsetNode, off: p.offset }; }
+    if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); return r && { node: r.startContainer, off: r.startOffset }; }
+    return null;
+  }
+  window.sozlukKapat = () => { balon.classList.remove("acik"); isaret.style.display = "none"; };
+  document.addEventListener("click", (e) => {
+    const hedef = e.target.closest && e.target.closest(".text p, .quote, .cover-wrap p");
+    if (!hedef || e.target.closest("a, button") || String(window.getSelection())) { sozlukKapat(); return; }
+    const c = noktadan(e.clientX, e.clientY);
+    if (!c || c.node.nodeType !== 3) { sozlukKapat(); return; }
+    const t = c.node.textContent; let a = c.off, b = c.off;
+    while (a > 0 && HARF.test(t[a - 1])) a--;
+    while (b < t.length && HARF.test(t[b])) b++;
+    const kelime = t.slice(a, b).replace(/^['’]+|['’]+$/g, "");
+    if (!kelime) { sozlukKapat(); return; }
+    const an = anlam(kelime); const kl = kalip(t, a, b);
+    if (!an && !kl) { sozlukKapat(); return; }
+    const r = document.createRange(); r.setStart(c.node, a); r.setEnd(c.node, b);
+    const k = r.getBoundingClientRect();
+    if (k.width === 0 || e.clientX < k.left - 4 || e.clientX > k.right + 4) { sozlukKapat(); return; }
+    balon.innerHTML = `<span class="dil" lang="tr">${esc(SOZLUK.baslik || "")}</span><b>${esc(kelime)}</b>` + (an ? `<span class="an" lang="tr">${esc(an)}</span>` : "") +
+      (kl ? `<span class="kal"><b>${esc(kl)}</b> → ${esc(SOZLUK.kaliplar[kl])}</span>` : "");
+    isaret.style.cssText = `display:block;left:${k.left - 2}px;top:${k.top - 1}px;width:${k.width + 4}px;height:${k.height + 2}px`;
+    balon.classList.add("acik");
+    const bw = balon.offsetWidth, bh = balon.offsetHeight;
+    let x = Math.min(Math.max(8, k.left + k.width / 2 - bw / 2), window.innerWidth - bw - 8);
+    let y = k.top - bh - 10; if (y < 8) y = k.bottom + 10;
+    balon.style.left = x + "px"; balon.style.top = y + "px";
+    e.stopPropagation();
+  });
+  ["scroll", "resize"].forEach((ev) => window.addEventListener(ev, () => sozlukKapat(), true));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") sozlukKapat(); });
+})();
+
+/* ---------------- Karadeniz dağ köyü: sırtlar, ladinler, ev lambaları, inen sis ---------------- */
+const koy = { level: 0.1, target: 0.1, flash: 0, hour: 16.5, h: 16.5, sonen: 0 };
+window.ATM = koy;
+(function scene() {
+  const cv = $("sea"), ctx = cv.getContext("2d");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, dpr, ridges = [], trees = [], lamps = [], puffs = [], seed = 11;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const mix = (c1, c2, t) => c1.map((v, i) => Math.round(lerp(v, c2[i], t)));
+  // saat: 16 bulutlu öğleden sonra, 17.5 akşam, 19+ gece, 6 şafak
+  const SKY = [
+    [0, [6, 9, 12], [14, 18, 22]], [5, [10, 14, 20], [40, 46, 54]], [7, [96, 108, 118], [150, 156, 158]],
+    [15, [110, 120, 128], [160, 162, 160]], [16.5, [88, 96, 106], [150, 140, 128]], [17.6, [40, 46, 58], [110, 90, 80]],
+    [19, [10, 14, 20], [26, 30, 36]], [24, [6, 9, 12], [14, 18, 22]]
+  ];
+  function skyAt(h) {
+    for (let i = 0; i < SKY.length - 1; i++) {
+      const [a, t1, b1] = SKY[i], [b, t2, b2] = SKY[i + 1];
+      if (h >= a && h <= b) { const t = (h - a) / (b - a); return [mix(t1, t2, t), mix(b1, b2, t)]; }
+    }
+    return [SKY[0][1], SKY[0][2]];
+  }
+  const nightness = (h) => (h < 5 || h > 19) ? 1 : (h < 7 ? 1 - (h - 5) / 2 : (h > 17 ? (h - 17) / 2 : 0));
+  function size() {
+    dpr = Math.min(2, window.devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    seed = 11;
+    ridges = [0, 1, 2].map((d) => { const pts = []; for (let x = -60; x <= W + 60; x += 30) pts.push([x, H * (0.28 + d * 0.16) + Math.sin(x * (0.006 - d * 0.0012) + d * 1.7) * (70 - d * 18) + rnd() * 18]); return pts; });
+    trees = Array.from({ length: Math.floor(W / 14) }, () => ({ x: rnd() * W, d: Math.floor(rnd() * 3), s: 0.6 + rnd() * 0.8 }));
+    lamps = Array.from({ length: 14 }, () => ({ x: W * (0.15 + rnd() * 0.7), y: H * (0.62 + rnd() * 0.25), p: rnd() * 6 }));
+    puffs = Array.from({ length: 26 }, () => ({ x: rnd() * W, y: H * (0.3 + rnd() * 0.7), r: 120 + rnd() * 220, v: 0.1 + rnd() * 0.3 }));
+  }
+  function ridgeY(pts, x) { for (let i = 0; i < pts.length - 1; i++) if (x >= pts[i][0] && x <= pts[i + 1][0]) { const t = (x - pts[i][0]) / (pts[i + 1][0] - pts[i][0]); return lerp(pts[i][1], pts[i + 1][1], t); } return pts[0][1]; }
+  window.addEventListener("resize", size); size();
+  function frame(t) {
+    const time = t / 1000;
+    koy.level += (koy.target - koy.level) * 0.015;
+    koy.h += (koy.hour - koy.h) * 0.02;
+    const h = koy.h, L = koy.level, n = nightness(h);
+    const [top, bot] = skyAt(h);
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, `rgb(${top})`); g.addColorStop(1, `rgb(${bot})`);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ridges.forEach((pts, d) => {
+      const c = mix(mix([70, 84, 88], [14, 20, 24], n), [8, 12, 14], d * 0.3);
+      ctx.fillStyle = `rgb(${c})`; ctx.beginPath(); ctx.moveTo(0, H);
+      pts.forEach(([x, y]) => ctx.lineTo(x, y)); ctx.lineTo(W, H); ctx.fill();
+      // ladinler
+      ctx.fillStyle = `rgb(${mix(c, [4, 6, 8], 0.35)})`;
+      trees.filter((tr) => tr.d === d).forEach((tr) => {
+        const y = ridgeY(pts, tr.x), hh = (18 + d * 10) * tr.s;
+        ctx.beginPath(); ctx.moveTo(tr.x, y - hh); ctx.lineTo(tr.x - hh * 0.32, y + 2); ctx.lineTo(tr.x + hh * 0.32, y + 2); ctx.fill();
+      });
+    });
+    // ev lambaları (gece yanar; sönen lambalar hikâyeye göre)
+    if (n > 0.2) lamps.forEach((l, i) => {
+      if (i < koy.sonen) return;
+      const a = n * (0.55 + 0.25 * Math.sin(time * 2 + l.p)) * (1 - L * 0.6);
+      const gl = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, 16); gl.addColorStop(0, `rgba(240,180,90,${a})`); gl.addColorStop(1, "rgba(240,180,90,0)");
+      ctx.fillStyle = gl; ctx.fillRect(l.x - 16, l.y - 16, 32, 32);
+      ctx.fillStyle = `rgba(255,214,140,${a})`; ctx.fillRect(l.x - 1.5, l.y - 1.5, 3, 3);
+    });
+    // sis
+    if (L > 0.03) {
+      puffs.forEach((p) => {
+        const gl = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+        const c = n > 0.5 ? "150,160,168" : "205,210,212";
+        gl.addColorStop(0, `rgba(${c},${0.16 * L})`); gl.addColorStop(1, `rgba(${c},0)`);
+        ctx.fillStyle = gl; ctx.fillRect(p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
+        if (!reduce) { p.x += p.v; if (p.x - p.r > W) p.x = -p.r; }
+      });
+      ctx.fillStyle = `rgba(${n > 0.5 ? "60,68,74" : "190,196,198"},${0.22 * L})`; ctx.fillRect(0, 0, W, H);
+    }
+    if (koy.flash > 0) { ctx.fillStyle = `rgba(230,236,240,${koy.flash * 0.25})`; ctx.fillRect(0, 0, W, H); koy.flash *= 0.9; if (koy.flash < 0.02) koy.flash = 0; }
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  if (reduce) { frame(0); window.addEventListener("resize", () => frame(0)); }
+  else requestAnimationFrame(frame);
+})();
+
+/* ---------------- Başlat ---------------- */
+function start(data) {
+  if (data && data.sec && (data.sec === "cover" || S[data.sec])) state = Object.assign(fresh(), data);
+  else if (location.hash === "#oku") state = fresh();
+  render();
+}
+window.claude?.hot?.snapshot?.(() => state);
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>

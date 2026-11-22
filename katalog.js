@@ -130,6 +130,48 @@ window.KATALOG = {
       adres: "kitaplar/amazon-en/index.html",
       sonAnahtari: "amazon-en-sonlar",
       sirt: { renk: "#2c3a22", yazi: "#cdbb86", yukseklik: 280, kalinlik: 44 }
+    },
+    {
+      id: "kum-firtinasi-en",
+      dil: "en",
+      kaynak: "kum-firtinasi",
+      durum: "yayinda",
+      eklenme: "2026-11-22",
+      seri: "Choose Your Own Adventure",
+      kitapNo: 3,
+      baslik: "Sandstorm",
+      altBaslik: "A Star Wars fan adventure",
+      yazar: "Burak Karatatar",
+      tur: ["Space opera", "Fan fiction"],
+      okumaSuresi: "30 min",
+      sonSayisi: 7,
+      slogan: "The moment you touched the pod, the hum began.",
+      tanitim: "On the desert planet Kessar you're a scrap dealer's apprentice. Inside a pod that falls into the scrapyard you find a stone cube that hums, and that same night an Imperial shuttle lands in town. By dawn you'll have to choose who to trust, and what to become.",
+      kapak: "kitaplar/kum-firtinasi-en/img/kapak.jpg",
+      adres: "kitaplar/kum-firtinasi-en/index.html",
+      sonAnahtari: "kum-firtinasi-en-sonlar",
+      sirt: { renk: "#3a2216", yazi: "#e8a64a", yukseklik: 340, kalinlik: 48, yaziBoyu: 17 }
+    },
+    {
+      id: "karanlik-koy-en",
+      dil: "en",
+      kaynak: "karanlik-koy",
+      durum: "yayinda",
+      eklenme: "2026-11-22",
+      seri: "Choose Your Own Adventure",
+      kitapNo: 4,
+      baslik: "The Dark Village",
+      altBaslik: "A Black Sea horror story",
+      yazar: "Burak Karatatar",
+      tur: ["Horror", "Thriller"],
+      okumaSuresi: "30 min",
+      sonSayisi: 7,
+      slogan: "When the fog comes, open your door to no one.",
+      tanitim: "November 1987. You're the new teacher in a Black Sea mountain village. The last teacher vanished last winter, and on the school door hangs a note in her handwriting: when the fog comes, open your door to no one. Tonight the fog comes down, and someone knocks in your mother's voice.",
+      kapak: "kitaplar/karanlik-koy-en/img/kapak.jpg",
+      adres: "kitaplar/karanlik-koy-en/index.html",
+      sonAnahtari: "karanlik-koy-en-sonlar",
+      sirt: { renk: "#172024", yazi: "#e3a64f", yukseklik: 320, kalinlik: 46, yaziBoyu: 13 }
     }
   ]
 };
