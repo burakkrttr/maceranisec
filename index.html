@@ -196,7 +196,9 @@ section { position: relative; }
 .bk.soon .cover { filter: grayscale(0.6) brightness(0.55); display: grid; place-items: center; }
 .bk.soon .cover span { font-family: var(--display); font-weight: 700; font-size: 26px; letter-spacing: 0.2em; color: #e7dcc0; text-transform: uppercase; transform: rotate(-8deg); border: 2px solid #e7dcc0; padding: 6px 14px; }
 .slot { position: relative; flex: none; display: flex; align-items: flex-end; }
-.case.on .slot { animation: shelfin .9s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--n, 0) * 110ms + 150ms); }
+.case.on .slot { animation: shelfin .9s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--n, 0) * 110ms + 150ms); }
+/* üzerine gelinen kitabın kapağı yanındaki kitapların önünde açılsın */
+.slot:hover, .slot:has(.peek), .slot:has(.bk:focus-visible) { z-index: 10; }
 @keyframes shelfin { from { transform: translateY(70px); opacity: 0; } to { transform: none; opacity: 1; } }
 .slot::before { content: ""; position: absolute; left: 50%; bottom: -10px; width: 160px; height: 60px; transform: translateX(-50%); pointer-events: none; border-radius: 50%;
   background: radial-gradient(closest-side, var(--c, #e9b34f), transparent); opacity: 0; transition: opacity .4s; filter: blur(6px); }
