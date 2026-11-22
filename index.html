@@ -424,7 +424,7 @@ footer .big em { color: var(--lamp); }
     const enLive = enBooks.filter((b) => b.durum === "yayinda");
     if (enLive.length) {
       const pill = $("#en-pill"); pill.hidden = false;
-      pill.innerHTML = `<b>NEW</b>Now in English: <i>${enLive.length === 1 ? esc(enLive[0].baslik) : enLive.length + " books"}</i> →`;
+      pill.innerHTML = `<b>NEW</b>Now in English: <i>${enLive.length <= 2 ? enLive.map((b) => esc(b.baslik)).join(" & ") : enLive.length + " books"}</i> →`;
     }
   }
   const shelves = [[$("#row"), books.filter((b) => dilOf(b) === "tr")], [$("#row-en"), enBooks]];

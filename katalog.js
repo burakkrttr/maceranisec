@@ -109,6 +109,27 @@ window.KATALOG = {
       adres: "kitaplar/fener-en/index.html",
       sonAnahtari: "fener-en-sonlar",
       sirt: { renk: "#1d3338", yazi: "#e9b34f", yukseklik: 320, kalinlik: 50, yaziBoyu: 12 }
+    },
+    {
+      id: "amazon-en",
+      dil: "en",
+      kaynak: "amazon",
+      durum: "yayinda",
+      eklenme: "2026-11-22",
+      seri: "Choose Your Own Adventure",
+      kitapNo: 2,
+      baslik: "Amazon",
+      altBaslik: "The Green Silence",
+      yazar: "Burak Karatatar",
+      tur: ["Adventure", "Survival"],
+      okumaSuresi: "30 min",
+      sonSayisi: 7,
+      slogan: "The plane went down. The forest is waiting.",
+      tanitim: "You're a photojournalist on a small cargo plane over the Amazon, with a sealed box in your lap that the pilot told you never to open. Twenty minutes after takeoff the engine stops. Three days of river lie between you and the one person who must get that box.",
+      kapak: "kitaplar/amazon-en/img/kapak.jpg",
+      adres: "kitaplar/amazon-en/index.html",
+      sonAnahtari: "amazon-en-sonlar",
+      sirt: { renk: "#2c3a22", yazi: "#cdbb86", yukseklik: 280, kalinlik: 44 }
     }
   ]
 };
