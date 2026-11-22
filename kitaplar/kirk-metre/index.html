@@ -504,11 +504,11 @@ const S = {
       const p = [];
       if (has(s, "SORDU")) p.push("\"Babamı o sularda kaybettim,\" demişti Nuri iskelede. \"Kırk dört yazı. Kayığımızı batırdılar.\" Kimin batırdığını sorduğunda motoru çalıştırmıştı. Şimdi o motor susuyor ve Nuri denize uzun uzun bakıyor, sanki dibi görebilirmiş gibi.");
       else p.push("Nuri bütün yol tek kelime etmedi. Kompresör tüpleri doldururken bile başını kaldırmadı. Şimdi motoru durduruyor ve denize uzun uzun bakıyor, sanki dibi görebilirmiş gibi.");
-      if (has(s, "HARITA")) p.push("Rıza'nın haritası sende ama Nuri ona bir kez bile bakmadı. Dümeni karanın iki kayasını üst üste getirerek kırdı, sonra Bodrum kalesinin kulesini Karaada'nın ucuna oturttu ve durdu. Kendi evinin kapısını bulur gibi.");
-      else p.push("Harita yok, işaret yok. Nuri dümeni karanın iki kayasını üst üste getirerek kırdı, sonra Bodrum kalesinin kulesini Karaada'nın ucuna oturttu ve durdu. Kendi evinin kapısını bulur gibi.");
+      if (has(s, "HARITA")) p.push("Rıza'nın haritası sende ama Nuri ona bir kez bile bakmıyor. Balıkçıların yer bulma yöntemiyle gidiyor: kıyıdaki iki kayayı birbirinin arkasına hizalıyor, sonra Bodrum kalesinin kulesini Karaada'nın ucuyla aynı çizgiye getiriyor ve motoru durduruyor. O noktayı ezbere biliyor.");
+      else p.push("Elinizde harita yok, ama Nuri'nin buna ihtiyacı yok. Balıkçıların yer bulma yöntemiyle gidiyor: kıyıdaki iki kayayı birbirinin arkasına hizalıyor, sonra Bodrum kalesinin kulesini Karaada'nın ucuyla aynı çizgiye getiriyor ve motoru durduruyor. O noktayı ezbere biliyor.");
       p.push("Su öyle berrak ki tekne havada asılıymış gibi duruyor. Aşağıda, mavinin karardığı yerde, uzun, düz bir gölge var. Kaya değil. Kayalar böyle düz olmaz.");
       p.push("Çift tüpü sırtlıyorsun. Manometre iki yüz bar gösteriyor. Nuri kemerini bağlarken kuralını söylüyor, babanın da söylediği kuralı: \"Kırk metrede yirmi dakika. Çıkarken altı metrede dur, beş dakika bekle. Acele çıkan bir daha dalamaz.\"");
-      p.push("Teknede üç şey daha var: Rıza'nın levyesi, yedek bir tüp ve geçen yaz İzmir'den aldığınız su geçirmez fener. \"İki elin var,\" diyor Nuri. \"Birini kendine ayır. Birini seç.\"");
+      p.push("Teknede üç şey daha var: Rıza'nın levyesi, yedek bir tüp ve geçen yaz İzmir'den aldığınız su geçirmez fener. \"Yalnızca birini alabilirsin,\" diyor Nuri. \"Bir elin hep ipte, kendinde olacak. Öbür elinle ancak tek bir şey taşırsın.\"");
       return p;
     },
     choices: [
@@ -547,11 +547,11 @@ const S = {
     text: (s) => {
       const p = [];
       if (s.via === "cevap") p.push("Üç kısa, üç uzun, üç kısa vuruyorsun. Bir an içeriden hiç ses gelmiyor. Sonra hızlı, telaşlı vuruşlar geliyor; artık bir işaret değil, biri gövdeyi yumruklarıyla dövüyor. Kuleye çıkıyorsun.");
-      else p.push("Kulenin tepesine çıkıyorsun. İçeriden vuruşlar arkandan geliyor, inatla, aynı işaret, aynı işaret.");
-      p.push("Kule kapağı açık. Menteşesi pırıl pırıl: yeni sürtünmüş. Biri burayı birkaç gün önce açmış. İçeri, dar bir merdivenle kontrol odasına iniyorsun.");
+      else p.push("Kulenin tepesine çıkıyorsun. Arkanda, gövdenin içinden, aynı işaret inatla tekrar tekrar vuruluyor.");
+      p.push("Kule kapağı açık. Menteşesinin pası yeni sıyrılmış, altındaki metal parlıyor. Biri bu kapağı birkaç gün önce açmış. İçeri, dar bir merdivenle kontrol odasına iniyorsun.");
       if (has(s, "FENER")) p.push("Feneri yakıyorsun. Işık suyun içinde bir mızrak gibi: göstergeler, borular, dümen tekerleri, yerde bir subay kasketi. Kemiklere ışığı çevirmiyorsun. Duvardaki pirinç levhanın da üstü kazınmış, harfleri tek tek silinmiş.");
       else p.push("Fenerin yok. Kuleden süzülen mavi ışık kontrol odasının yarısını gösteriyor, gerisi kara. Göstergeler, borular, dümen tekerleri. Yerde bir subay kasketi. Kafanın içindeki ılıklık büyüyor. Bir an kendini çok iyi hissediyorsun, hiçbir şeyden korkmuyorsun. Bu kötü bir işaret.");
-      p.push("Ön tarafta yuvarlak, çelik bir kapak. Önüne borular, bir raf yığılmış ama yığın bir çökmeden olamayacak kadar düzgün. Kapağın koluna kalın bir demir çubuk geçirilmiş, ucu kenara takozlanmış. Kapak içeriden açılamasın diye.");
+      p.push("Ön tarafta yuvarlak, çelik bir kapak. Önüne borular ve devrilmiş bir raf yığılmış. Ama bu yığın kendiliğinden çökmüş gibi durmuyor: borular kapağın önüne tek tek, düzgünce dizilmiş. Biri onları oraya bilerek koymuş. Kapağın koluna kalın bir demir çubuk geçirilmiş, ucu kenara takozlanmış. Kapak içeriden açılamasın diye.");
       p.push("Bıçak sapıyla kapağa vuruyorsun. Cevap bu kez yavaş geliyor, harf harf, sabırla, askerde muhabereci olan birinin elinden: R-I-Z-A.");
       if (has(s, "CEVAP")) p.push("Sonra, arkasından: Y-U-S. Seni ilk vuruşundan tanımış.");
       p.push("Sonra: İ-K-İ K-İ-Ş-İ. H-A-V-A A-Z. K-A-P-A-K D-I-Ş-T-A-N.");
@@ -576,8 +576,8 @@ const S = {
       if (has(s, "YEDEK_BIRAKTI")) p.push("Yedek tüpü kapağın yanındaki boruya kayışıyla bağlıyorsun. Bir sonraki dalışta ilk iş onu alacaksın.");
       if (has(s, "PLAKA")) p.push("Fenerle kontrol odasını taradın. Yerdeki büyük valf tekerleri sonuna kadar açık çevrilmiş. Pirinç levhadaki ad kazınmış ama altında bir yıl okunuyor: 1943.");
       if (has(s, "SOZ")) p.push("Kapağa harf harf vurdun: DAYANIN. DÖNECEĞİM. İçeriden tek bir vuruş geldi; «anladım» demek.");
-      p.push("Çapa ipinden yukarı çıkıyorsun, kabarcıklarından yavaş, Nuri'nin öğrettiği gibi. Renkler geri geliyor: önce sarı, sonra kırmızı. Altı metrede ipi kavrayıp duruyorsun. Beş dakika.");
-      p.push("Yukarıda, yüzeyin gümüş tavanında Nuri'nin teknesinin karnı. Ve onun yanına doğru gelen ikinci bir karın: daha büyük, beyaz. Bir motor sesi suyun içinde büyüyor, sonra kesiliyor. Beyaz teknenin çapası yanından süzülüp geçiyor, dibe iniyor.");
+      p.push("Çapa ipinden yukarı çıkıyorsun; Nuri'nin öğrettiği gibi yavaş, kendi kabarcıklarını hiç geçmeden. Renkler geri geliyor: önce sarı, sonra kırmızı. Altı metrede ipi kavrayıp duruyorsun. Beş dakika.");
+      p.push("Başının üstünde, gümüş gibi parlayan yüzeyde Nuri'nin teknesinin altını görüyorsun. Yanına doğru ikinci, daha büyük, beyaz bir tekne yaklaşıyor. Motor sesi suyun içinde büyüyor, sonra kesiliyor. Beyaz teknenin çapası yanından süzülüp geçiyor, dibe iniyor.");
       p.push("Yukarıda sesler. Boğuk, anlaşılmaz. Biri bağırıyor mu, gülüyor mu? Nuri yukarıda yalnız.");
       return p;
     },
@@ -652,14 +652,14 @@ const S = {
     title: "Beyaz motor",
     text: (s) => {
       const p = [];
-      p.push("Yüzeye çıktığında Nuri'nin teknesine beyaz bir motor bordalamış. Kıçında Almanca bir ad: SEESTERN. Güvertesinde kırçıl saçlı, gözlüklü, elli yaşlarında bir adam bir fincan kahve tutuyor. Yanında yanık yüzlü, iri biri dikiliyor, kucağında av tüfeği: Güllüklü Cemil. Limanda ondan iş yapan herkes korkar.");
+      p.push("Yüzeye çıktığında Nuri'nin teknesine beyaz bir motor bordalamış. Kıçında Almanca bir ad: SEESTERN. Güvertesinde kırçıl saçlı, gözlüklü, elli yaşlarında bir adam bir fincan kahve tutuyor. Yanında yanık yüzlü, iri biri dikiliyor, kucağında av tüfeği: Güllüklü Cemil. Limanda iş yapan herkes ondan korkar.");
       if (has(s, "PANSIYON")) p.push("Motorun güvertesinde, branda altında tahta bir sandık duruyor. Kenarından hâlâ su damlıyor. Saffet Hanım'ın merdivenlerini ıslatan sandık bu.");
       p.push("\"Dieter Brandt,\" diyor adam, Türkçesi düzgün, kitap gibi. \"Ağabeyinizi ben de arıyorum. Ne yazık, iki gündür arıyorum.\"");
       p.push("Maskeni çıkarıyorsun. \"Yaşıyor,\" diyorsun.");
       p.push("Brandt'ın elindeki fincan dudağına giderken havada kalıyor. \"İkisi de mi?\" diye soruyor. Sonra kendini toparlıyor, gülümsüyor. \"Benim dalgıcım da aşağıda. Kostas. İstanköylü.\" Fincanı yavaşça bırakıyor. \"Bir Yunan.\"");
       p.push("Sabah kahvede duyduğun radyo aklına geliyor: Kıbrıs'ta savaş bu sabah yeniden başladı.");
       p.push("\"Sahil güvenlik bugün Türk sularında bir Yunan dalgıç bulsa ne der, sizce?\" diyor Brandt. \"Bir Alman, bir Yunan ve bir Türk, kayıtlarda olmayan bir batıkta. Ağabeyiniz casusla beraber çıkar oradan. Çıkarsa.\"");
-      p.push("Sonra Brandt başını çeviriyor ve Nuri Reis'e bakıyor. Uzun uzun. Gözlüklerinin arkasında bir şey kımıldıyor.");
+      p.push("Sonra Brandt başını çeviriyor ve Nuri Reis'e bakıyor. Uzun uzun. Gözlüklerinin ardında bakışı bir an değişiyor.");
       p.push("\"Reis,\" diyor. \"Sizi bir yerden tanıyor muyum?\"");
       p.push("Nuri'nin dümendeki eli beyazlıyor.");
       return p;
@@ -674,7 +674,7 @@ const ACT2 = {
     title: "Teklif",
     text: (s) => {
       const p = [];
-      p.push("Nuri cevap vermiyor. Brandt üstelemiyor; tanıyormuş gibi yapmanın tadını çıkaran biri gibi gülümsüyor, sonra sana dönüyor. Cemil'e bir işaret ediyor; Cemil tüfeği omzuna asıp iki teknenin arasına bir iskele tahtası uzatıyor.");
+      p.push("Nuri cevap vermiyor. Brandt üstelemiyor; bir sır bildiğini ima eder gibi gülümsüyor, sonra sana dönüyor. Cemil'e bir işaret ediyor; Cemil tüfeği omzuna asıp iki teknenin arasına bir iskele tahtası uzatıyor.");
       p.push("\"Açık konuşayım,\" diyor Brandt. \"Dümeni ben bağladım. İki gün önce ön bölmede bir raf çöktü. Ağabeyinizle Kostas'ın öldüğünü sandım. Tekne ailesine dönsün, bir kaza gibi görünsün istedim. Kötü bir karardı. Kabul ediyorum.\"");
       p.push("Raf çökmesi. Kapağın koluna geçirilmiş, ucu takozlanmış demiri sen gördün. Raf çökünce demir kendi kendine kola geçmez.");
       p.push("\"Teklifim şu,\" diyor Brandt. \"Bende vinç var, altı dolu tüp var. Aşağıda sandıklar var; bunları çıkarmama yardım edin, iki adamı birlikte çıkaralım. Ağabeyinize beş yüz lira söz vermiştim. Size bunun on katını veririm.\"");
@@ -722,8 +722,8 @@ const ACT2 = {
       p.push("Renkler yine teker teker gidiyor. Denizaltı yine kumun üstünde, yine sessiz. Ama bu kez onun ne olduğunu biliyorsun ve gövdesine dokunduğunda içeriden hemen cevap geliyor: üç kısa, üç uzun, üç kısa. Daha zayıf. Sabahkinden daha zayıf.");
       if (has(s, "YEDEK_BIRAKTI")) p.push("Kapağın yanındaki yedek tüpü çözüp regülatörünü çift tüpün yanına bağlıyorsun.");
       if (has(s, "KAPAK_GEVSEK")) p.push("Sabah söktüğün demir kumun üstünde duruyor. Kapak kilitsiz; yalnızca önündeki boruların kenara çekilmesi gerek.");
-      else if (has(s, "LEVYE")) p.push("Kapağın kolundaki demir hâlâ yerinde. Levyen kemerinde; demiri sökmek bir dakikanı alır. Ya da dışarıdan, gövdenin burnundaki torpido kovanının kapağı. Dar. Ama açık duruyor.");
-      else p.push("Kapağın kolundaki demir hâlâ yerinde. Levye yok; demiri iki elinle, ayaklarını kapağa dayayıp sökmen gerekecek. Ya da dışarıdan, gövdenin burnundaki torpido kovanının kapağı. Dar. Ama açık duruyor.");
+      else if (has(s, "LEVYE")) p.push("Kapağın kolundaki demir hâlâ yerinde. Levyen kemerinde; demiri sökmek bir dakikanı alır. Bir yol daha var: gövdenin burnundaki torpido kovanı. Dar, ama ağzı açık.");
+      else p.push("Kapağın kolundaki demir hâlâ yerinde. Levye yok; demiri iki elinle, ayaklarını kapağa dayayıp sökmen gerekecek. Bir yol daha var: gövdenin burnundaki torpido kovanı. Dar, ama ağzı açık.");
       return p;
     },
     choices: [
@@ -749,7 +749,7 @@ const ACT2 = {
       p.push("Rıza her şeyi hızlı, kesik anlatıyor; havayı boşa harcamamak için. Brandt sandıkların yarısını çıkardıktan sonra ikisini kalanları toplamaya göndermiş. Döndüklerinde kapak kapanmış. Dört tüpleri vardı, havayı cebe boşalta boşalta iki gün dayandılar. Kırk dörtten kalma teneke kutulardan su içtiler.");
       p.push("Sonra " + (has(s, "FENER") ? "senin fenerini alıp" : "kendi fenerini") + " bir köşeye çeviriyor. Rafların arasında açık bir sandık, altın ışıltısı. Yanında kurşundan, küçük bir kutu. Kapağı açık. İçi kâğıtla dolu.");
       p.push("\"Mektuplar,\" diyor Rıza. \"Fotoğraflar, kimlikler. Kostas İtalyanca okuyor. İlki şöyle başlıyor: Rodos, Temmuz 1944.\" Sesi çatlıyor. \"Bunlar Rodos'tan sürülen ailelerin. Altınları da onların. Almanlar hepsini toplamış, bir daha hiçbiri yerine varmamış.\"");
-      if (has(s, "SANDIK")) p.push("Brandt'ın sandığında gördüğün bileziği hatırlıyorsun. İçindeki harfleri. Aynı ellerden.");
+      if (has(s, "SANDIK")) p.push("Brandt'ın sandığında gördüğün bileziği hatırlıyorsun. İçindeki harfleri. İkisi de aynı ailelerden alınmış.");
       p.push("Rıza bileğini tutuyor. \"Dinle. İki gündür kırk metredeyiz. Kanımız azotla dolu. Bizi bir saatte yukarı çıkarırsan güvertede ölürüz. Hatta saatlerce durmamız lazım, çok tüp lazım. Nuri Reis bilir. Yukarı çık, hazırla, sonra gel al bizi. Acele et. Bu havayla akşama dayanmayız.\"");
       p.push("Manometre sende " + s.hava + " bar diyor. Çıkmadan önce yapabileceğin tek bir şey var.");
       return p;
@@ -817,7 +817,7 @@ const ACT2 = {
     title: "Telsiz",
     text: () => [
       "Telsizin ahizesini kapıyorsun. \"Sahil güvenlik, sahil güvenlik. Karaada açığı. Batıkta iki kişi sıkıştı. Yaşıyorlar.\"",
-      "Brandt bir an kıpırdamıyor. Sonra Cemil'e bir şey söylüyor; Cemil iskele tahtasını çekiyor. Seestern'in motoru homurdanıyor. Beyaz motor batıya, İstanköy'e doğru açılıyor. Sandığı güvertesinde.",
+      "Brandt bir an kıpırdamıyor. Sonra Cemil'e bir şey söylüyor; Cemil iskele tahtasını çekiyor. Seestern'in motoru homurdanıyor. Beyaz motor batıya, İstanköy'e doğru açılıyor. Sandık hâlâ güvertesinde.",
       "Kırk dakika sonra gri bir sahil güvenlik botu geliyor. Ardından donanmanın dalgıçları. İki adamı saatlerce duraklarla çıkarıyorlar, İzmir'e basınç odasına götürüyorlar. Rıza yaşıyor."
     ],
     sabah: "Gazeteler bir gün yazıyor, sonra Kıbrıs haberleri her şeyi siliyor: «Karaada'da Yunan casus yakalandı.»",
@@ -827,7 +827,7 @@ const ACT2 = {
       ["Brandt", "Seestern'i İstanköy limanında boş buldular. Kendisi o hafta Münih'e uçmuş."],
       ["Altın", "Batıktan kalan sandıklar bir depoya götürüldü. Sonrası bir tutanakta bile yok."]
     ],
-    yil: "Nuri Reis o yazdan sonra Karaada açığına hiç gitmedi. Sorduğunda tek bir şey dedi: «Orada benim bir borcum var. Sen onu ödemedin, ben de ödemedim.»"
+    yil: "Nuri Reis o yazdan sonra Karaada açığına hiç gitmedi. Sorduğunda tek bir şey dedi: «Orada benim ödenmemiş bir borcum var.»"
   },
 
   e_pay: {
@@ -903,7 +903,7 @@ const ACT3 = {
         if (has(s, "KULCE")) p.push("Cebindeki sikkeleri çıkarıp Seestern'in güvertesine fırlatıyorsun. \"Bunlar da.\" Brandt eğilip tek tek topluyor.");
         p.push("Cemil altı dolu tüpü iskele tahtasından Nuri'nin teknesine itiyor. Seestern'in motoru çalışıyor. Beyaz motor sandıklarla birlikte İstanköy'e doğru açılıyor.");
       }
-      p.push("Nuri hemen işe girişiyor. Çapa ipine dokuz, altı ve üç metreye dolu tüpler asıyor, yanlarına su geçirmez bir yazı tahtası. \"Saatlerce,\" diyor. \"Her durakta bir saat, belki daha fazla. Yoksa yukarıda kanları köpürür.\"");
+      p.push("Nuri hemen işe girişiyor. Çapa ipine dokuz, altı ve üç metreye dolu tüpler asıyor, yanlarına da su geçirmez bir yazı tahtası bağlıyor. \"Saatlerce,\" diyor. \"Her durakta bir saat, belki daha fazla. Yoksa yukarıda kanları köpürür.\"");
       if (!has(s, "KOSTAS_KURTAR")) p.push("\"Kostas'ın bacağı hâlâ rafın altında,\" diyorsun. Nuri yüzünü buruşturuyor: \"O rafı tek başına kaldırmak zor. Ama aşağıda başka kimse yok.\"");
       p.push("Biri inip onları ön bölmeden çıkarmalı, tüpleri taktırmalı ve hatta onlarla kalmalı. Sen bugün iki kez kırk metreye indin. \"Üçüncüsü seni öldürebilir,\" diyor Nuri. \"Ben inerim. Benim borcum.\"");
       if (has(s, "OKUDU") || has(s, "MEKTUP")) p.push("Brandt dalış ceketini giyiyor. \"Hayır,\" diyor. \"Babamın gemisi. Bana bırakın.\"");
@@ -922,12 +922,12 @@ const ACT3 = {
     text: (s) => {
       const p = [];
       p.push("Üçüncü kez iniyorsun. Kulakların uğulduyor, dizlerinde ince bir sızı var; bunu Nuri'ye söylemedin. Kapaktan geçip hava cebine çıkıyorsun. Rıza'nın gözleri kapalı. Dürtünce açılıyor.");
-      if (has(s, "KOSTAS_KURTAR")) p.push("Kostas'ın bacağı şişmiş ama kurtardığın günden beri oynatabiliyor. Ona tüp takıyorsunuz, maskesini yüzüne bastırıyorsunuz. Üçünüz birden kapaktan geçiyorsunuz, Kostas'ı aranıza alarak.");
+      if (has(s, "KOSTAS_KURTAR")) p.push("Kostas'ın bacağı şişmiş ama sabah onu rafın altından kurtardığından beri oynatabiliyor. Ona tüp takıyorsunuz, maskesini yüzüne bastırıyorsunuz. Üçünüz birden kapaktan geçiyorsunuz, Kostas'ı aranıza alarak.");
       else p.push("Rıza'yla birlikte rafa omuz veriyorsunuz. Bir kez. İki kez. Raf bir parmak bile kalkmıyor. Manometren kırmızıya yaklaşıyor. Kostas elini senin elinin üstüne koyuyor, sonra seni yavaşça itiyor. Yazı tahtasını gösteriyor: üstüne Rumca bir şey yazmış, altına bir adres. Çantasından suya dayanıklı bir zarf çıkarıp sana veriyor. Gözlerini kapıyor.");
-      p.push("Sonra saatler. Dokuz metrede, altı metrede, üç metrede. Nuri tüpleri değiştiriyor, yazı tahtasına sorular yazıp sallıyor: AĞRI? SOĞUK? Rıza tankına bıçağıyla vuruyor, eski işaretleri: YAŞIYORUM. YAŞIYORUM. Güneş batarken üç metrede, suyun yüzeyi kızıl bir tavan.");
+      p.push("Sonra saatler süren bekleyiş başlıyor: önce dokuz metrede, sonra altı, sonra üç metrede. Nuri tüpleri değiştiriyor, yazı tahtasına sorular yazıp sallıyor: AĞRI? SOĞUK? Rıza bıçağıyla tüpüne vurup eski işaretle cevap veriyor: YAŞIYORUM. YAŞIYORUM. Güneş batarken hâlâ üç metredesiniz; başınızın üstündeki su kıpkızıl.");
       if (has(s, "ZORLA")) p.push("Bordada Brandt hâlâ bağlı oturuyor; Nuri arada bir ona su veriyor.");
       else if (has(s, "PAZARLIK")) p.push("Seestern çoktan gitti. Ufukta yalnızca İstanköy'ün ışıkları.");
-      else p.push("Brandt bütün öğleden sonra Nuri'nin yanında, tüpleri birlikte indirip çıkardılar. Tek kelime etmeden.");
+      else p.push("Brandt bütün öğleden sonra Nuri'nin yanındaydı; tüpleri birlikte indirip çıkardılar, tek kelime etmeden.");
       p.push("Saat altıyı kırk geçe yüzeye çıkıyorsunuz. Rıza güverteye uzanıp gökyüzüne bakıyor ve gülüyor, sesi hırıltılı. Sonra ağlıyor.");
       p.push("Ön bölmede hâlâ bir sandık altın var. Bir saat sonra karanlık basacak. Ve batığın yerini artık bilen tek kişi Nuri değil.");
       return p;
@@ -971,7 +971,7 @@ const ACT3 = {
     akibet: (s) => [
       ["Rıza", "Kostas'ın son gününü kimseye anlatmıyor. Her ağustos Karaada açığında denize bir karanfil bırakıyor."],
       ["Kostas", "Donanmanın dalgıçları onu bir ay sonra çıkardı. İstanköy'deki kilisenin bahçesine gömüldü. Mezar taşında Türkçe bir satır var; Rıza yazdırdı."],
-      ["Nuri Reis", "Savcı dosyayı kapattı. Nuri kendi dosyasını hiç kapatmadı."],
+      ["Nuri Reis", "Savcı dosyayı kapattı. Nuri ise kendini hiç affetmedi."],
       ["Brandt", brandtSonu(s)],
       ["Mektuplar", has(s, "KUTU") ? "Kurşun kutudaki mektuplar İzmir'deki cemaat aracılığıyla sahiplerine dağıtıldı." : "Kurşun kutu dalgıçların getirdiği yüklerin arasındaydı; bir depoya kaldırıldı. Nuri yıllarca peşinden koştu."]
     ],
@@ -984,7 +984,7 @@ const ACT3 = {
     title: "Altın",
     text: (s) => [
       "Nuri bir şey demiyor. Rıza'nın yüzüne bakıyor, sonra senin. Sonra dümene geçip teknesini Bodrum'a çeviriyor ve bütün yol tek kelime etmiyor.",
-      "Üç gece sonra Rıza'yla Saniye'yle çıkıyorsunuz. Ön bölmedeki sandığı halatla, tek tek torbalarla çıkarıyorsunuz. Sikkeler, bilezikler, kolyeler. Güvertede fenerin ışığında parlıyorlar.",
+      "Üç gece sonra Rıza'yla birlikte Saniye'ye binip denize açılıyorsunuz. Ön bölmedeki sandığı halatla, tek tek torbalarla çıkarıyorsunuz. Sikkeler, bilezikler, kolyeler. Güvertede fenerin ışığında parlıyorlar.",
       has(s, "KUTU") ? "Kurşun kutu evin tavan arasında duruyor. Açmıyorsun." : "Kurşun kutuyu ön bölmede bırakıyorsunuz. Rıza ona uzun uzun bakıyor ama bir şey söylemiyor."
     ],
     sabah: "İzmir'de bir kuyumcu sikkeleri tartıyor, soru sormuyor. Bir yıl içinde iki tekne, bir arsa, bir dükkân.",
@@ -1005,7 +1005,7 @@ const ACT3 = {
     text: (s) => [
       "Nuri Reis çift tüpü sırtlıyor. Yıllardır dalmıyordu; kayışları sıkarken parmakları beceriksiz. Sana dönüp gülümsüyor, otuz yılda gördüğün en hafif yüzle. \"Kılavuz benim, Yusuf,\" diyor. \"O gemiyi oraya ben götürdüm.\"",
       "Saatlerce çapa ipinin dibinde, altı metrede bekliyorsun. Önce Rıza geliyor, yüzü bembeyaz, sonra " + (has(s, "KOSTAS_KURTAR") ? "Kostas, Rıza'nın koluna tutunarak." : "Kostas, bacağı sargılı, bir başına yüzemeyecek halde; Nuri onu rafın altından tek başına kurtarmış.") + " Nuri ikisine tüpleri taktırıyor, yazı tahtasına bir şey yazıyor, sana uzatıyor.",
-      "Tahtada üç kelime: BABAMIN YANINA GİDİYORUM. Sonra Nuri'nin kabarcıkları geri, aşağı, karanlığa iniyor."
+      "Tahtada üç kelime: BABAMIN YANINA GİDİYORUM. Sonra Nuri ipi bırakıp yeniden aşağıya, karanlığa iniyor."
     ],
     sabah: "Gün batarken Rıza ve Kostas'la yüzeye çıkıyorsun. Nuri'nin kabarcıkları öğleden sonradan beri gelmiyor.",
     akibet: (s) => [
@@ -1013,7 +1013,7 @@ const ACT3 = {
       ["Rıza", "Yaşıyor. Nuri'nin teknesini aldı. Adını değiştirmedi."],
       ["Kostas", "İstanköy'e döndü. Nuri'nin adını oğluna verdi."],
       ["Brandt", brandtSonu(s)],
-      ["Mektuplar", has(s, "KUTU") ? "Kurşun kutuyu Nuri'nin vasiyetiyle İzmir'deki cemaate sen götürdün." : "Kurşun kutu ön bölmede kaldı. Nuri onu kucaklamış buldular."]
+      ["Mektuplar", has(s, "KUTU") ? "Kurşun kutuyu Nuri'nin vasiyetiyle İzmir'deki cemaate sen götürdün." : "Kurşun kutu ön bölmede kaldı. Nuri'yi onu kucaklamış halde buldular."]
     ],
     yil: "Her yıl on dört ağustosta Karaada açığında motoru durdurup denize iki çiçek bırakıyorsun. Biri Nuri'ye. Biri onun babasına."
   },
@@ -1025,7 +1025,7 @@ const ACT3 = {
     text: (s) => [
       "Brandt dalış ceketinin fermuarını çekiyor. Gözlüklerini çıkarıp sana veriyor. \"Bunu saklayın,\" diyor. Sonra Nuri'ye dönüyor, bir şey söyleyecek gibi oluyor, söylemiyor. Bordadan sırtüstü suya düşüyor.",
       "Saatler sonra altı metrede Rıza'yı ve Kostas'ı karşılıyorsun. " + (has(s, "KOSTAS_KURTAR") ? "Brandt ikisini de kapaktan çıkarmış, tüplerini taktırmış." : "Brandt Kostas'ı rafın altından tek başına kurtarmış; Kostas'ın bacağı sargılı, Rıza onu çekiyor.") + " Brandt yazı tahtasına Almanca bir şey yazıp ipe asmış.",
-      "Brandt'ın kendisi yok. Kabarcıkları kontrol odasının oradan yükseliyor, sonra seyrekleşiyor, sonra duruyor."
+      "Brandt'ın kendisi yok. Kabarcıkları kontrol odasının üstünden yükseliyor, sonra seyrekleşiyor, sonra duruyor."
     ],
     sabah: "Nuri tahtayı okuyor, sonra uzun süre konuşmuyor. Sonunda çeviriyor: «Babamın yanında kalıyorum. Sandıklar sahiplerinin. Reis, özür dilerim.»",
     akibet: (s) => [
