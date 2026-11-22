@@ -30,6 +30,7 @@ window.KATALOG = {
       kapak: "kitaplar/fener/img/kapak.jpg",
       adres: "kitaplar/fener/index.html",
       sonAnahtari: "fener-sonlar",
+      gorseller: ["kitaplar/fener/img/acilis.jpg", "kitaplar/fener/img/cizim.jpg", "kitaplar/fener/img/halil.jpg", "kitaplar/fener/img/kapi.jpg", "kitaplar/fener/img/lamba.jpg", "kitaplar/fener/img/lojman.jpg", "kitaplar/fener/img/mektup.jpg", "kitaplar/fener/img/mercek.jpg", "kitaplar/fener/img/oda.jpg", "kitaplar/fener/img/safak.jpg", "kitaplar/fener/img/sevket.jpg", "kitaplar/fener/img/telsiz.jpg"],
       sirt: { renk: "#1d3338", yazi: "#e9b34f", yukseklik: 300, kalinlik: 50 }
     },
     {
@@ -49,6 +50,7 @@ window.KATALOG = {
       kapak: "kitaplar/amazon/img/kapak.jpg",
       adres: "kitaplar/amazon/index.html",
       sonAnahtari: "amazon-sonlar",
+      gorseller: ["kitaplar/amazon/img/dantas.jpg", "kitaplar/amazon/img/enkaz.jpg", "kitaplar/amazon/img/inis.jpg", "kitaplar/amazon/img/kilise.jpg", "kitaplar/amazon/img/koy.jpg", "kitaplar/amazon/img/kutu.jpg", "kitaplar/amazon/img/pist.jpg", "kitaplar/amazon/img/sal.jpg", "kitaplar/amazon/img/tomas.jpg", "kitaplar/amazon/img/ucak.jpg", "kitaplar/amazon/img/yaku.jpg"],
       sirt: { renk: "#2c3a22", yazi: "#cdbb86", yukseklik: 280, kalinlik: 44 }
     },
     {
@@ -68,6 +70,7 @@ window.KATALOG = {
       kapak: "kitaplar/kum-firtinasi/img/kapak.jpg",
       adres: "kitaplar/kum-firtinasi/index.html",
       sonAnahtari: "kum-firtinasi-sonlar",
+      gorseller: ["kitaplar/kum-firtinasi/img/engizitor.jpg", "kitaplar/kum-firtinasi/img/garnizon.jpg", "kitaplar/kum-firtinasi/img/istasyon-yalniz.jpg", "kitaplar/kum-firtinasi/img/istasyon.jpg", "kitaplar/kum-firtinasi/img/kalkis.jpg", "kitaplar/kum-firtinasi/img/kapsul.jpg", "kitaplar/kum-firtinasi/img/kup.jpg", "kitaplar/kum-firtinasi/img/mekik.jpg", "kitaplar/kum-firtinasi/img/sena.jpg", "kitaplar/kum-firtinasi/img/tapinak.jpg", "kitaplar/kum-firtinasi/img/yuzlesme.jpg"],
       sirt: { renk: "#3a2216", yazi: "#e8a64a", yukseklik: 340, kalinlik: 48, yaziBoyu: 17 }
     },
     {
@@ -87,6 +90,7 @@ window.KATALOG = {
       kapak: "kitaplar/karanlik-koy/img/kapak.jpg",
       adres: "kitaplar/karanlik-koy/index.html",
       sonAnahtari: "karanlik-koy-sonlar",
+      gorseller: ["kitaplar/karanlik-koy/img/buz.jpg", "kitaplar/karanlik-koy/img/defter.jpg", "kitaplar/karanlik-koy/img/degirmen.jpg", "kitaplar/karanlik-koy/img/dolmus.jpg", "kitaplar/karanlik-koy/img/icerisi.jpg", "kitaplar/karanlik-koy/img/kahve.jpg", "kitaplar/karanlik-koy/img/kapi.jpg", "kitaplar/karanlik-koy/img/koy.jpg", "kitaplar/karanlik-koy/img/nazife.jpg", "kitaplar/karanlik-koy/img/ocak.jpg", "kitaplar/karanlik-koy/img/okul.jpg", "kitaplar/karanlik-koy/img/safak.jpg", "kitaplar/karanlik-koy/img/selim.jpg", "kitaplar/karanlik-koy/img/yol.jpg"],
       sirt: { renk: "#172024", yazi: "#e3a64f", yukseklik: 320, kalinlik: 46, yaziBoyu: 17 }
     },
     {
@@ -106,6 +110,7 @@ window.KATALOG = {
       kapak: "kitaplar/son-gun/img/kapak.jpg",
       adres: "kitaplar/son-gun/index.html",
       sonAnahtari: "son-gun-sonlar",
+      gorseller: ["kitaplar/son-gun/img/barinak.jpg", "kitaplar/son-gun/img/dukkan.jpg", "kitaplar/son-gun/img/gokyuzu.jpg", "kitaplar/son-gun/img/halka.jpg", "kitaplar/son-gun/img/hucre.jpg", "kitaplar/son-gun/img/hucreler.jpg", "kitaplar/son-gun/img/irmak.jpg", "kitaplar/son-gun/img/kamp.jpg", "kitaplar/son-gun/img/les.jpg", "kitaplar/son-gun/img/leyla.jpg", "kitaplar/son-gun/img/makine.jpg", "kitaplar/son-gun/img/nevzat.jpg", "kitaplar/son-gun/img/notlar.jpg", "kitaplar/son-gun/img/saatler.jpg", "kitaplar/son-gun/img/silah.jpg", "kitaplar/son-gun/img/tas.jpg", "kitaplar/son-gun/img/ufuk.jpg"],
       sirt: { renk: "#24361f", yazi: "#e3b85a", yukseklik: 300, kalinlik: 44, yaziBoyu: 17 }
     },
     {

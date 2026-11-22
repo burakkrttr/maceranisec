@@ -20,7 +20,7 @@
 /* Macera Kütüphanesi: gece, ahşap raflar, tek bir lamba ışığı.
    Düzen: tam ekran ışıklı giriş → yeni gelen vitrini → 3D kitap sırtlı raf → nasıl okunur → künye. */
 :root {
-  --night: #0e0b09;        /* oda */
+  --night: #160f0a;        /* oda: sıcak koyu kahve */
   --wood: #3b2618;         /* raf ahşabı */
   --brass: #c9a063;        /* pirinç, ince ayrıntılar */
   --paper: #efe6d1;        /* kağıt, ana metin rengi */
@@ -39,7 +39,7 @@ a { color: inherit; }
 
 /* üst menü */
 .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; transition: background .4s, backdrop-filter .4s; }
-.nav.solid { background: rgba(14,11,9,0.78); backdrop-filter: blur(10px); }
+.nav.solid { background: rgba(22,15,10,0.8); backdrop-filter: blur(10px); }
 .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 66px; gap: 16px; }
 .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: 0.04em; }
 .logo svg { width: 26px; height: 26px; }
@@ -50,17 +50,24 @@ a { color: inherit; }
 /* ---------- giriş: lamba ışığı ve toz ---------- */
 .hero { position: relative; min-height: 100vh; display: grid; place-items: center; overflow: hidden; isolation: isolate; }
 .hero .shelves {
-  position: absolute; inset: -40px; z-index: -3; opacity: 0.55;
+  position: absolute; inset: -40px; z-index: -4; opacity: 0.55;
   background:
     repeating-linear-gradient(180deg, transparent 0 238px, #2a1a10 238px 258px, #160e08 258px 262px),
     repeating-linear-gradient(90deg, #1c1410 0 22px, #241912 22px 48px, #1a120d 48px 62px, #2b1d14 62px 100px, #181009 100px 118px, #20160f 118px 160px);
   filter: blur(1.2px);
 }
 .hero .light { position: absolute; inset: 0; z-index: -2; pointer-events: none;
-  background: radial-gradient(520px circle at var(--lx, 50%) var(--ly, 40%), rgba(233,179,79,0.32), rgba(233,179,79,0.08) 45%, rgba(14,11,9,0) 70%),
-              radial-gradient(ellipse at 50% 100%, rgba(14,11,9,1) 10%, rgba(14,11,9,0) 60%);
+  background: radial-gradient(560px circle at var(--lx, 50%) var(--ly, 40%), rgba(240,170,70,0.36), rgba(233,140,60,0.1) 45%, rgba(22,15,10,0) 70%),
+              radial-gradient(ellipse at 50% 100%, rgba(22,15,10,1) 6%, rgba(22,15,10,0) 50%);
 }
-.hero .veil { position: absolute; inset: 0; z-index: -2; background: radial-gradient(ellipse at 50% 45%, rgba(14,11,9,0.2), rgba(14,11,9,0.92) 75%); }
+.hero .veil { position: absolute; inset: 0; z-index: -2; background: radial-gradient(ellipse 60% 55% at 50% 46%, rgba(22,15,10,0.86) 30%, rgba(22,15,10,0.45) 70%, rgba(22,15,10,0.92) 100%), linear-gradient(rgba(22,15,10,0.2), rgba(22,15,10,0) 30%, rgba(22,15,10,0) 70%, var(--night)); }
+/* giriş kolajı: kitapların sahneleri yavaşça kayar */
+.hero .reel { position: absolute; inset: -12% -8%; z-index: -3; display: flex; flex-direction: column; justify-content: center; gap: 18px; transform: rotate(-7deg); opacity: 0.5; filter: sepia(0.3) saturate(1.2) brightness(0.8); }
+.reel .strip { display: flex; gap: 18px; width: max-content; animation: slide 100s linear infinite; }
+.reel .strip:nth-child(2) { animation-direction: reverse; animation-duration: 120s; }
+.reel .strip:nth-child(3) { animation-duration: 140s; }
+.reel img { height: clamp(130px, 21vh, 220px); aspect-ratio: 1200 / 655; object-fit: cover; border-radius: 10px; box-shadow: 0 12px 30px rgba(0,0,0,0.6); }
+@keyframes slide { to { transform: translateX(-50%); } }
 #dust { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; }
 .hero-inner { text-align: center; padding: 120px 20px 90px; max-width: 900px; }
 .kicker { font-family: var(--display); font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; font-size: 15px; color: var(--lamp); margin: 0 0 18px; }
@@ -95,7 +102,25 @@ section { position: relative; }
 .reveal.pre { transform: translateY(40px); opacity: 0.25; }
 
 /* ---------- vitrin ---------- */
-.featured { padding: 110px 0 120px; background: radial-gradient(ellipse at 30% 50%, rgba(233,179,79,0.08), transparent 60%); }
+.featured { padding: 110px 0 120px; overflow: hidden; isolation: isolate; }
+.feat-bg { position: absolute; inset: 0; z-index: -1; }
+.feat-bg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 2.2s ease; animation: kb 18s ease-in-out infinite alternate; }
+.feat-bg img.on { opacity: 0.6; }
+.feat-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(22,15,10,0.35) 0%, rgba(22,15,10,0.62) 38%, rgba(22,15,10,0.84) 62%), linear-gradient(var(--night), rgba(22,15,10,0) 22%, rgba(22,15,10,0) 78%, var(--night)); }
+@keyframes kb { from { transform: scale(1.04); } to { transform: scale(1.16) translate(-1.5%, -1.5%); } }
+.featured .kicker { color: var(--acc, var(--lamp)); }
+/* sahneler galerisi */
+.scenes { padding: 20px 0 40px; }
+.marquee { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+.marquee .track { display: flex; gap: 22px; width: max-content; padding: 14px 0 24px; animation: slide 150s linear infinite; }
+.marquee:hover .track, .marquee:focus-within .track { animation-play-state: paused; }
+.scene { position: relative; flex: none; width: clamp(250px, 30vw, 420px); aspect-ratio: 1200 / 655; border-radius: 14px; overflow: hidden; cursor: pointer; border: 0; padding: 0; background: #000;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.55); transition: transform .45s cubic-bezier(.2,.7,.2,1), box-shadow .45s; }
+.scene img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.4s cubic-bezier(.2,.7,.2,1); }
+.scene:hover, .scene:focus-visible { transform: translateY(-8px) rotate(-0.6deg); box-shadow: 0 26px 50px rgba(0,0,0,0.6), 0 0 0 2px var(--c); outline: none; }
+.scene:hover img { transform: scale(1.08); }
+.scene span { position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 16px 12px; text-align: left; font-family: var(--display); font-weight: 600; font-size: 21px; letter-spacing: 0.05em; color: #f3e9d2; background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.78)); }
+.scene span i { display: block; font-style: normal; font-size: 12.5px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--c); }
 .feat { display: grid; grid-template-columns: minmax(260px, 420px) 1fr; gap: clamp(30px, 6vw, 80px); align-items: center; }
 .tilt { perspective: 1200px; }
 .tilt .cv { position: relative; aspect-ratio: 2 / 3; border-radius: 4px 10px 10px 4px; overflow: hidden; cursor: pointer;
@@ -124,7 +149,7 @@ section { position: relative; }
 .ring b { font-family: var(--display); font-size: 22px; color: var(--paper); display: block; line-height: 1; }
 
 /* ---------- raf ---------- */
-.library { padding: 100px 0 120px; background: linear-gradient(#0e0b09, #140f0b 30%, #0e0b09); }
+.library { padding: 100px 0 120px; background: linear-gradient(var(--night), #1d140d 30%, var(--night)); }
 .tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .filter { font-family: var(--display); font-weight: 600; font-size: 16px; letter-spacing: 0.08em; padding: 7px 16px; border-radius: 999px; border: 0; cursor: pointer;
   background: rgba(239,230,209,0.06); color: #d8ccb4; transition: background .2s, color .2s; }
@@ -171,6 +196,11 @@ section { position: relative; }
 .bk.soon .cover { filter: grayscale(0.6) brightness(0.55); display: grid; place-items: center; }
 .bk.soon .cover span { font-family: var(--display); font-weight: 700; font-size: 26px; letter-spacing: 0.2em; color: #e7dcc0; text-transform: uppercase; transform: rotate(-8deg); border: 2px solid #e7dcc0; padding: 6px 14px; }
 .slot { position: relative; flex: none; display: flex; align-items: flex-end; }
+.case.on .slot { animation: shelfin .9s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--n, 0) * 110ms + 150ms); }
+@keyframes shelfin { from { transform: translateY(70px); opacity: 0; } to { transform: none; opacity: 1; } }
+.slot::before { content: ""; position: absolute; left: 50%; bottom: -10px; width: 160px; height: 60px; transform: translateX(-50%); pointer-events: none; border-radius: 50%;
+  background: radial-gradient(closest-side, var(--c, #e9b34f), transparent); opacity: 0; transition: opacity .4s; filter: blur(6px); }
+.slot:hover::before, .slot:has(.peek)::before { opacity: 0.55; }
 .slot.hidden { display: none; }
 .slot .tag { position: absolute; left: 50%; bottom: calc(100% + 14px); transform: translateX(-50%) translateY(6px); white-space: nowrap; font-family: var(--display); font-weight: 600; font-size: 15px; letter-spacing: 0.08em;
   padding: 4px 12px; border-radius: 999px; background: var(--lamp); color: #1c1407; opacity: 0; transition: opacity .3s, transform .3s; pointer-events: none; z-index: 6; }
@@ -258,6 +288,7 @@ footer .big em { color: var(--lamp); }
     </a>
     <ul>
       <li><a href="#vitrin">Yeni gelen</a></li>
+      <li><a href="#sahneler">Sahneler</a></li>
       <li><a href="#raf">Raflar</a></li>
       <li><a href="#nasil">Nasıl okunur?</a></li>
       <li class="keep" id="nav-en-li" hidden><a id="nav-en" href="#shelf-en" lang="en">English</a></li>
@@ -268,6 +299,7 @@ footer .big em { color: var(--lamp); }
 
 <header class="hero" id="ust">
   <div class="shelves" aria-hidden="true"></div>
+  <div class="reel" id="reel" aria-hidden="true"></div>
   <div class="veil" aria-hidden="true"></div>
   <div class="light" id="light" aria-hidden="true"></div>
   <canvas id="dust" aria-hidden="true"></canvas>
@@ -286,7 +318,13 @@ footer .big em { color: var(--lamp); }
 </header>
 
 <section class="featured" id="vitrin">
+  <div class="feat-bg" id="feat-bg" aria-hidden="true"></div>
   <div class="wrap feat reveal" id="feat"></div>
+</section>
+
+<section class="scenes" id="sahneler">
+  <div class="wrap"><div class="sec-head reveal"><div><p class="kicker">Sahneler</p><h2>Kitapların <em>içinden</em>.</h2></div></div></div>
+  <div class="marquee reveal" id="scenes"></div>
 </section>
 
 <section class="library" id="raf">
@@ -375,6 +413,34 @@ footer .big em { color: var(--lamp); }
   $("#stats").innerHTML = `<div><b>${trLive.length}</b><span>Kitap</span></div><div><b>${endings}</b><span>Son</span></div><div id="stat-likes" hidden><b>0</b><span>Beğeni</span></div><div><b>${soon}</b><span>Yakında</span></div>`;
   const likeTotals = {};
 
+  /* görseller: Türkçe kitapların sahneleri (katalogda gorseller) */
+  const trShow = books.filter((b) => (!b.dil || b.dil === "tr") && b.durum === "yayinda" && (b.gorseller || []).length);
+  const mixed = []; { const lists = trShow.map((b) => b.gorseller.map((g) => ({ g, b }))); for (let k = 0; lists.some((l) => l[k]); k++) lists.forEach((l) => l[k] && mixed.push(l[k])); }
+  const reel = $("#reel");
+  if (reel && mixed.length) {
+    for (let r = 0; r < 3; r++) {
+      const part = mixed.filter((_, k) => k % 3 === r).slice(0, 9); if (!part.length) continue;
+      const strip = document.createElement("div"); strip.className = "strip";
+      strip.innerHTML = [...part, ...part].map((x) => `<img src="${esc(x.g)}" alt="" loading="lazy" decoding="async">`).join("");
+      reel.appendChild(strip);
+    }
+  }
+  const sc = $("#scenes");
+  if (sc && mixed.length) {
+    const track = document.createElement("div"); track.className = "track";
+    const items = mixed.slice(0, 24);
+    [...items, ...items].forEach((x, k) => {
+      const card = document.createElement("button"); card.type = "button"; card.className = "scene";
+      if (k >= items.length) { card.tabIndex = -1; card.setAttribute("aria-hidden", "true"); }
+      card.style.setProperty("--c", (x.b.sirt && x.b.sirt.yazi) || "#e9b34f");
+      card.setAttribute("aria-label", x.b.baslik + " kitabını aç");
+      card.innerHTML = `<img src="${esc(x.g)}" alt="" loading="lazy" decoding="async"><span><i>Kitap ${x.b.kitapNo}</i>${esc(x.b.baslik)}</span>`;
+      card.addEventListener("click", () => openBook(x.b, card.querySelector("img")));
+      track.appendChild(card);
+    });
+    sc.appendChild(track);
+  }
+
   /* vitrin: en yeni yayındaki kitap */
   const F = [...live].filter((b) => !b.dil || b.dil === "tr").sort((a, b) => (b.eklenme || "").localeCompare(a.eklenme || "") || (b.kitapNo || 0) - (a.kitapNo || 0))[0];
   if (F) {
@@ -400,6 +466,13 @@ footer .big em { color: var(--lamp); }
           </div>
         </div>
       </div>`;
+    $("#vitrin").style.setProperty("--acc", (F.sirt && F.sirt.yazi) || "#e9b34f");
+    const fbg = $("#feat-bg"), fimgs = (F.gorseller || []).slice(0, 8);
+    if (fbg && fimgs.length) {
+      fbg.innerHTML = fimgs.map((g, k) => `<img src="${esc(g)}" alt=""${k ? ' loading="lazy"' : ""} class="${k ? "" : "on"}">`).join("");
+      const ims = fbg.querySelectorAll("img"); let cur = 0;
+      if (!reduce && ims.length > 1) setInterval(() => { ims[cur].classList.remove("on"); cur = (cur + 1) % ims.length; ims[cur].classList.add("on"); }, 6000);
+    }
     const ring = $("#ringfg");
     setTimeout(() => { ring.style.strokeDashoffset = C * (1 - (total ? got / total : 0)); }, 400);
     const cv = $("#feat-cv");
@@ -436,6 +509,7 @@ footer .big em { color: var(--lamp); }
     const en = dilOf(b) === "en";
     const s = b.sirt || {}, H = s.yukseklik || 290, T = s.kalinlik || 46, D = Math.round(H * 0.68);
     const slot = document.createElement("div"); slot.className = "slot";
+    slot.style.setProperty("--n", row.querySelectorAll(".slot").length); slot.style.setProperty("--c", s.yazi || "#e9b34f");
     const el = document.createElement("button");
     el.type = "button";
     el.className = "bk" + (b.durum === "yakinda" ? " soon" : "");

@@ -358,6 +358,25 @@ canvas#sea { opacity: 0.62; }
 .choice, .choice:active { background-color:#f1f0de; box-shadow: inset 0 0 0 3px #f1f0de, inset 0 0 0 4px rgba(50,70,40,0.14), 0 1px 2px rgba(30,50,20,0.08); }
 .choice:hover { background-color:#f4f3e5; border-color: rgba(47,94,62,0.55); box-shadow: inset 0 0 0 3px #f4f3e5, inset 0 0 0 4px rgba(47,94,62,0.25), 0 8px 18px rgba(30,50,20,0.14); }
 
+
+/* ---------- canlılık: görsel yavaşça yaklaşır, seçenekler sırayla gelir, kapak süzülür ---------- */
+.ill .kb { overflow: hidden; }
+.ill .kb img { animation: kb 20s ease-in-out infinite alternate; transform-origin: 50% 45%; }
+@keyframes kb { from { transform: scale(1.02); } to { transform: scale(1.14) translate(-1.5%, -1%); } }
+.choices .choice { animation: cin .55s cubic-bezier(.2,.8,.2,1) both; }
+.choices .choice:nth-child(1) { animation-delay: .35s; } .choices .choice:nth-child(2) { animation-delay: .45s; }
+.choices .choice:nth-child(3) { animation-delay: .55s; } .choices .choice:nth-child(4) { animation-delay: .65s; }
+.choices .choice:nth-child(5) { animation-delay: .75s; } .choices .choice:nth-child(6) { animation-delay: .85s; }
+@keyframes cin { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.cover { animation: coverfloat 7s ease-in-out infinite; }
+@keyframes coverfloat { 0%, 100% { transform: translateY(0) rotate(-0.4deg); } 50% { transform: translateY(-8px) rotate(0.4deg); } }
+.cover-wrap { position: relative; }
+.cover-wrap::before { content: ""; position: absolute; left: 0; top: 50%; width: min(520px, 90vw); aspect-ratio: 1; transform: translate(-10%, -50%); pointer-events: none; z-index: -1;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--lamp) 32%, transparent), transparent); animation: glow 6s ease-in-out infinite; }
+@keyframes glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+.the-end { animation: endin 1.4s .2s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes endin { from { opacity: 0; letter-spacing: 0.9em; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ill .kb img, .choices .choice, .cover, .cover-wrap::before, .the-end { animation: none; } }
 </style>
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
 <link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
@@ -477,7 +496,7 @@ const S = {
         p.push("Hayri Usta seni görünce ocağın altını kısıp yanına oturtuyor. Taşı gösteriyorsun. Uzun süre bakıyor. \"Annenin cenazesinde tabut boştu, kızım,\" diyor sonunda. \"Herkes kazadan, yanmadan bahsetti. Ben babanı tanırım. O gün ağlamadı. Mezara taş da koydurmadı. 'Gelecek,' derdi. Kim gelecek, sormadım.\"");
         p.push("Çayını bitirmeni bekliyor, sonra ekliyor: \"Bir de Nevzat vardı. Babanın üniversiteden arkadaşı. Annen kaybolduktan sonra bir daha bu sokağa adım atmadı. Bugün cenazedeydi ama. Gördün mü?\"");
       }
-      p.push("Dükkâna döndüğünde kapının camına biri vuruyor. Uzun boylu, ince, altmışlarında bir adam; kır saçları özenle taranmış, gri yünlü bir palto, elinde beyaz karanfiller. Gülümsüyor, ama gözleri senin omzunun üstünden dükkânın içine bakıyor.");
+      p.push((has(s, "HAYRI") ? "Çayını bitirip Hayri Usta'ya teşekkür ediyorsun, taşı cebine koyup karşıya, dükkâna dönüyorsun. Tezgâhın başına yeni oturmuşken kapının camına biri vuruyor." : "O sırada kapının camına biri vuruyor.") + " Uzun boylu, ince, altmışlarında bir adam; kır saçları özenle taranmış, gri yünlü bir palto, elinde beyaz karanfiller. Gülümsüyor, ama gözleri senin omzunun üstünden dükkânın içine bakıyor.");
       p.push("\"Elif,\" diyor, kapıyı açınca. \"Beni hatırlamazsın. Nevzat Kural. Babanla otuz yıl… arkadaştık.\" Karanfilleri uzatıyor. \"Başın sağ olsun.\"");
       p.push("Sonra sesini alçaltıyor, sanki birileri dinliyormuş gibi. \"Baban bana bazı aletlerini bırakacağını söylemişti. Bodrumda. Anahtarı sende mi acaba?\"" + (has(s, "BANT") ? " Kasetteki ses kulağında: ona hiç güvenme." : ""));
       return p;
@@ -485,7 +504,7 @@ const S = {
     choices: [
       { t: "İçeri al, bodruma birlikte inin", to: "a4", fx: (s) => { flag(s, "NEVZAT_GORDU"); rel(s, "nevzat", 1); s.via = "birlikte"; } },
       { t: "Kibarca kapıda geri çevir", to: "a4", fx: (s) => { s.via = "cevir"; rel(s, "nevzat", -1, "Nevzat'ın gülümsemesi bir an kaydı."); } },
-      { t: "Ona annemi sor", to: "a4", fx: (s) => { flag(s, "NEVZAT_ANNE"); s.via = "anne"; note(s, "Nevzat: «Leyla o gün Karaköy'deydi, dükkânda.» Oysa herkes Ankara yolunda kaza dedi."); } }
+      { t: "Ona anneni sor", to: "a4", fx: (s) => { flag(s, "NEVZAT_ANNE"); s.via = "anne"; note(s, "Nevzat: «Leyla o gün Karaköy'deydi, dükkânda.» Oysa herkes Ankara yolunda kaza dedi."); } }
     ]
   },
 
@@ -549,9 +568,10 @@ const S = {
     text: (s) => {
       const p = [];
       p.push("Nevzat tezgâhın başında, babanın sandalyesinde oturuyor. Paltosunu çıkarmamış. Karanfiller hâlâ tezgâhın üstünde.");
+      if (!has(s, "NEVZAT_GORDU")) p.push("Halının altındaki demir kapaktan çıktığını görünce yüzü değişiyor. Gözleri tozlu ellerine, sonra parkanın şişkin cebine kayıyor. \"Demek indin,\" diyor alçak sesle. \"Demek buldun.\"");
       p.push("\"Otur,\" diyor, sanki dükkân onunmuş gibi. \"Sana bir şey anlatacağım. Annen benim de arkadaşımdı. O makineyi üçümüz yaptık: baban, annen ve ben. Annen ilk giden oldu. Hayaliydi. Dinozorları canlı görmek.\"");
       p.push("\"Geri dönemedi. Bir arıza.\" Gözlerini kaçırıyor. \"Baban yirmi dokuz yıl onu düzeltmeye çalıştı. Ben de. Ama o bana kapıyı kapattı.\"");
-      p.push("\"Sen o makineyi kullanmayı bilmiyorsun, Elif. Ben biliyorum. Hücreyi bana ver. Anneni ben getireyim. Sen burada bekle. Yarın akşam annen bu dükkânın kapısından girer. Söz.\"");
+      p.push((has(s, "NEVZAT_GORDU") ? "" : "\"Akşam karanfilleri getirdiğimde de onun için gelmiştim. Bodrumu görmek için. Baban yirmi dokuz yıl kimseyi indirmedi.\" ") + "\"Sen o makineyi kullanmayı bilmiyorsun, Elif. Ben biliyorum. Hücreyi bana ver. Anneni ben getireyim. Sen burada bekle. Yarın akşam annen bu dükkânın kapısından girer. Söz.\"");
       if (has(s, "BANT")) p.push("Babanın sesi kulağında: hücreyi kimseye verme.");
       if (has(s, "NEVZAT_ANNE")) p.push("O gün buradaydı, demişti. Ankara yolu, demişti herkes.");
       return p;
@@ -777,17 +797,16 @@ const ACT3 = {
       const p = [];
       if (has(s, "TAKIP")) {
         p.push("Nevzat'ın elindeki tabanca titriyor. Paltosu yırtık, bir kolunun yeni yarası kanıyor. Arkandan kabine girmiş, hücresiz, hiç dönmeyecekmiş gibi.");
-        p.push("\"Bu sabah, sen dükkândan çıkınca, sayaç bir kez daha 17.04 gösterdi,\" diyor. \"Kabin hâlâ sıcaktı. Bekleyemedim.\"");
+        p.push("\"Sen kabine girdikten sonra sayaç bir kez daha 17.04 gösterdi,\" diyor. \"Kabin hâlâ sıcaktı. Bekleyemedim.\"");
         p.push("Annen bir adım öne çıkıyor. Mızrağı alçakta. \"Hücremi sen değiştirdin,\" diyor. Soru değil.");
         p.push("Nevzat'ın yüzü buruşuyor. \"Döndüğünde makineyi kapatacaktın, Leyla. Söylemiştin. Ben de bir şey istedim, bir kez. Seni Kemal'e kaptırmıştım; makineyi de kaptırmak istemedim. Bir günlüğüne geride kalırsın sandım. Kemal gelir alır sandım.\" Sesi çatlıyor. \"Yirmi dokuz yıl.\"");
         p.push({ q: "Hücreyi ver, Elif. Kadranı 1979'a çeviririm. O sabaha dönüp kendimi durdurmak istiyorum. Leyla da hiç kaybolmaz. Herkes kurtulur." });
         p.push("Sesinde yalan yok. Ama elindeki tabanca hâlâ sana dönük. Ve bir hücreyle yalnızca bir kişi gider.");
         if (has(s, "BANT")) p.push("Babanın sesi kulağında: hücreyi kimseye verme.");
       } else {
-        p.push(has(s, "POLIS") ? "Bodrumu sürgüleyip polisi aramıştın. Nevzat bu kez gelemedi." : has(s, "KILIT") ? "Bodrumun kapağını içeriden sürgülemiştin. Nevzat bu kez gelemedi." : "Nevzat'ı dükkânda bırakmıştın. Burada yoksunuz ikiniz.");
-        p.push("Barınağa dönüyorsunuz. Dışarıdan gelen ışık artık beyaz, gölgesiz. Annen ocağın başına, yassı bir taşın öbür yanına oturuyor. Hücreleri taşın üstüne diziyorsun: seninki" + (has(s, "YEDEK_HUCRE") ? ", babanın yarım hücresi" : "") + " ve annenin ölü hücresi.");
+        p.push("Sarsıntı diner dinmez annen elini bırakmadan seni barınağa çekiyor. Dışarıdan gelen ışık artık beyaz, gölgesiz. Annen ocağın başına, yassı bir taşın öbür yanına oturuyor. Hücreleri taşın üstüne diziyorsun: seninki" + (has(s, "YEDEK_HUCRE") ? ", babanın yarım hücresi" : "") + " ve annenin ölü hücresi.");
         if (has(s, "DINLEDI")) p.push("Annen hâlâ sana bir yabancıya bakar gibi bakıyor arada. Sonra kendini toplayıp yeniden bakıyor. Kızı. Otuz bir yaşında.");
-        p.push("\"Nevzat'ı anlatayım,\" diyor annen. \"Bir gece, makine daha yarımken, bana bir şey söylemişti. Makine bitince ilk iş geçmişe gidip kendimi durdurmak isterim, demişti. Seni Kemal'e kaptırdığım güne. Güldüm. Şaka sandım.\" Ölü hücreye dokunuyor. \"Şaka değilmiş.\"");
+        p.push("Ona Nevzat'ın dükkâna geldiğini, hücreyi istediğini anlatıyorsun. Annenin yüzü sertleşiyor. \"Nevzat'ı anlatayım,\" diyor. \"Bir gece, makine daha yarımken, bana bir şey söylemişti. Makine bitince ilk iş geçmişe gidip kendimi durdurmak isterim, demişti. Seni Kemal'e kaptırdığım güne. Güldüm. Şaka sandım.\" Ölü hücreye dokunuyor. \"Şaka değilmiş.\"");
         p.push(has(s, "YEDEK_HUCRE")
           ? "Sonra yarım hücreyi eline alıp kulağına götürüyor, zembereğini dinliyor. \"Yüzde altmış,\" diyor. \"Kemal hep iyimserdi. Belki yeter. Belki ikimizi de yarı yolda bırakır.\""
           : "Sonra senin hücreni avucuna alıp tartıyor. \"Bir hücre,\" diyor. \"Kemal hep bir kişi hesapladı. Kendisi gelecekti çünkü. Beni almaya.\"");
@@ -798,8 +817,8 @@ const ACT3 = {
       { t: "Hücreyi ona ver", to: "c2", if: (s) => has(s, "TAKIP"), fx: (s) => { flag(s, "NEVZAT_ALDI"); } },
       { t: "Bırak annen konuşsun", to: "c2", if: (s) => has(s, "TAKIP"), fx: (s) => { if (has(s, "NOT_KOPYA") || has(s, "NEVZAT_ANNE") || (s.r.leyla || 0) >= 2) flag(s, "NEVZAT_DUSTU"); else { flag(s, "NEVZAT_ALDI"); flag(s, "ZORLA"); } } },
       { t: "Yer sarsılınca üstüne atıl", to: "c2", if: (s) => has(s, "TAKIP"), fx: (s) => { flag(s, "NEVZAT_KACTI"); } },
-      { t: "Ona babamı anlat", to: "c2", if: (s) => !has(s, "TAKIP"), fx: (s) => { flag(s, "BABA_ANLATTI"); rel(s, "leyla", 1, "Annen Kemal'in son yirmi dokuz yılını dinledi."); } },
-      { t: "Ona kendimi anlat: kim olduğumu", to: "c2", if: (s) => !has(s, "TAKIP"), fx: (s) => { flag(s, "KENDINI"); rel(s, "leyla", 1, "Annen kızını tanımaya başladı."); } },
+      { t: "Ona babanı anlat", to: "c2", if: (s) => !has(s, "TAKIP"), fx: (s) => { flag(s, "BABA_ANLATTI"); rel(s, "leyla", 1, "Annen Kemal'in son yirmi dokuz yılını dinledi."); } },
+      { t: "Ona kendini anlat: kim olduğunu", to: "c2", if: (s) => !has(s, "TAKIP"), fx: (s) => { flag(s, "KENDINI"); rel(s, "leyla", 1, "Annen kızını tanımaya başladı."); } },
       { t: "Sus. Elini tut", to: "c2", if: (s) => !has(s, "TAKIP"), fx: (s) => { rel(s, "leyla", 1); } }
     ]
   },
@@ -1098,7 +1117,7 @@ function renderPage(turn) {
   const imgKey = val(sec.img);
   const imgLabel = val(sec.imgLabel) || "";
   const hasImg = !!(imgKey && IMG[imgKey]);
-  if (hasImg) left += `<figure class="ill"><img src="${IMG[imgKey]}" alt="${esc(imgLabel)}"><figcaption>${esc(imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
+  if (hasImg) left += `<figure class="ill"><div class="kb"><img src="${IMG[imgKey]}" alt="${esc(imgLabel)}"></div><figcaption>${esc(imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
   const lg = BOOK.ledger(sec, time);
   left += `<div class="ledger" aria-label="${esc(lg.title)}"><div class="lh">${esc(lg.title)}</div><div class="lv">${lg.html}</div></div>`;
   if (!hasImg) {

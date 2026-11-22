@@ -65,7 +65,10 @@
       b.setAttribute("aria-label", on ? `Bu kitabı beğendin, toplam ${n} beğeni` : `Bu kitabı beğen, şu an ${n} beğeni`);
       b.disabled = on;
     };
-    get(id).then((n) => { set(n, mine(id)); b.hidden = false; opts.onCount && opts.onCount(n); }).catch(() => { b.remove(); });
+    // Servis geç uyanabilir (ücretsiz sunucu): iki kez daha dene, sonra gizle
+    const yukle = (deneme) => get(id).then((n) => { set(n, mine(id)); b.hidden = false; opts.onCount && opts.onCount(n); })
+      .catch(() => { if (deneme < 2) setTimeout(() => yukle(deneme + 1), 2500 * (deneme + 1)); else b.remove(); });
+    yukle(0);
     b.addEventListener("click", () => {
       if (mine(id)) return;
       const cur = parseInt(b.querySelector(".n").textContent.replace(/\D/g, ""), 10) || 0;

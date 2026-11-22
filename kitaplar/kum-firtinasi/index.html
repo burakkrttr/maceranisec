@@ -355,6 +355,25 @@ canvas#sea { opacity: 0.85; }
 p.quote { font-style: italic; }
 .cover h1 { font-size: clamp(34px, 13.5cqi, 64px); letter-spacing: 0.1em; padding-left: 0.1em; }
 
+
+/* ---------- canlılık: görsel yavaşça yaklaşır, seçenekler sırayla gelir, kapak süzülür ---------- */
+.ill .kb { overflow: hidden; }
+.ill .kb img { animation: kb 20s ease-in-out infinite alternate; transform-origin: 50% 45%; }
+@keyframes kb { from { transform: scale(1.02); } to { transform: scale(1.14) translate(-1.5%, -1%); } }
+.choices .choice { animation: cin .55s cubic-bezier(.2,.8,.2,1) both; }
+.choices .choice:nth-child(1) { animation-delay: .35s; } .choices .choice:nth-child(2) { animation-delay: .45s; }
+.choices .choice:nth-child(3) { animation-delay: .55s; } .choices .choice:nth-child(4) { animation-delay: .65s; }
+.choices .choice:nth-child(5) { animation-delay: .75s; } .choices .choice:nth-child(6) { animation-delay: .85s; }
+@keyframes cin { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.cover { animation: coverfloat 7s ease-in-out infinite; }
+@keyframes coverfloat { 0%, 100% { transform: translateY(0) rotate(-0.4deg); } 50% { transform: translateY(-8px) rotate(0.4deg); } }
+.cover-wrap { position: relative; }
+.cover-wrap::before { content: ""; position: absolute; left: 0; top: 50%; width: min(520px, 90vw); aspect-ratio: 1; transform: translate(-10%, -50%); pointer-events: none; z-index: -1;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--lamp) 32%, transparent), transparent); animation: glow 6s ease-in-out infinite; }
+@keyframes glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+.the-end { animation: endin 1.4s .2s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes endin { from { opacity: 0; letter-spacing: 0.9em; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ill .kb img, .choices .choice, .cover, .cover-wrap::before, .the-end { animation: none; } }
 </style>
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
 <link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
@@ -1106,6 +1125,7 @@ const BOOK = {
 };
 
 
+
 /* ---------------- Kitap motoru ---------------- */
 const META = JSON.parse(document.getElementById("book-meta").textContent);
 const ACTS = BOOK.acts;
@@ -1118,14 +1138,14 @@ const UI = {
         bulunan: (f, n) => `Bulduğun sonlar: ${f} / ${n}`, takip: "Yazarı takip et:", kacirdiklar: "Bu gece kaçırdıkların",
         perdeSonu: (a) => `${a}nin sonu`, kapatmadan: "Kitabı kapatmadan önce", geceDevam: "Gece devam ediyor", neYapacaksin: "Ne yapacaksın?",
         bolum: (n) => `Bölüm ${n}`, kapagaDon: "kapağa dön", sayfayaGit: "sayfaya git", bastan: "Geceyi baştan yaşa", KapagaDon: "Kapağa dön",
-        bosDefter: "Henüz bir şey yazmadın." },
+        bosDefter: "Henüz bir şey yazmadın.", sozlukIpucu: "İpucu: anlamını görmek için bir kelimeye dokun." },
   en: { kapagi: (t) => `Cover of ${t}`, kitap: "Book", yazar: "Author", tur: "Genre", okuma: "Reading time", sonlar: "Endings",
         farkliSon: (n) => `${n} different endings`, buldugun: (f, n) => ` · found: ${f} / ${n}`, basla: "Start reading",
         sonYazdigin: "Last thing you wrote down:", sabah: "Morning", akibet: "What became of them", yil: "A year later", son: "THE END",
         bulunan: (f, n) => `Endings found: ${f} / ${n}`, takip: "Follow the author:", kacirdiklar: "What you missed tonight",
         perdeSonu: (a) => `End of the ${a}`, kapatmadan: "Before you close the book", geceDevam: "The night goes on", neYapacaksin: "What will you do?",
         bolum: (n) => `Section ${n}`, kapagaDon: "back to cover", sayfayaGit: "turn to section", bastan: "Live the night again", KapagaDon: "Back to cover",
-        bosDefter: "You haven't written anything down yet." }
+        bosDefter: "You haven't written anything down yet.", sozlukIpucu: "Tip: tap any word to see its Turkish meaning." }
 }[DIL];
 const END_KEY = META.sonAnahtari || (META.id + "-sonlar");
 const fresh = () => ({ sec: BOOK.start, f: {}, r: Object.assign({}, BOOK.rel), notes: [], talked: [], num: null, steps: 0 });
@@ -1186,6 +1206,7 @@ function renderCover() {
         <dt>${UI.okuma}</dt><dd>${esc(META.okumaSuresi)}</dd>
         <dt>${UI.sonlar}</dt><dd>${UI.farkliSon(META.sonSayisi)}${found ? UI.buldugun(found, META.sonSayisi) : ""}</dd>
       </dl>
+      ${typeof SOZLUK !== "undefined" ? `<p class="sozluk-ipucu">${esc(UI.sozlukIpucu)}</p>` : ""}
       <button class="btn" id="btn-start" type="button">${UI.basla}</button>
     </div>
   </section>`;
@@ -1206,7 +1227,7 @@ function renderPage(turn) {
   const imgKey = val(sec.img);
   const imgLabel = val(sec.imgLabel) || "";
   const hasImg = !!(imgKey && IMG[imgKey]);
-  if (hasImg) left += `<figure class="ill"><img src="${IMG[imgKey]}" alt="${esc(imgLabel)}"><figcaption>${esc(imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
+  if (hasImg) left += `<figure class="ill"><div class="kb"><img src="${IMG[imgKey]}" alt="${esc(imgLabel)}"></div><figcaption>${esc(imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
   const lg = BOOK.ledger(sec, time);
   left += `<div class="ledger" aria-label="${esc(lg.title)}"><div class="lh">${esc(lg.title)}</div><div class="lv">${lg.html}</div></div>`;
   if (!hasImg) {
@@ -1224,7 +1245,7 @@ function renderPage(turn) {
   right += `<h2>${esc(sec.title)}</h2><div class="text">`;
   let leadDone = false;
   sec.text(state).forEach((para) => {
-    if (typeof para === "object") right += `<p class="quote">«${esc(para.q)}»</p>`;
+    if (typeof para === "object") right += `<p class="quote">${DIL === "en" ? "“" : "«"}${esc(para.q)}${DIL === "en" ? "”" : "»"}</p>`;
     else {
       const cap = !leadDone && /^[A-Za-zÇĞİÖŞÜçğıöşü]/.test(para);
       right += `<p class="${cap ? "lead" : (!leadDone ? "first" : "")}">${esc(para)}</p>`; leadDone = true;
@@ -1317,6 +1338,7 @@ function flipFrom(oldRight, oldBook, oldLeft) {
 }
 
 function render(turn) {
+  if (window.sozlukKapat) sozlukKapat();
   const onCover = state.sec === "cover";
   ["btn-book", "btn-cover"].forEach((id) => { $(id).style.visibility = onCover ? "hidden" : "visible"; });
   if (window.ATM) ATM.target = onCover ? (BOOK.coverAtmos ?? 0.6) : BOOK.atmos(S[state.sec]);
@@ -1354,6 +1376,74 @@ $("btn-no").addEventListener("click", closeConfirm);
 $("btn-yes").addEventListener("click", () => { closeConfirm(); state = Object.assign(fresh(), { sec: "cover" }); render(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("drawer").classList.remove("open"); });
 
+
+/* ---------- Sözlük: bir kelimeye dokununca kitaptaki anlamı (books/<id>/sozluk.js varsa) ---------- */
+if (typeof SOZLUK !== "undefined") (function () {
+  const st = document.createElement("style");
+  st.textContent = `
+  #sozluk { position: fixed; z-index: 60; max-width: 300px; padding: 10px 14px 11px; border-radius: 8px; background: #fbf6ea; color: #2a2118;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35), 0 0 0 1px rgba(120,90,50,.35); font-family: "EB Garamond", Georgia, serif; font-size: 18px; line-height: 1.35;
+    opacity: 0; transform: translateY(4px); transition: opacity .15s, transform .15s; pointer-events: none; }
+  #sozluk.acik { opacity: 1; transform: none; pointer-events: auto; }
+  #sozluk b { font-weight: 600; } #sozluk .an { display: block; margin-top: 2px; }
+  #sozluk .kal { display: block; margin-top: 7px; padding-top: 6px; border-top: 1px solid rgba(120,90,50,.25); font-size: 15px; }
+  #sozluk .dil { display: block; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #8a6a3a; margin-bottom: 3px; }
+  #sozluk-isaret { position: fixed; z-index: 59; border-radius: 3px; background: rgba(233,179,79,.35); pointer-events: none; display: none; }
+  .text p, .quote, .cover-wrap p { -webkit-tap-highlight-color: transparent; }
+  .sozluk-ipucu { font-style: italic; font-size: 15px; opacity: .8; margin: 10px 0 4px; }`;
+  document.head.appendChild(st);
+  const balon = document.createElement("div"); balon.id = "sozluk"; balon.setAttribute("role", "status"); document.body.appendChild(balon);
+  const isaret = document.createElement("div"); isaret.id = "sozluk-isaret"; document.body.appendChild(isaret);
+  const HARF = /[\p{L}'’]/u;
+  const temiz = (w) => w.toLocaleLowerCase("en").replace(/̇/g, "").replace(/’/g, "'").replace(/^'+|'+$/g, "");
+  const kok = (w) => (w.length > 4 ? w.replace(/(ing|ed|s)$/, "") : w);
+  const KAL = {}; Object.keys(SOZLUK.kaliplar || {}).forEach((k) => { KAL[k.split(" ").map(kok).join(" ")] = k; });
+  function anlam(w) { const t = temiz(w); return SOZLUK.kelimeler[t] || (t.endsWith("'s") && SOZLUK.kelimeler[t.slice(0, -2)]) || null; }
+  function kalip(metin, bas, son) {
+    // dokunulan kelimeyi içeren 2-3 kelimelik kalıp var mı
+    const ws = []; const re = /[\p{L}'’]+/gu; let m;
+    while ((m = re.exec(metin))) ws.push({ w: kok(temiz(m[0])), a: m.index, b: m.index + m[0].length });
+    const i = ws.findIndex((x) => x.a === bas); if (i < 0) return null;
+    for (const n of [3, 2]) for (let j = i - n + 1; j <= i; j++) {
+      if (j < 0 || j + n > ws.length) continue;
+      const k = KAL[ws.slice(j, j + n).map((x) => x.w).join(" ")]; if (k) return k;
+    }
+    return null;
+  }
+  function noktadan(x, y) {
+    if (document.caretPositionFromPoint) { const p = document.caretPositionFromPoint(x, y); return p && { node: p.offsetNode, off: p.offset }; }
+    if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); return r && { node: r.startContainer, off: r.startOffset }; }
+    return null;
+  }
+  window.sozlukKapat = () => { balon.classList.remove("acik"); isaret.style.display = "none"; };
+  document.addEventListener("click", (e) => {
+    const hedef = e.target.closest && e.target.closest(".text p, .quote, .cover-wrap p");
+    if (!hedef || e.target.closest("a, button") || String(window.getSelection())) { sozlukKapat(); return; }
+    const c = noktadan(e.clientX, e.clientY);
+    if (!c || c.node.nodeType !== 3) { sozlukKapat(); return; }
+    const t = c.node.textContent; let a = c.off, b = c.off;
+    while (a > 0 && HARF.test(t[a - 1])) a--;
+    while (b < t.length && HARF.test(t[b])) b++;
+    const kelime = t.slice(a, b).replace(/^['’]+|['’]+$/g, "");
+    if (!kelime) { sozlukKapat(); return; }
+    const an = anlam(kelime); const kl = kalip(t, a, b);
+    if (!an && !kl) { sozlukKapat(); return; }
+    const r = document.createRange(); r.setStart(c.node, a); r.setEnd(c.node, b);
+    const k = r.getBoundingClientRect();
+    if (k.width === 0 || e.clientX < k.left - 4 || e.clientX > k.right + 4) { sozlukKapat(); return; }
+    balon.innerHTML = `<span class="dil" lang="tr">${esc(SOZLUK.baslik || "")}</span><b>${esc(kelime)}</b>` + (an ? `<span class="an" lang="tr">${esc(an)}</span>` : "") +
+      (kl ? `<span class="kal"><b>${esc(kl)}</b> → ${esc(SOZLUK.kaliplar[kl])}</span>` : "");
+    isaret.style.cssText = `display:block;left:${k.left - 2}px;top:${k.top - 1}px;width:${k.width + 4}px;height:${k.height + 2}px`;
+    balon.classList.add("acik");
+    const bw = balon.offsetWidth, bh = balon.offsetHeight;
+    let x = Math.min(Math.max(8, k.left + k.width / 2 - bw / 2), window.innerWidth - bw - 8);
+    let y = k.top - bh - 10; if (y < 8) y = k.bottom + 10;
+    balon.style.left = x + "px"; balon.style.top = y + "px";
+    e.stopPropagation();
+  });
+  ["scroll", "resize"].forEach((ev) => window.addEventListener(ev, () => sozlukKapat(), true));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") sozlukKapat(); });
+})();
 
 /* ---------------- Çöl gezegeni: iki güneş, kum tepeleri, yıldızlar, kum fırtınası ---------------- */
 const desert = { level: 0.15, target: 0.15, flash: 0, hour: 18, h: 18 };

@@ -345,6 +345,25 @@ body, .sect, .cover .band, .top .series, .choice .seal, h1, h2 { font-variant-nu
 /* The Lighthouse: uzun İngilizce başlık kapağa sığsın */
 .cover h1 { font-size: clamp(28px, 9cqi, 56px); }
 
+
+/* ---------- canlılık: görsel yavaşça yaklaşır, seçenekler sırayla gelir, kapak süzülür ---------- */
+.ill .kb { overflow: hidden; }
+.ill .kb img { animation: kb 20s ease-in-out infinite alternate; transform-origin: 50% 45%; }
+@keyframes kb { from { transform: scale(1.02); } to { transform: scale(1.14) translate(-1.5%, -1%); } }
+.choices .choice { animation: cin .55s cubic-bezier(.2,.8,.2,1) both; }
+.choices .choice:nth-child(1) { animation-delay: .35s; } .choices .choice:nth-child(2) { animation-delay: .45s; }
+.choices .choice:nth-child(3) { animation-delay: .55s; } .choices .choice:nth-child(4) { animation-delay: .65s; }
+.choices .choice:nth-child(5) { animation-delay: .75s; } .choices .choice:nth-child(6) { animation-delay: .85s; }
+@keyframes cin { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.cover { animation: coverfloat 7s ease-in-out infinite; }
+@keyframes coverfloat { 0%, 100% { transform: translateY(0) rotate(-0.4deg); } 50% { transform: translateY(-8px) rotate(0.4deg); } }
+.cover-wrap { position: relative; }
+.cover-wrap::before { content: ""; position: absolute; left: 0; top: 50%; width: min(520px, 90vw); aspect-ratio: 1; transform: translate(-10%, -50%); pointer-events: none; z-index: -1;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--lamp) 32%, transparent), transparent); animation: glow 6s ease-in-out infinite; }
+@keyframes glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+.the-end { animation: endin 1.4s .2s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes endin { from { opacity: 0; letter-spacing: 0.9em; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ill .kb img, .choices .choice, .cover, .cover-wrap::before, .the-end { animation: none; } }
 </style>
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
 <link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
@@ -2525,7 +2544,7 @@ function renderPage(turn) {
   const imgKey = val(sec.img);
   const imgLabel = val(sec.imgLabel) || "";
   const hasImg = !!(imgKey && IMG[imgKey]);
-  if (hasImg) left += `<figure class="ill"><img src="${IMG[imgKey]}" alt="${esc(imgLabel)}"><figcaption>${esc(imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
+  if (hasImg) left += `<figure class="ill"><div class="kb"><img src="${IMG[imgKey]}" alt="${esc(imgLabel)}"></div><figcaption>${esc(imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
   const lg = BOOK.ledger(sec, time);
   left += `<div class="ledger" aria-label="${esc(lg.title)}"><div class="lh">${esc(lg.title)}</div><div class="lv">${lg.html}</div></div>`;
   if (!hasImg) {
