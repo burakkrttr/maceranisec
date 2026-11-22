@@ -104,7 +104,7 @@ window.KATALOG = {
       yazar: "Burak Karatatar",
       tur: ["Zaman yolculuğu", "Macera"],
       okumaSuresi: "30 dk",
-      sonSayisi: 7,
+      sonSayisi: 10,
       slogan: "Annen 1979'da ölmedi.",
       tanitim: "Mayıs 2008, İstanbul. Saatçi babanın dükkânında kırk iki saatin hepsi 17.04'te durmuş. Kilitli dolapta 66 milyon yıllık bir taş var ve taşın içinde, 1979'da ölen annenin alyansı. Bodrumdaki makine seni dinozorlar çağının son gününe götürecek.",
       kapak: "kitaplar/son-gun/img/kapak.jpg",

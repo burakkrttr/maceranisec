@@ -20,7 +20,7 @@
   "slogan": "Annen 1979'da ölmedi.",
   "tur": "Zaman yolculuğu · Macera",
   "okumaSuresi": "Yaklaşık 30 dakika",
-  "sonSayisi": 7,
+  "sonSayisi": 10,
   "kapak": "img/kapak.jpg",
   "kapakYedek": "img/kamp.jpg",
   "sonAnahtari": "son-gun-sonlar",
@@ -421,7 +421,10 @@ const ENDINGS = [
   { id: "baska",   title: "Başka Bir Hayat" },
   { id: "nevzat",  title: "Gri Halka" },
   { id: "dukkan",  title: "Kapalı Dükkân" },
-  { id: "av",      title: "Av" }
+  { id: "av",      title: "Av" },
+  { id: "bant",    title: "Kopuk Bant" },
+  { id: "geri",    title: "Geri Dönüş" },
+  { id: "uyku",    title: "Uyku" }
 ];
 
 const IMG = {
@@ -473,7 +476,8 @@ const S = {
     choices: [
       { t: "Bandı onarmaya otur", to: "a3", fx: (s) => { flag(s, "BANT"); note(s, "Kasetin devamı: «Makine tek kişi getirir. Hücreyi kimseye verme. Nevzat'a güvenme.»"); } },
       { t: "Yüzüğü taştan çıkarmaya çalış", to: "a3", fx: (s) => { flag(s, "YUZUK"); note(s, "Alyansın içinde: «Kemal 12.6.1976». Annenin yüzüğü. Etiketin arkasında: «Montana, 1994. Müze deposu. Onu buldum.»"); } },
-      { t: "Karşıdaki çaycı Hayri Usta'ya git, ona sor", to: "a3", fx: (s) => { flag(s, "HAYRI"); note(s, "Hayri Usta: «Annenin tabutu boştu, kızım. Baban mezara taş koydurmadı. 'Gelecek' derdi.»"); } }
+      { t: "Karşıdaki çaycı Hayri Usta'ya git, ona sor", to: "a3", fx: (s) => { flag(s, "HAYRI"); note(s, "Hayri Usta: «Annenin tabutu boştu, kızım. Baban mezara taş koydurmadı. 'Gelecek' derdi.»"); } },
+      { t: "Kasetçaları kapat. Dolabı kilitle, dükkândan git", to: "e_bant" }
     ]
   },
 
@@ -641,7 +645,8 @@ const ACT2 = {
     choices: [
       { t: "Taş işaretlerini izle", to: "b2", fx: (s) => { flag(s, "IZ"); } },
       { t: "Sürünün arkasından ırmak boyunca in", to: "b3", fx: (s) => { s.via = "irmak"; } },
-      { t: "Kayalığa tırman, yukarıdan bak", to: "b2", fx: (s) => { flag(s, "GOKYUZU"); note(s, "Kayalıktan bakınca gökteki ışığın kuyruğu görünüyor. Sabahtan beri büyüyor. Kuzeyde, bir kaya duvarının dibinden ince bir duman yükseliyor."); } }
+      { t: "Kayalığa tırman, yukarıdan bak", to: "b2", fx: (s) => { flag(s, "GOKYUZU"); note(s, "Kayalıktan bakınca gökteki ışığın kuyruğu görünüyor. Sabahtan beri büyüyor. Kuzeyde, bir kaya duvarının dibinden ince bir duman yükseliyor."); } },
+      { t: "Sürüye yaklaş, daha yakından bak", to: "e_av", fx: (s) => { s.av = "suru"; } }
     ]
   },
 
@@ -667,7 +672,8 @@ const ACT2 = {
     choices: [
       { t: "Notları tek tek defterine geçir", to: "b4", fx: (s) => { flag(s, "NOT_KOPYA"); note(s, "Kayadaki notlar: «1. gün. Hücre boş çıktı. Biri değiştirmiş.» «212. gün. Yüzüğümü ırmağın çamuruna gömdüm.» «1.130. gün. Bugün.»"); } },
       { t: "Elini kayadaki küçük el izine koy", to: "b4", fx: (s) => { rel(s, "leyla", 1); s.via = "el"; } },
-      { t: "Vakit yok. Kestirmeden, düzlükten geç", to: "b3", fx: (s) => { s.via = "kestirme"; } }
+      { t: "Vakit yok. Kestirmeden, düzlükten geç", to: "b3", fx: (s) => { s.via = "kestirme"; } },
+      { t: "Hücreyi kur, hemen geri dön", to: "e_geri" }
     ]
   },
 
@@ -692,19 +698,23 @@ const ACT2 = {
   },
 
   e_av: {
-    act: 2, time: "11:41", gok: 0.35,
+    act: 2, time: (s) => s.av === "suru" ? "09:50" : "11:41", gok: 0.35,
     end: { id: "av", kind: "Erken son" },
     title: "Av",
-    text: () => [
+    text: (s) => s.av === "suru" ? [
+      "Kütüğün arkasından çıkıp çamurlu kıyıya iniyorsun. Bir adım. Bir adım daha. En yakındaki Triceratops'un yelpazesindeki desenleri tek tek görebiliyorsun; turuncu halkalar, yeşil benekler.",
+      "Sonra hayvan başını kaldırıp sana bakıyor. Homurdanıyor. Bütün sürü aynı anda dönüyor; yavruları ortaya alıp boynuzlarını dışarı çeviriyorlar. Yer, on iki hayvanın ağırlığıyla titriyor.",
+      "Geri kaçmaya çalışıyorsun. Çamur ayaklarını tutuyor. Son düşündüğün şey annenin defterindeki şaka oluyor: hayır, Triceratops seni ısırmaz. Isırmıyor."
+    ] : [
       "Kalkıyorsun. Eğreltiler bacaklarına dolanıyor. Arkanda bir ses, yerden mi gökten mi geldiği belli olmayan, göğsünü titreten bir ses.",
       "Tyrannosaurus koşmuyor. Ona gerek yok. Üç adımda aradaki mesafe kapanıyor.",
       "Son düşündüğün şey annenin kayadaki el izi oluyor. Sana hiç dokunamadığı el."
     ],
     sabah: "Saat 17.04'te göktaşının ısısı ovaya ulaşıyor. Irmak, orman, leş, hepsi aynı ışıkta kayboluyor.",
-    akibet: () => [
+    akibet: (s) => [
       ["Sen", "İstanbul'da kayıp ilanı verildi. Dükkânın kepengi bir ay kapalı kaldı."],
       ["Annen", "Kampa döndüğünde ocağının yanında yabancı bir ayak izi buldu. Kimin olduğunu hiç öğrenmedi."],
-      ["Nevzat", "Bodruma indiğinde kabin boştu. Sayaç sönmüştü."],
+      ["Nevzat", has(s, "TAKIP") ? "Senin arkandan kabine girdi. Bir daha görülmedi." : "Bodrumun kapağını sürgülü buldu. Bir hafta sonra kırdırdığında kabin boştu, sayaç sönmüştü."],
       ["Hücre", "Göğüs cebinde. Kurulmadan."]
     ],
     yil: "Montana'da bir kazı ekibi, iridyum tabakasının hemen altında, pirinçten bir silindir buluyor. Raporlarına yazıyorlar: «Açıklanamayan buluntu.»"
@@ -730,7 +740,8 @@ const ACT2 = {
     },
     choices: [
       { t: "Burada, ocağın başında onu bekle", to: "b5", fx: (s) => { s.bul = "bekle"; } },
-      { t: "Irmak ağzına in, onu bul", to: "b5", fx: (s) => { s.bul = "ara"; } }
+      { t: "Irmak ağzına in, onu bul", to: "b5", fx: (s) => { s.bul = "ara"; } },
+      { t: "Ocağın başına uzan, biraz dinlen", to: "e_uyku" }
     ]
   },
 
@@ -970,6 +981,63 @@ const ACT3 = {
   }
 };
 Object.assign(S, ACT3);
+
+/* ================= ERKEN SONLAR (eklenenler) ================= */
+Object.assign(S, {
+  e_bant: {
+    act: 1, time: "17:10", gok: 0,
+    end: { id: "bant", kind: "Erken son" },
+    title: "Kopuk Bant",
+    text: () => [
+      "Kasetçaların kapağını kapatıyorsun. Sarkan bant içeride kalıyor. Taşı ve kasetçaları dolaba geri koyup kilitliyorsun.",
+      "Annen 1979'da öldü. Yirmi dokuz yıldır bildiğin bu. Bir babanın son günlerinde kafası karışmış olabilir. Taşın içindeki yüzük bir saatçinin tuhaf bir hobisi olabilir.",
+      "Kepengi indiriyorsun. Ortasında yine takılıyor. Bu kez omzunla itmiyorsun; yarım bırakıp gidiyorsun."
+    ],
+    sabah: "Ertesi hafta dükkânı satışa çıkarıyorsun. İlk ve tek teklif, peşin parayla, babanın eski bir arkadaşından geliyor. Adı Nevzat Kural. Tezgâhın altındaki dolabı sormuyor. Bodrumu soruyor.",
+    akibet: () => [
+      ["Sen", "Dükkânın parasıyla Kadıköy'de küçük bir ev aldın. Kaseti hiç onarmadın. Ne yazdığını hiç bilmedin."],
+      ["Dolap", "Kilitli kaldı. Anahtarı bir çekmecede, bir zarfın içinde, babanın yazısıyla: «Yalnızken aç.»"],
+      ["Nevzat", "Dükkânın kepengini bir daha kaldırmadı. Bodrumda ne yaptığını kimse bilmiyor."]
+    ],
+    yil: "Bir yıl sonra Karaköy'den geçerken dükkânın önünde duruyorsun. Kepenk kapalı. Ama içeriden, çok derinden, kırk iki saatin hepsinin aynı anda tıkladığı bir ses geliyor. Sonra hiçbir şey."
+  },
+
+  e_geri: {
+    act: 2, time: "11:05", gok: 0.3,
+    end: { id: "geri", kind: "Erken son" },
+    title: "Geri Dönüş",
+    text: (s) => [
+      "1. gün. Hücre boş çıktı. Kayadaki satırı bir kez daha okuyorsun ve elin, kendiliğinden, göğüs cebindeki hücreye gidiyor. Ya seninki de boşsa? Ya akşama sen de bir duvara çentik atmaya başlarsan?",
+      "Sel yatağından aşağı, halkaya koşuyorsun. Hücreyi halkanın yuvasına oturtup kurma kolunu üç kez çeviriyorsun. Halka beyaza dönüyor.",
+      "Son anda kampın önünden geçerken kayadaki fotoğrafı dikeninden çekip almışsın. Bunu ancak bodrumda, çıplak ampulün altında, avucunu açınca fark ediyorsun."
+    ],
+    sabah: (s) => "Bodrumdasın. Saat gece yarısını on dakika geçiyor. Kabin boş, sayaç bir kez 17.04 gösterip sönüyor." + (has(s, "YEDEK_HUCRE") ? " Cebinde yarım bir hücre var. Bir kez daha gidebilirsin. Gitmiyorsun." : " Başka hücre yok."),
+    akibet: (s) => [
+      ["Sen", "Fotoğrafı çerçeveletip dükkânın duvarına, kırk iki saatin arasına astın. Arkasındaki yazıyı kimseye göstermedin."],
+      ["Annen", "O akşam kampa döndüğünde fotoğrafın yerinde olmadığını gördü. Dikenin yanında yabancı bir ayak izi vardı. Kayaya son bir satır kazıdı: «1.130. gün. Biri geldi.»"],
+      ["Nevzat", has(s, "TAKIP") ? "Senin arkandan kabine girdi. Bir daha görülmedi." : "Bodrumun kapağını sürgülü buldu. Sabah dükkânın önünde bekliyordu; yüzünü görünce bir şey sormadan gitti."]
+    ],
+    yil: "Yıllar sonra Montana'da bir kazı ekibi, iridyum tabakasının hemen altında bir kaya duvarı buluyor: binlerce çentik, dinozor çizimleri, bir çocuk eli. Ve en son satır: «Biri geldi.»"
+  },
+
+  e_uyku: {
+    act: 2, time: "17:03", gok: 1,
+    end: { id: "uyku", kind: "Erken son" },
+    title: "Uyku",
+    text: () => [
+      "Ocağın başındaki deri yatağa uzanıyorsun. Bir dakika, diyorsun kendi kendine. Dün geceden beri uyumadın; cenaze, dükkân, bodrum, sıcak. Gözlerin kapanıyor.",
+      "Uyandığında barınağın içi bembeyaz. Dışarıdan bir uğultu geliyor, rüzgâr değil. Ocağın öbür yanında biri oturuyor: kızıl, kıvırcık saçlı, güneşten yanmış bir kadın. Elinde senin fotoğrafın. Saatlerdir orada oturup seni izlediği belli.",
+      "\"Uyandırmaya kıyamadım,\" diyor annen. Sesi titriyor. \"Uyurken iki yaşındaki gibisin.\" Elini tutuyor. Duvardaki saat tıklıyor. Konuşacak bir dakikanız var."
+    ],
+    sabah: "Saat 17.04'te göktaşının ısısı ovaya ulaşıyor. Barınağın içinde iki kadın, el ele. Biri hâlâ uykulu.",
+    akibet: (s) => [
+      ["Sen", "İstanbul'da kayıp ilanı verildi. Dükkânın kepengi bir daha kalkmadı."],
+      ["Annen", "Seni bulduğu son öğleden sonrayı uyuyan kızını izleyerek geçirdi. Hücreni cebinden almadı. Almayı düşündü mü, bilmiyorsun."],
+      ["Hücre", "Göğüs cebinde, kurulmadan." + (has(s, "YEDEK_HUCRE") ? " Yanında yarım bir hücre, o da kurulmadan." : "")]
+    ],
+    yil: "Montana'da bir kazı ekibi, bir kaya oyuğunda iki pirinç silindir ve çelik bir kol saati buluyor. Saat 17.04'te durmuş."
+  }
+});
 
 /* SON GÜN: kitaba özel ayarlar */
 const BOOK = {
