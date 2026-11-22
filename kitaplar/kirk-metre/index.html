@@ -20,7 +20,7 @@
   "slogan": "Otuz yıllık bir batığın içinden biri vuruyor.",
   "tur": "Gerilim · Macera",
   "okumaSuresi": "Yaklaşık 30 dakika",
-  "sonSayisi": 10,
+  "sonSayisi": 13,
   "kapak": "img/kapak.jpg",
   "kapakYedek": "img/karaada.jpg",
   "sonAnahtari": "kirk-metre-sonlar",
@@ -440,7 +440,10 @@ const ENDINGS = [
   { id: "narkoz",    title: "Mavi Sarhoşluk" },
   { id: "vurgun",    title: "Vurgun" },
   { id: "telsiz",    title: "Telsiz" },
-  { id: "pay",       title: "Pay" }
+  { id: "pay",       title: "Pay" },
+  { id: "bulanik",   title: "Bulanık" },
+  { id: "kabarcik",  title: "Kabarcık" },
+  { id: "dugum",     title: "Düğüm" }
 ];
 
 const IMG = {
@@ -537,7 +540,8 @@ const S = {
     },
     choices: [
       { t: "Aynı işaretle cevap ver", to: "a5", fx: (s) => { s.via = "cevap"; flag(s, "CEVAP"); hava(s, 10); } },
-      { t: "Kuleye çık, içeri bir giriş ara", to: "a5", fx: (s) => { s.via = "kule"; hava(s, 20); } }
+      { t: "Kuleye çık, içeri bir giriş ara", to: "a5", fx: (s) => { s.via = "kule"; hava(s, 20); } },
+      { t: "Vakit kaybetme: levyeyle sesin geldiği yerdeki saçı sök, Rıza'ya doğrudan ulaş", to: "e_kabarcik", if: (s) => has(s, "LEVYE") }
     ]
   },
 
@@ -563,7 +567,9 @@ const S = {
       { t: "Yedek tüpü kapağın yanına bağla, dönüşte lazım olacak", to: "a6", if: (s) => has(s, "YEDEK"), fx: (s) => { flag(s, "YEDEK_BIRAKTI"); } },
       { t: "Fenerle kontrol odasını tara", to: "a6", if: (s) => has(s, "FENER"), fx: (s) => { flag(s, "PLAKA"); hava(s, 20); note(s, "Kontrol odasında yerdeki büyük valf tekerleri sonuna kadar açık çevrilmiş. Pirinç levhadaki ad kazınmış ama altında bir tarih okunuyor: 1943."); } },
       { t: "Kapağa vur: D-A-Y-A-N-I-N. D-Ö-N-E-C-E-Ğ-İ-M.", to: "a6", fx: (s) => { flag(s, "SOZ"); hava(s, 10); } },
-      { t: "Arka bölmede bir ışık kıpırdıyor. Rıza orada olmalı. Işığa yüz", to: "e_narkoz", if: (s) => !has(s, "FENER") }
+      { t: "Arka bölmede bir ışık kıpırdıyor. Rıza orada olmalı. Işığa yüz", to: "e_narkoz", if: (s) => !has(s, "FENER") },
+      { t: "Fenerin var: arka bölmelere geç, ön bölmeye başka bir yol ara", to: "e_bulanik", if: (s) => has(s, "FENER") },
+      { t: "Yedek tüpü boruların arasındaki aralıktan kapağın dibine it, Rıza içeriden alsın", to: "e_dugum", if: (s) => has(s, "YEDEK") }
     ]
   },
 
@@ -644,6 +650,63 @@ const S = {
       ["Kostas", "Rıza'nın yanındaki öbür adam. Güverteye çıkarıldıktan bir saat sonra öldü. Rıza adını hâlâ her gece bir kere söylüyor."]
     ],
     yil: "Rıza bir akşam, rakının üçüncü kadehinde, kutudan söz ediyor. Kurşun bir kutu, mektuplarla dolu. «Almana onu da verdim,» diyor. Bir daha hiç söz etmiyor."
+  },
+
+  e_kabarcik: {
+    act: 1, time: "08:34", derin: 38,
+    end: { id: "kabarcik", kind: "Erken son" },
+    title: "Kabarcık",
+    text: () => [
+      "Kuleyle, kapaklarla uğraşacak vaktin yok. Vuruşların geldiği yere, gövdenin burnuna yüzüyorsun. Otuz yılda paslanıp incelmiş bir saçın kenarına levyeyi sokuyorsun ve bütün ağırlığınla asılıyorsun.",
+      "Saç bir anda yerinden fırlıyor. Delikten kocaman, gümüş bir kabarcık çıkıyor; bir değil, peş peşe onlarcası. Hava cebinin havası bu. Rıza'nın iki gündür soluduğu hava, şimdi yüzeye doğru kaçıyor.",
+      "İçeriden gelen vuruşlar hızlanıyor, sonra seyrekleşiyor. Delikten giren su, kabarcıkların yerini dolduruyor. Elini deliğe bastırıyorsun, bütün gücünle. Kabarcıklar parmaklarının arasından akıp gidiyor."
+    ],
+    sabah: "Yüzeyde Nuri, teknenin yanında kaynayan kocaman kabarcığı görüyor. Sen çıktığında hiçbir şey sormuyor. Yüzüne bakması yetiyor.",
+    akibet: () => [
+      ["Rıza", "Donanmanın dalgıçları iki gün sonra onu ön bölmede, tavana en yakın yerde buldu. Yanında Kostas adında bir Yunan dalgıç."],
+      ["Sen", "Levyeyi o akşam limanda denize attın. Bir daha hiçbir batığa dalmadın."],
+      ["Brandt", "Beyaz motoru ertesi sabah İstanköy'e yanaşmış. Sonrası bilinmiyor."],
+      ["Nuri Reis", "Sana bir kez bile «neden» demedi. Sen her gün kendine soruyorsun."]
+    ],
+    yil: "Bir yıl sonra bir gece rüyanda yine o saçı söküyorsun. Bu kez kabarcık çıkmıyor; içeriden Rıza gülümseyerek el sallıyor. Uyanınca ağlıyorsun."
+  },
+
+  e_bulanik: {
+    act: 1, time: "08:46", derin: 40,
+    end: { id: "bulanik", kind: "Erken son" },
+    title: "Bulanık",
+    text: () => [
+      "Fenerin var; karanlık seni korkutmuyor. Kontrol odasının arka kapısından geçip dar bir koridora giriyorsun. Ranzalar, dolaplar, yerde dizlere kadar yumuşak, gri bir çamur. Ön bölmeye giden başka bir yol olmalı.",
+      "Bir dolabın arkasına uzanırken paletin yere değiyor. Çamur bir anda ayağa kalkıyor, gri bir bulut gibi her yeri dolduruyor. Feneri yüzüne tutuyorsun; ışık bir karış ötede, bulanık bir duvara çarpıp geri dönüyor. Elini bile göremiyorsun.",
+      "Hangi yönden geldiğini bilmiyorsun. Tavana tutunup ilerliyorsun; bir borudan ötekine, bir duvardan ötekine. Manometreye bakamıyorsun bile. Nefeslerin gittikçe ağırlaşıyor."
+    ],
+    sabah: "Nuri, kabarcıkların gelmediğini görünce eski sünger dalgıçları gibi tek nefesle kuleye kadar iniyor. Kuledeki ipi kendi beline bağlayıp ucunu içeri, bulanığın içine sallıyor. İpi senin elin buluyor.",
+    akibet: () => [
+      ["Sen", "Güvertede tüpün sıfırı gösteriyordu. İki gün konuşamadın. Sonraki iki gün de meltem esti; kimse denize çıkamadı."],
+      ["Rıza", "Beşinci gün indiğinizde ön bölmenin kapağı açıktı. İçeride kimse yoktu."],
+      ["Brandt", "Beyaz motoru o hafta İstanköy açıklarında, batıya giderken görenler oldu."],
+      ["Nuri Reis", "Sana tek bir şey söyledi: «Işık, gözün değildir, Yusuf.»"]
+    ],
+    yil: "Bir yıl sonra Almanya'dan pulsuz bir kartpostal geliyor. Arkasında tek satır, Rıza'nın el yazısıyla: «Yaşıyorum. Aramayın.»"
+  },
+
+  e_dugum: {
+    act: 1, time: "08:46", derin: 40,
+    end: { id: "dugum", kind: "Erken son" },
+    title: "Düğüm",
+    text: () => [
+      "Kapağın önündeki borular sana bir aralık bırakmış; bir kol, belki bir omuz sığacak kadar. Yedek tüpü göğsünden çözmeden, boruların arasına omzunla giriyorsun. Tüpü kapağın dibine itebilirsen Rıza içeriden bir yolunu bulup alır.",
+      "Tüp borulara takılıyor. İtiyorsun; daha da sıkışıyor. Geri çekilmeye çalışıyorsun ama yedek tüpün hortumu bir vanaya dolanmış. Kendi regülatörünün hortumu da öbür boruya. Kıpırdadıkça düğüm daha çok sıkışıyor.",
+      "Bıçağına uzanıyorsun. Kolun boruların arasında kalmış, bıçağa yetişmiyor. Kapağın öbür yanından Rıza vuruyor, vuruyor. Senin cevap verecek elin yok."
+    ],
+    sabah: "Nuri, ipin ucundan gelen kabarcıkların bir yerde durduğunu görüyor. İniyor, düğümü bıçağıyla kesip seni boruların arasından çekip çıkarıyor. Yukarı çıkarken iki kez durup sana kendi havasını veriyor.",
+    akibet: () => [
+      ["Sen", "Omzun çıkmıştı. O gün bir daha dalamadın; ertesi gün de, ondan sonraki gün de."],
+      ["Rıza", "Donanmanın dalgıçları üç gün sonra geldi. Ön bölmede Rıza'yı ve Kostas adında bir Yunan dalgıcı buldular. İkisinin de eli kapağın üstündeydi."],
+      ["Yedek tüp", "Hâlâ orada, boruların arasında sıkışık. Dalgıçlar onu kesip çıkaramadı."],
+      ["Nuri Reis", "O dalıştan sonra kulağı hiç düzelmedi. Sana bir kez bile kızmadı."]
+    ],
+    yil: "Bir yıl sonra limanda bir çocuk, ağzına kadar dolu bir tüpü göğsüne bağlamış dalmaya hazırlanıyor. Elinden tutup tüpü sırtına almasını söylüyorsun. Sebebini anlatmıyorsun."
   },
 
   act1_end: {

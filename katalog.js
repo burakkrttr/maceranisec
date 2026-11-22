@@ -124,7 +124,7 @@ window.KATALOG = {
       yazar: "Burak Karatatar",
       tur: ["Gerilim", "Macera"],
       okumaSuresi: "30 dk",
-      sonSayisi: 10,
+      sonSayisi: 13,
       slogan: "Otuz yıllık bir batığın içinden biri vuruyor.",
       tanitim: "Bodrum, Ağustos 1974. Ağabeyin iki gün önce bir Almanla denize açıldı; bu sabah teknesi limana kendi kendine girdi, dümeni iple bağlı. Karaada açığında, kırk metrede, hiçbir kayıtta adı geçmeyen bir denizaltı yatıyor. Ve içinden biri vuruyor.",
       kapak: "kitaplar/kirk-metre/img/kapak.jpg",
