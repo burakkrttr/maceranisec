@@ -523,10 +523,11 @@ const S = {
     title: "Gölge",
     text: (s) => {
       const p = [];
+      if (has(s, "LEVYE")) p.push("Levyeyi kemerine, bıçağının yanına sıkıca bağlıyorsun. Ağır; seni dibe çekecek, çıkarken de tutacak.");
+      if (has(s, "YEDEK")) p.push("Yedek tüpü göğsüne kayışla bağlıyorsun, regülatörünü omzuna sarıyorsun. Ağabeyinin yanında ondan biri daha nefes alabilir.");
+      if (has(s, "FENER")) p.push("Feneri bileğine geçirip bir kez yakıp söndürüyorsun. Pili dolu.");
+      p.push("Nuri maskeni alıp camına tükürüyor, silip geri veriyor; babanın da yaptığı gibi. Sırtına bir kez vuruyor. \"Yirmi dakika, Yusuf. Ne bulursan bul, yirmi dakika.\" Bordaya oturup sırtüstü suya düşüyorsun.");
       p.push("Çapa ipinden aşağı iniyorsun. On metrede kırmızı kayboluyor; elinin sırtındaki çizik kara görünüyor. Yirmi metrede sarı gidiyor. Otuzda dünya maviden ibaret ve kafanın içinde tatlı, ılık bir şey dolaşmaya başlıyor, bir kadeh rakı gibi. Derinlik sarhoşluğu. Rıza buna «denizin şakası» derdi.");
-      if (has(s, "LEVYE")) p.push("Levye kemerine sıkıca bağlı, her kulaçta kalçana vuruyor.");
-      if (has(s, "YEDEK")) p.push("Yedek tüp göğsüne kayışla bağlı, seni hafifçe öne çekiyor.");
-      if (has(s, "FENER")) p.push("Fener bileğinde. Henüz yakmıyorsun; ışık daha var.");
       p.push("Ve o, kumun üstünde yatıyor. Bir denizaltı. Elli metre kadar, ince, uzun, sırtında bir kule, kulenin önünde paslı bir top. Gövdesini otuz yılın süngerleri kaplamış; Rıza böyle yerlere «para bahçesi» derdi. Kulenin yan yüzündeki numara boyanın altında kalmış. Biri onu silmek istemiş. Hiçbir kayıtta adı geçmeyen bir gemi mi bu?");
       p.push("Saniye'nin çapası güverte topuna dolanmış. Halatı bir kulaç yukarıdan kesilmiş, teknede gördüğün kesik gibi temiz.");
       p.push("Bıçağının sapıyla gövdeye vuruyorsun. Bir kez. Boş, ağır bir ses.");
@@ -714,6 +715,7 @@ const ACT2 = {
     title: "İkinci dalış",
     text: (s) => {
       const p = [];
+      p.push("Nuri dolu tüpleri sırtına geçirip kayışlarını kendi eliyle sıkıyor. Bu kez hiçbir şey söylemiyor. Bordadan ikinci kez suya düşüyorsun.");
       if (has(s, "NURI_KONUSTU")) p.push("Nuri'nin sözleri kulağında, ipten aşağı iniyorsun: «Ben de oradaydım.» On beş yaşında bir oğlan. Almancası iyi.");
       if (has(s, "SANDIK")) p.push("Brandt'ın sandığında gördüğün çocuk bileziği gözünün önünden gitmiyor. Rodi. İtalyanların Rodos'a verdiği ad.");
       if (has(s, "ANLASMA")) p.push("Bu kez yalnız değilsin. Cemil de iniyor, Brandt'ın tüplerinden birini sırtlamış, belinde vinç kancası. Cemil bir zamanlar sünger dalgıcıymış; kırk metreyi bilir. Kancayı sana gösteriyor, sonra kontrol odasının arkasını: sandıklar orada.");
