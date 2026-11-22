@@ -90,6 +90,25 @@ window.KATALOG = {
       sirt: { renk: "#172024", yazi: "#e3a64f", yukseklik: 320, kalinlik: 46, yaziBoyu: 17 }
     },
     {
+      id: "son-gun",
+      durum: "yayinda",
+      eklenme: "2026-11-22",
+      seri: "Kendi Maceranı Seç",
+      kitapNo: 5,
+      baslik: "Son Gün",
+      altBaslik: "Bir zaman yolculuğu hikâyesi",
+      yazar: "Burak Karatatar",
+      tur: ["Zaman yolculuğu", "Macera"],
+      okumaSuresi: "30 dk",
+      sonSayisi: 7,
+      slogan: "Annen 1979'da ölmedi.",
+      tanitim: "Mayıs 2008, İstanbul. Saatçi babanın dükkânında kırk iki saatin hepsi 17.04'te durmuş. Kilitli dolapta 66 milyon yıllık bir taş var ve taşın içinde, 1979'da ölen annenin alyansı. Bodrumdaki makine seni dinozorlar çağının son gününe götürecek.",
+      kapak: "kitaplar/son-gun/img/kapak.jpg",
+      adres: "kitaplar/son-gun/index.html",
+      sonAnahtari: "son-gun-sonlar",
+      sirt: { renk: "#24361f", yazi: "#e3b85a", yukseklik: 300, kalinlik: 44, yaziBoyu: 17 }
+    },
+    {
       id: "fener-en",
       dil: "en",
       kaynak: "fener",
