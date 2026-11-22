@@ -114,6 +114,26 @@ window.KATALOG = {
       sirt: { renk: "#24361f", yazi: "#e3b85a", yukseklik: 300, kalinlik: 44, yaziBoyu: 17 }
     },
     {
+      id: "kirk-metre",
+      durum: "yayinda",
+      eklenme: "2026-11-22",
+      seri: "Kendi Maceranı Seç",
+      kitapNo: 6,
+      baslik: "Kırk Metre",
+      altBaslik: "Bodrum, Ağustos 1974",
+      yazar: "Burak Karatatar",
+      tur: ["Gerilim", "Macera"],
+      okumaSuresi: "30 dk",
+      sonSayisi: 10,
+      slogan: "Otuz yıllık bir batığın içinden biri vuruyor.",
+      tanitim: "Bodrum, Ağustos 1974. Ağabeyin iki gün önce bir Almanla denize açıldı; bu sabah teknesi limana kendi kendine girdi, dümeni iple bağlı. Karaada açığında, kırk metrede, hiçbir kayıtta adı geçmeyen bir denizaltı yatıyor. Ve içinden biri vuruyor.",
+      kapak: "kitaplar/kirk-metre/img/kapak.jpg",
+      adres: "kitaplar/kirk-metre/index.html",
+      sonAnahtari: "kirk-metre-sonlar",
+      gorseller: ["kitaplar/kirk-metre/img/batik.jpg", "kitaplar/kirk-metre/img/brandt.jpg", "kitaplar/kirk-metre/img/cep.jpg", "kitaplar/kirk-metre/img/durak.jpg", "kitaplar/kirk-metre/img/gunbatimi.jpg", "kitaplar/kirk-metre/img/hat.jpg", "kitaplar/kirk-metre/img/itiraf.jpg", "kitaplar/kirk-metre/img/karaada.jpg", "kitaplar/kirk-metre/img/kingston.jpg", "kitaplar/kirk-metre/img/kule.jpg", "kitaplar/kirk-metre/img/mektuplar.jpg", "kitaplar/kirk-metre/img/nuri.jpg", "kitaplar/kirk-metre/img/sandik.jpg", "kitaplar/kirk-metre/img/tekne.jpg", "kitaplar/kirk-metre/img/torpido.jpg", "kitaplar/kirk-metre/img/tufek.jpg"],
+      sirt: { renk: "#132a36", yazi: "#e0b45a", yukseklik: 310, kalinlik: 46, yaziBoyu: 15 }
+    },
+    {
       id: "fener-en",
       dil: "en",
       kaynak: "fener",

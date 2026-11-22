@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kırk Metre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<script type="application/json" id="book-meta">
+{
+  "id": "kirk-metre",
+  "seri": "Kendi Maceranı Seç",
+  "kitapNo": 6,
+  "baslik": "Kırk Metre",
+  "altBaslik": "Bodrum, Ağustos 1974",
+  "yazar": "Burak Karatatar",
+  "instagram": "https://www.instagram.com/burakkrttr/",
+  "instagramKullanici": "burakkrttr",
+  "slogan": "Otuz yıllık bir batığın içinden biri vuruyor.",
+  "tur": "Gerilim · Macera",
+  "okumaSuresi": "Yaklaşık 30 dakika",
+  "sonSayisi": 10,
+  "kapak": "img/kapak.jpg",
+  "kapakYedek": "img/karaada.jpg",
+  "sonAnahtari": "kirk-metre-sonlar",
+  "taban": "son-gun",
+  "katalog": {
+    "tur": [
+      "Gerilim",
+      "Macera"
+    ],
+    "okumaSuresi": "30 dk",
+    "tanitim": "Bodrum, Ağustos 1974. Ağabeyin iki gün önce bir Almanla denize açıldı; bu sabah teknesi limana kendi kendine girdi, dümeni iple bağlı. Karaada açığında, kırk metrede, hiçbir kayıtta adı geçmeyen bir denizaltı yatıyor. Ve içinden biri vuruyor.",
+    "sirt": {
+      "renk": "#132a36",
+      "yazi": "#e0b45a",
+      "yukseklik": 310,
+      "kalinlik": 46,
+      "yaziBoyu": 15
+    }
+  },
+  "kutuphane": "../../index.html"
+}
+</script>
+<style>
+/* Tek tema bilerek: karanlık bir oda, masada açık bir kitap, arkada fırtınalı pencere.
+   Düzen: masaüstünde iki sayfalı açık kitap (solda levha ve bekçinin kaydı, sağda metin), telefonda tek sayfa. */
+:root {
+  --night: #0c1012;        /* oda, kitabın dışı */
+  --paper: #efe6d1;        /* sayfa */
+  --paper-edge: #e2d6bb;   /* sayfa kenarı, cilt gölgesi */
+  --ink: #2b241d;          /* metin mürekkebi */
+  --faded: #75685a;        /* soluk mürekkep, ikincil metin */
+  --rubric: #8d3a26;       /* kırmızı mürekkep: § numaraları, başharfler, süslemeler */
+  --lamp: #e9b34f;         /* fener ışığı, kapak vurgusu */
+  --display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --body: "EB Garamond", "Iowan Old Style", Georgia, serif;
+  --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --cloth: #3b2520;        /* cilt kumaşı */
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--night); color: var(--ink); font-family: var(--body); overflow: hidden; }
+canvas#sea { position: fixed; inset: 0; width: 100%; height: 100%; display: block; opacity: 0.42; }
+.vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(12,16,18,0) 30%, rgba(12,16,18,0.85) 100%); }
+
+/* üst şerit */
+.top {
+  background: linear-gradient(var(--night) 55%, rgba(12,16,18,0));
+  position: fixed; top: 0; left: 0; right: 0; z-index: 4;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 12px clamp(16px, 3vw, 36px);
+  font-family: var(--display); color: #cfc4ad;
+}
+.top .series { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; }
+.top .series b { color: var(--lamp); font-weight: 600; }
+.top nav { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.link {
+  font-family: var(--display); font-size: 17px; font-weight: 600; letter-spacing: 0.06em;
+  background: none; border: 0; color: #cfc4ad; cursor: pointer; padding: 6px 10px; border-radius: 2px;
+}
+.link:hover { color: var(--lamp); }
+a.link { text-decoration: none; }
+.link:focus-visible, .choice:focus-visible, .btn:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
+.confirm { display: none; gap: 4px; align-items: center; font-style: italic; color: #cfc4ad; font-size: 16px; }
+.confirm.show { display: inline-flex; }
+
+main { position: relative; z-index: 2; height: 100%; overflow-y: auto; padding: 64px clamp(10px, 3vw, 40px) 40px; }
+
+/* ---------- açık kitap ---------- */
+.book {
+  max-width: 1120px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  background: var(--paper);
+  border-radius: 3px 6px 6px 3px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.25), 0 6px 0 -2px #d9ccad, 0 10px 0 -4px #cdbf9e;
+  position: relative;
+}
+.book::before { /* cilt */
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 70px; transform: translateX(-50%); pointer-events: none;
+  background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(80,60,30,0.10) 38%, rgba(40,28,10,0.28) 50%, rgba(80,60,30,0.10) 62%, rgba(0,0,0,0) 100%);
+}
+.leaf {
+  position: relative; padding: 46px clamp(26px, 4vw, 58px) 54px;
+  background-image:
+    radial-gradient(rgba(120,95,55,0.07) 1px, transparent 1px),
+    radial-gradient(rgba(120,95,55,0.05) 1px, transparent 1px);
+  background-size: 7px 7px, 11px 11px; background-position: 0 0, 3px 5px;
+  min-height: min(760px, calc(100vh - 110px));
+}
+.leaf.left { border-right: 1px solid rgba(120,95,55,0.15); }
+.folio { position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; font-family: var(--display); font-size: 15px; color: var(--faded); letter-spacing: 0.1em; }
+
+/* sol sayfa: levha + kayıt */
+.plate { display: flex; flex-direction: column; gap: 22px; }
+.act-title { text-align: center; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.22em; font-size: 13.6px; color: var(--rubric); }
+.act-title span { display: block; font-size: 30px; letter-spacing: 0.06em; color: var(--ink); font-variant: normal; text-transform: none; font-weight: 600; margin-top: 2px; }
+.ill { margin: 0; padding: 10px; background: #f6efdf; border: 1px solid rgba(80,60,30,0.25); box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px rgba(80,60,30,0.25); }
+.ill img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; filter: sepia(0.18) contrast(1.02); }
+.ill figcaption { text-align: center; font-style: italic; font-size: 16px; color: var(--faded); margin-top: 8px; }
+.log { border-top: 1px solid rgba(80,60,30,0.3); border-bottom: 1px solid rgba(80,60,30,0.3); padding: 14px 4px; display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; gap: 6px; }
+.log div { font-size: 11.2px; color: var(--faded); text-transform: uppercase; letter-spacing: 0.12em; }
+.log b { display: block; font-family: var(--display); font-size: 30px; color: var(--ink); font-weight: 600; letter-spacing: 0.02em; font-variant-numeric: lining-nums tabular-nums; text-transform: none; }
+.margin-note { font-style: italic; font-size: 18px; line-height: 1.55; color: var(--faded); text-align: center; padding: 0 10px; text-wrap: balance; }
+.fleuron { text-align: center; color: var(--rubric); font-size: 22px; letter-spacing: 0.6em; }
+
+/* sağ sayfa: metin */
+.sect { text-align: center; font-family: var(--display); color: var(--rubric); font-size: 22px; font-weight: 600; letter-spacing: 0.08em; }
+.sect::before, .sect::after { content: "❧"; font-size: 16px; margin: 0 12px; position: relative; top: -2px; opacity: 0.8; }
+.sect::before { display: inline-block; transform: scaleX(-1); }
+.leaf h2 { font-family: var(--display); font-weight: 600; font-size: 24px; text-align: center; margin: 6px 0 4px; text-transform: uppercase; letter-spacing: 0.08em; text-wrap: balance; }
+.kind { text-align: center; font-style: italic; color: var(--rubric); font-size: 17px; margin-bottom: 4px; }
+.text { margin-top: 22px; }
+.text p { font-size: 20px; line-height: 1.58; margin: 0 0 12px; text-align: justify; hyphens: auto; -webkit-hyphens: auto; text-indent: 1.4em; }
+.text p.lead, .text p.first { text-indent: 0; }
+.text p.lead::first-letter { float: left; font-family: var(--display); font-weight: 600; color: var(--rubric); font-size: 76px; line-height: 0.82; padding: 6px 8px 0 0; }
+.text p.quote { font-style: italic; text-indent: 0; margin: 4px 1.6em 14px; text-align: left; color: #3d342b; }
+.sub { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; color: var(--rubric); font-size: 13.6px; text-align: center; margin: 26px 0 10px; }
+.fates { list-style: none; padding: 0; margin: 0; }
+.fates li { font-size: 18px; line-height: 1.5; padding: 7px 0; border-bottom: 1px dotted rgba(80,60,30,0.35); }
+.fates b { text-transform: uppercase; letter-spacing: 0.06em; font-size: 15.2px; margin-right: 6px; }
+.the-end { text-align: center; font-family: var(--display); font-size: 40px; letter-spacing: 0.4em; color: var(--ink); margin: 30px 0 4px; padding-left: 0.4em; }
+.missed { list-style: none; padding: 0; margin: 0; }
+.missed li { font-style: italic; color: var(--faded); font-size: 17px; text-align: center; padding: 3px 0; }
+.tally { text-align: center; font-style: italic; color: var(--faded); font-size: 16px; margin-top: 14px; }
+
+/* seçenekler: oyun kitabı yönergesi */
+.choices { margin-top: 26px; border-top: 1px solid rgba(80,60,30,0.3); padding-top: 14px; display: flex; flex-direction: column; }
+.choice {
+  display: flex; align-items: baseline; gap: 10px; width: 100%; text-align: left; cursor: pointer;
+  background: none; border: 0; border-bottom: 1px dotted rgba(80,60,30,0.3); padding: 11px 4px;
+  font-family: var(--body); font-size: 19px; line-height: 1.4; color: var(--ink);
+}
+.choice .ct { flex: 1; font-style: italic; }
+.choice .cn { font-family: var(--display); font-weight: 600; font-size: 20px; color: var(--rubric); white-space: nowrap; font-variant-numeric: lining-nums; }
+.choice:hover .ct { text-decoration: underline; text-decoration-color: var(--rubric); text-underline-offset: 4px; }
+.choice:hover { background: rgba(141,58,38,0.05); }
+
+/* sayfa çevirme */
+@keyframes ink { from { opacity: 0.1; transform: translateX(10px); } to { opacity: 1; transform: none; } }
+
+/* ---------- kapak ---------- */
+.cover-wrap { max-width: 1040px; margin: 0 auto; display: grid; grid-template-columns: minmax(280px, 430px) 1fr; gap: clamp(24px, 4vw, 56px); align-items: center; min-height: calc(100vh - 120px); }
+.cover {
+  container-type: inline-size;
+  position: relative; aspect-ratio: 2 / 3; border-radius: 3px 8px 8px 3px; overflow: hidden;
+  background: #101619 center / cover no-repeat;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.7), inset 6px 0 0 rgba(0,0,0,0.25), inset 9px 0 0 rgba(255,255,255,0.05);
+  color: #f1e7cf; display: flex; flex-direction: column; justify-content: space-between; padding: 30px 26px 26px 34px;
+}
+.cover::before { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(6,10,12,0.78) 0%, rgba(6,10,12,0.05) 38%, rgba(6,10,12,0.05) 62%, rgba(6,10,12,0.85) 100%); }
+.cover > * { position: relative; }
+.cover .band { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.18em; font-size: clamp(9px, 2.7cqi, 12.5px); white-space: nowrap; text-align: center; color: var(--lamp); border-top: 1px solid rgba(233,179,79,0.5); border-bottom: 1px solid rgba(233,179,79,0.5); padding: 6px 0; }
+.cover h1 { font-family: var(--display); font-weight: 600; font-size: clamp(44px, 19cqi, 88px); letter-spacing: 0.16em; text-align: center; margin: 18px 0 0; padding-left: 0.16em; line-height: 1; text-shadow: 0 2px 24px rgba(0,0,0,0.6); }
+.cover .subt { text-align: center; font-style: italic; font-size: clamp(15px, 4.6cqi, 20px); margin-bottom: 10px; color: #e4d8bd; }
+.cover .author { text-align: center; font-family: var(--display); font-size: clamp(14px, 4.8cqi, 20px); letter-spacing: 0.26em; text-transform: uppercase; padding-left: 0.26em; white-space: nowrap; }
+.backcover { color: #e6dcc4; }
+.backcover .slogan { font-family: var(--display); font-size: clamp(28px, 3.2vw, 38px); line-height: 1.2; font-weight: 600; color: #f3e9d2; margin: 0 0 18px; text-wrap: balance; }
+.backcover p { font-size: 19px; line-height: 1.6; margin: 0 0 12px; max-width: 58ch; color: #d6cbb2; }
+.colophon { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; margin: 22px 0; padding: 14px 0; border-top: 1px solid rgba(214,203,178,0.25); border-bottom: 1px solid rgba(214,203,178,0.25); font-size: 17px; }
+.colophon dt { text-transform: uppercase; letter-spacing: 0.14em; color: #a99d86; }
+.colophon dd { margin: 0; color: #efe5cd; }
+.btn {
+  font-family: var(--display); font-size: 22px; font-weight: 600; letter-spacing: 0.1em;
+  background: var(--lamp); color: #1d1608; border: 0; padding: 12px 28px; border-radius: 2px; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(233,179,79,0.25);
+}
+.btn:hover { background: #f2c56a; }
+
+/* ---------- defter ---------- */
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 6; width: min(400px, 92vw);
+  background: var(--paper); color: var(--ink); box-shadow: -20px 0 50px rgba(0,0,0,0.5);
+  transform: translateX(105%); transition: transform .35s ease; padding: 28px 28px 34px; overflow-y: auto;
+}
+.drawer.open { transform: none; }
+.drawer::before { content: ""; position: absolute; top: 0; left: 28px; width: 14px; height: 70px; background: var(--rubric); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%); }
+.drawer h3 { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; color: var(--rubric); font-size: 14.4px; margin: 26px 0 8px; text-align: center; }
+.drawer h3:first-of-type { margin-top: 54px; }
+.drawer ul { list-style: none; padding: 0; margin: 0; }
+.drawer li { font-size: 17px; line-height: 1.5; padding: 8px 0; border-bottom: 1px dotted rgba(80,60,30,0.35); }
+.drawer .empty { color: var(--faded); font-style: italic; }
+.drawer-close { position: absolute; top: 14px; right: 16px; color: var(--ink); }
+
+.toast {
+  position: fixed; left: 50%; top: 58px; z-index: 7; transform: translate(-50%, -10px);
+  font-style: italic; font-size: 18px; color: var(--paper); background: rgba(43,36,29,0.94);
+  padding: 9px 18px; border-radius: 2px; border-left: 3px solid var(--rubric);
+  opacity: 0; transition: opacity .4s, transform .4s; pointer-events: none; max-width: 90vw; text-align: center;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 860px) {
+  .book { grid-template-columns: 1fr; }
+  .book::before { display: none; }
+  .leaf { min-height: 0; padding: 30px 22px 50px; }
+  .leaf.left { border-right: 0; border-bottom: 1px solid rgba(120,95,55,0.2); padding-bottom: 24px; }
+  .plate { position: static; gap: 14px; }
+  .log b { font-size: 24px; }
+  .text p { font-size: 18.5px; text-align: left; }
+  .leaf.left .folio { display: none; }
+  main { padding-top: 92px; }
+  .top .series { font-size: 13px; }
+  .cover-wrap { grid-template-columns: 1fr; justify-items: center; }
+  .cover { width: min(360px, 86vw); }
+  .backcover { text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .turn .leaf.right > *, .turn .leaf.left .plate { animation: none; }
+  .drawer, .toast { transition: none; }
+}
+
+/* ===== kitap havası: cilt, sayfa kalınlığı, kurdele, sayfa başlıkları ===== */
+.binding {
+  max-width: 1150px; margin: 6px auto 30px; position: relative;
+  background: var(--cloth); border-radius: 6px; padding: 12px 14px 14px;
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 4px), repeating-linear-gradient(-45deg, rgba(0,0,0,0.08) 0 2px, transparent 2px 4px);
+  box-shadow: 0 34px 80px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 0 30px rgba(0,0,0,0.5);
+}
+.binding .book { box-shadow: 0 2px 6px rgba(0,0,0,0.35); border-radius: 2px; perspective: 2400px; }
+.edges { position: absolute; top: 16px; bottom: 18px; z-index: 0; border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #efe6d1 0 1px, #cfc1a0 1px 2px); }
+.edges.l { right: calc(100% - 14px); }
+.edges.r { left: calc(100% - 14px); }
+.ribbon { position: absolute; z-index: 3; top: -6px; left: calc(50% + 14px); width: 11px; height: calc(100% + 46px); pointer-events: none;
+  background: linear-gradient(90deg, #6f2a1b, #9b4430 45%, #7a2f1f); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 12px), 0 100%);
+  box-shadow: 2px 0 4px rgba(0,0,0,0.3); opacity: 0.95; }
+.leaf { background-color: var(--paper); }
+.leaf.left { background-image:
+    linear-gradient(90deg, rgba(90,65,30,0.10) 0%, rgba(90,65,30,0) 7%, rgba(90,65,30,0) 84%, rgba(70,50,20,0.16) 100%),
+    radial-gradient(rgba(120,95,55,0.07) 1px, transparent 1px), radial-gradient(rgba(120,95,55,0.05) 1px, transparent 1px); }
+.leaf.right { background-image:
+    linear-gradient(90deg, rgba(70,50,20,0.16) 0%, rgba(90,65,30,0) 16%, rgba(90,65,30,0) 93%, rgba(90,65,30,0.10) 100%),
+    radial-gradient(rgba(120,95,55,0.07) 1px, transparent 1px), radial-gradient(rgba(120,95,55,0.05) 1px, transparent 1px); }
+.leaf { background-size: auto, 7px 7px, 11px 11px; background-position: 0 0, 0 0, 3px 5px; }
+.runhead { position: absolute; top: 20px; left: 0; right: 0; text-align: center; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.26em; font-size: 11.2px; color: var(--faded); }
+.folio { bottom: 20px; text-align: left; padding: 0 clamp(26px, 4vw, 58px); font-variant-numeric: oldstyle-nums; font-size: 16px; }
+.leaf.right .folio { text-align: right; }
+
+/* bekçinin defteri: el yazısı kayıt */
+.ledger { background: #f6eedb; border: 1px solid rgba(80,60,30,0.25); padding: 12px 16px 14px; transform: rotate(-0.6deg);
+  background-image: repeating-linear-gradient(transparent 0 29px, rgba(70,90,120,0.22) 29px 30px); box-shadow: 0 2px 6px rgba(60,40,10,0.12); }
+.ledger .lh { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; font-size: 10.4px; color: var(--rubric); }
+.ledger .lv { font-family: var(--hand); font-size: 25px; line-height: 30px; color: #263a5a; }
+.margin-note.hand { font-family: var(--hand); font-style: normal; font-size: 24px; line-height: 1.25; color: #263a5a; transform: rotate(-1.2deg); }
+.margin-note .lbl { display: block; font-family: var(--body); font-style: italic; font-size: 16px; color: var(--faded); margin-bottom: 6px; }
+
+/* seçenekler: içindekiler gibi noktalı çizgi */
+.choice { border-bottom: 0; padding: 9px 2px; gap: 8px; }
+.choice .ct { flex: 0 1 auto; }
+.choice .lead-dots { flex: 1 1 24px; border-bottom: 2px dotted rgba(80,60,30,0.45); transform: translateY(-5px); min-width: 24px; }
+.choice .cn::before { content: "§ "; font-size: 15px; }
+.choices { border-top: 0; }
+.choices::before { content: "❦"; display: block; text-align: center; color: var(--rubric); font-size: 20px; margin-bottom: 6px; }
+
+/* sayfa çevirme */
+.flip { position: absolute; top: 0; bottom: 0; left: 50%; width: 50%; z-index: 5; transform-origin: left center; transform-style: preserve-3d; pointer-events: none; animation: flip .85s cubic-bezier(.45,.05,.3,1) forwards; }
+.flip .face { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip .face.back { transform: rotateY(180deg); }
+.flip .face::after { content: ""; position: absolute; inset: 0; pointer-events: none; animation: shade .85s ease forwards; }
+@keyframes flip { from { transform: rotateY(0deg); } to { transform: rotateY(-180deg); } }
+@keyframes shade { 0% { background: rgba(40,28,10,0); } 50% { background: rgba(40,28,10,0.28); } 100% { background: rgba(40,28,10,0); } }
+.hide-under { visibility: hidden; }
+.lift { position: absolute; inset: 0; z-index: 5; transform-origin: left center; pointer-events: none; animation: lift .6s ease-in forwards; background: var(--paper); overflow: hidden; }
+@keyframes lift { 0% { transform: perspective(1400px) rotateY(0); opacity: 1; box-shadow: 0 0 0 rgba(0,0,0,0); } 75% { opacity: 1; box-shadow: 20px 0 40px rgba(0,0,0,0.35); } 100% { transform: perspective(1400px) rotateY(-100deg); opacity: 0; } }
+
+@media (max-width: 860px) {
+  .binding { padding: 8px 8px 10px; }
+  .edges, .ribbon { display: none; }
+  .ledger .lv { font-size: 22px; }
+  .runhead { top: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .flip, .lift { display: none; } }
+
+/* ===== karar kartları ===== */
+.choices { margin-top: 30px; gap: 12px; }
+.choices::before { content: none; }
+.decide { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.2em; font-size: 13.6px; color: var(--rubric); }
+.decide::before, .decide::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(141,58,38,0.5)); }
+.decide::after { background: linear-gradient(90deg, rgba(141,58,38,0.5), transparent); }
+.choice {
+  display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 14px;
+  padding: 12px 16px 12px 12px; border: 1px solid rgba(80,60,30,0.22); border-radius: 3px;
+  background: #f7f0de; box-shadow: inset 0 0 0 3px #f7f0de, inset 0 0 0 4px rgba(80,60,30,0.12), 0 1px 2px rgba(60,40,10,0.08);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.choice:hover { background: #f9f3e4; border-color: rgba(141,58,38,0.55); transform: translateY(-2px);
+  box-shadow: inset 0 0 0 3px #f9f3e4, inset 0 0 0 4px rgba(141,58,38,0.25), 0 8px 18px rgba(60,40,10,0.14); }
+.choice .ct { font-style: normal; font-size: 19px; line-height: 1.35; }
+.choice:hover .ct { text-decoration: none; }
+.choice .lead-dots { display: none; }
+.choice .seal {
+  width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 30%, #b45a40, #8d3a26 55%, #6e2a1a);
+  box-shadow: inset 0 0 0 3px rgba(255,235,210,0.18), inset 0 -3px 6px rgba(0,0,0,0.25), 0 2px 3px rgba(60,20,10,0.3);
+  color: #f6e9d0; font-family: var(--display); font-weight: 600; font-size: 19px; font-variant-numeric: lining-nums; letter-spacing: 0.02em;
+}
+.choice .seal.blank { background: radial-gradient(circle at 35% 30%, #a99a80, #85765e 60%, #6b5e49); font-size: 20px; }
+.choice .go { font-style: italic; font-size: 15px; color: var(--rubric); opacity: 0; transform: translateX(-6px); transition: opacity .18s, transform .18s; white-space: nowrap; }
+.choice:hover .go, .choice:focus-visible .go { opacity: 1; transform: none; }
+@media (max-width: 860px) {
+  .choice { grid-template-columns: 44px 1fr; padding: 11px 12px 11px 10px; }
+  .choice .seal { width: 40px; height: 40px; font-size: 17px; }
+  .choice .go { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .choice, .choice .go { transition: none; } .choice:hover { transform: none; } }
+
+/* yumuşatılmış kararlar: durağanken basılı satır, üstüne gelince kart */
+.choices { gap: 0; }
+.choice {
+  background: transparent; border: 0; border-radius: 3px; box-shadow: none;
+  border-bottom: 1px solid rgba(80,60,30,0.18); padding: 12px 14px 12px 6px;
+}
+.choice:last-child { border-bottom: 0; }
+.choice { grid-template-columns: 52px 1fr; }
+.choice .go { display: none; }
+.choice .seal { width: 42px; height: 42px; font-size: 18px; box-shadow: inset 0 0 0 2px rgba(255,235,210,0.16), 0 1px 2px rgba(60,20,10,0.25); transition: transform .18s ease; }
+.choice:hover, .choice:focus-visible {
+  background: #f7f0de; border-bottom-color: transparent; transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(141,58,38,0.35), 0 6px 16px rgba(60,40,10,0.12);
+}
+.choice:hover .seal { transform: rotate(-8deg) scale(1.05); }
+@media (hover: none) {
+  .choice { padding-top: 13px; padding-bottom: 13px; }
+  .choice:active { background: #f7f0de; box-shadow: 0 0 0 1px rgba(141,58,38,0.35); }
+}
+@media (prefers-reduced-motion: reduce) { .choice .seal { transition: none; } .choice:hover .seal { transform: none; } }
+
+.ig { color: var(--lamp); text-decoration: none; border-bottom: 1px solid rgba(233,179,79,0.45); }
+.ig:hover { color: #f2c56a; border-bottom-color: #f2c56a; }
+.leaf .ig { color: var(--rubric); border-bottom-color: rgba(141,58,38,0.4); }
+
+/* Cormorant'ın eski stil "1" rakamı "ı" gibi görünüyor: başlıklarda düz rakam */
+body, .sect, .cover .band, .top .series, .choice .seal, h1, h2 { font-variant-numeric: lining-nums; }
+
+/* Kırk Metre teması: lacivert cilt, deniz mavisi mühür, tuzlu, solgun kâğıt */
+:root {
+  --night: #050b10;
+  --rubric: #1f5a6e;
+  --cloth: #132a36;
+  --lamp: #e0b45a;
+}
+canvas#sea { opacity: 0.7; }
+.ribbon { background: linear-gradient(90deg, #17495a, #22677d 45%, #194e60); }
+.choice .seal { background: radial-gradient(circle at 35% 30%, #4b8fa3, #1f5a6e 55%, #153f4e); }
+.drawer::before { background: var(--rubric); }
+.leaf .ig { color: var(--rubric); }
+/* tuz lekeli, hafif mavimsi kâğıt */
+:root { --paper:#e6e8e0; --paper-edge:#d3d8cf; }
+.book { box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.25), 0 6px 0 -2px #cfd5cc, 0 10px 0 -4px #c0c8be; }
+.ill, .ledger { background-color:#eef0e9; border-color: rgba(30,60,70,0.25); }
+.choice, .choice:active { background-color:#eef0e9; box-shadow: inset 0 0 0 3px #eef0e9, inset 0 0 0 4px rgba(30,60,70,0.14), 0 1px 2px rgba(20,40,50,0.08); }
+.choice:hover { background-color:#f2f4ee; border-color: rgba(31,90,110,0.55); box-shadow: inset 0 0 0 3px #f2f4ee, inset 0 0 0 4px rgba(31,90,110,0.25), 0 8px 18px rgba(20,40,50,0.14); }
+
+
+/* ---------- canlılık: görsel yavaşça yaklaşır, seçenekler sırayla gelir, kapak süzülür ---------- */
+.ill .kb { overflow: hidden; }
+.ill .kb img { animation: kb 20s ease-in-out infinite alternate; transform-origin: 50% 45%; }
+@keyframes kb { from { transform: scale(1.02); } to { transform: scale(1.14) translate(-1.5%, -1%); } }
+.choices .choice { animation: cin .55s cubic-bezier(.2,.8,.2,1) both; }
+.choices .choice:nth-child(1) { animation-delay: .35s; } .choices .choice:nth-child(2) { animation-delay: .45s; }
+.choices .choice:nth-child(3) { animation-delay: .55s; } .choices .choice:nth-child(4) { animation-delay: .65s; }
+.choices .choice:nth-child(5) { animation-delay: .75s; } .choices .choice:nth-child(6) { animation-delay: .85s; }
+@keyframes cin { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.cover { animation: coverfloat 7s ease-in-out infinite; }
+@keyframes coverfloat { 0%, 100% { transform: translateY(0) rotate(-0.4deg); } 50% { transform: translateY(-8px) rotate(0.4deg); } }
+.cover-wrap { position: relative; }
+.cover-wrap::before { content: ""; position: absolute; left: 0; top: 50%; width: min(520px, 90vw); aspect-ratio: 1; transform: translate(-10%, -50%); pointer-events: none; z-index: -1;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--lamp) 32%, transparent), transparent); animation: glow 6s ease-in-out infinite; }
+@keyframes glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+.the-end { animation: endin 1.4s .2s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes endin { from { opacity: 0; letter-spacing: 0.9em; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ill .kb img, .choices .choice, .cover, .cover-wrap::before, .the-end { animation: none; } }
+</style>
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+</head>
+<body>
+<canvas id="sea" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="series"><b>Kendi Maceranı Seç</b> · Kitap 6 · Kırk Metre</div>
+  <nav>
+    <a class="link" id="lnk-lib" href="#" hidden>Kütüphane</a>
+    <button class="link" id="btn-book" type="button">Defter <span id="note-count"></span></button>
+    <button class="link" id="btn-cover" type="button">Kapak</button>
+    <span class="confirm" id="confirm">Okuma baştan başlar. Emin misin?
+      <button class="link" id="btn-yes" type="button">Evet</button>
+      <button class="link" id="btn-no" type="button">Hayır</button>
+    </span>
+  </nav>
+</header>
+
+<main id="main"><div id="view"></div></main>
+
+<aside class="drawer" id="drawer" aria-label="Bekçinin defteri">
+  <button class="link drawer-close" id="btn-close" type="button">Kapat</button>
+  <h3>Ceplerin</h3>
+  <ul id="items"></ul>
+  <h3>Gözlemlerin</h3>
+  <ul id="notes"></ul>
+  <h3>Bulduğun sonlar</h3>
+  <ul id="endings"></ul>
+</aside>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const ENDINGS = [
+  { id: "kirkmetre", title: "Kırk Metre" },
+  { id: "mektup",    title: "Teslim Edilmeyen" },
+  { id: "altin",     title: "Altın" },
+  { id: "kilavuz",   title: "Kılavuz" },
+  { id: "babalar",   title: "Babalar" },
+  { id: "kiyi",      title: "Liman" },
+  { id: "narkoz",    title: "Mavi Sarhoşluk" },
+  { id: "vurgun",    title: "Vurgun" },
+  { id: "telsiz",    title: "Telsiz" },
+  { id: "pay",       title: "Pay" }
+];
+
+const IMG = {
+  tekne: "img/tekne.jpg", nuri: "img/nuri.jpg", karaada: "img/karaada.jpg", batik: "img/batik.jpg",
+  kule: "img/kule.jpg", durak: "img/durak.jpg", brandt: "img/brandt.jpg",
+  sandik: "img/sandik.jpg", torpido: "img/torpido.jpg", cep: "img/cep.jpg", kingston: "img/kingston.jpg", itiraf: "img/itiraf.jpg",
+  tufek: "img/tufek.jpg", hat: "img/hat.jpg", gunbatimi: "img/gunbatimi.jpg", mektuplar: "img/mektuplar.jpg"
+};
+
+function flag(s, k) { s.f[k] = true; }
+function has(s, k) { return !!s.f[k]; }
+function rel(s, who, d, msg) { s.r[who] = (s.r[who] || 0) + d; if (msg) toast(msg); }
+function note(s, t) { if (!s.notes.includes(t)) s.notes.push(t); }
+function hava(s, d) { s.hava = Math.max(0, (s.hava ?? 200) - d); }
+
+const S = {
+  /* ================= 1. PERDE: BOŞ TEKNE ================= */
+  a1: {
+    act: 1, time: "06:10", img: "tekne", imgLabel: "Boş tekne",
+    title: "Boş tekne",
+    text: () => [
+      "Güneş kalenin burçlarına daha yeni vurmuşken limana bir tekne giriyor. Mavi boyalı, burnunda beyaz harflerle SANİYE yazıyor. Annenin adı. Ağabeyin Rıza'nın teknesi.",
+      "Motor tıkırdıyor. Tekne ağır ama dümdüz geliyor, iskeleye bindirmesine bir kulaç kala kıyıdaki balıkçılardan biri atlayıp gazı kesiyor. Güvertede kimse yok.",
+      "Dümen iple bağlanmış. Sıkı, iki kere dönülmüş bir denizci düğümüyle. Biri tekneyi açıkta bir yöne çevirmiş, dümeni sabitlemiş, gazı açık bırakıp gitmiş.",
+      "Rıza iki gün önce şafakta çıktı. Yanında kırçıl saçlı, gözlüklü bir Alman vardı; arkeologmuş. Almanın kiraladığı beyaz motorun güvertesinde boş tahta sandıklar duruyordu. Rıza gülmüştü: «Bu kadar sandıkla ne taşıyacaklar, Yusuf?» Akşama dönerim demişti. Annen iki gecedir pencerenin önünde oturuyor.",
+      "Tekneye atlıyorsun. Rıza'nın dalış çantası yok, iki tüpü yok. Çapa halatı başüstünde bıçakla kesilmiş, temiz, tek hamlede. Dümen bölmesine bir kartvizit sıkıştırılmış: «Dr. Dieter Brandt. Archäologe. München.» Masada Rıza'nın deniz haritası açık duruyor.",
+      "Kahvenin radyosu bütün liman duysun diye açılmış: Kıbrıs'ta harekât bu sabah yeniden başlamış. Kimse radyoya bakmıyor. Herkes boş tekneye bakıyor.",
+      "İskelenin ucunda Nuri Reis duruyor. Babanı denize verdikten sonra seni ve Rıza'yı büyüten adam. Yüzü bembeyaz. Haritaya bakıyor."
+    ],
+    choices: [
+      { t: "Haritayı incele", to: "a2", fx: (s) => { s.via = "harita"; flag(s, "HARITA"); note(s, "Rıza'nın haritası: Karaada'nın güneybatısında kurşun kalemle bir çarpı, yanında «38». Kenarda Rıza'nın yazısı: «Brandt. 2 gün, 500 lira. Kule açık.»"); } },
+      { t: "Kartı cebine koy, Almanın kaldığı pansiyona koş", to: "a2", fx: (s) => { s.via = "pansiyon"; flag(s, "PANSIYON"); note(s, "Pansiyoncu Saffet Hanım: Alman dün akşam hesabı nakit ödemiş, gece yarısı çıkmış. İki adam ıslak bir sandığı minibüse zor taşımış. Sandıktan deniz suyu damlıyormuş."); } }
+    ]
+  },
+
+  a2: {
+    act: 1, time: "06:50", img: "nuri", imgLabel: "Nuri Reis",
+    title: "Nuri Reis",
+    text: (s) => {
+      const p = [];
+      if (s.via === "harita") p.push("Haritanın üstüne eğiliyorsun. Karaada'nın güneybatısında, kıyıdan iki mil açıkta, kurşun kalemle atılmış bir çarpı. Yanında Rıza'nın yazısıyla «38». Derinlik. Kenara da bir not düşmüş: «Brandt. 2 gün, 500 lira. Kule açık.» Kule. Denizde kulesi olan tek bir şey var.");
+      else p.push("Saffet Hanım'ın pansiyonu limanın arkasında, begonvillerin altında. Kadın seni görünce önlüğünü siliyor. Alman dün akşam hesabı kapatmış, nakit, üstünü de almamış. Gece yarısı bir minibüs gelmiş, iki adam ıslak, tahta bir sandığı zor taşımış. «Sandıktan su damlıyordu, oğlum. Deniz suyu. Merdivenleri hâlâ siliyorum.»");
+      p.push("İskeleye döndüğünde Nuri Reis hâlâ aynı yerde. Kırk beş yaşında ama sabah ışığında daha yaşlı görünüyor. Elleri, bütün ömrünü halat çekmekle geçirmiş elleri, titriyor.");
+      p.push("\"Karaada açığı,\" diyor sen bir şey söylemeden. \"Güneybatı. Kırk metre.\"");
+      p.push("Haritaya bakmadı bile. Ona bunu söylüyorsun. Gözlerini kaçırıyor. \"Orada bir şey yok, Yusuf. Kum. Kum ve süngerden başka bir şey yok.\"");
+      p.push("Nuri Reis denizden hiç «bir şey yok» diye söz etmez. Otuz yıldır bu sularda, bütün kayaları, bütün batıkları adıyla bilir.");
+      p.push("\"Bir hafta önce o Alman kahveye geldi,\" diyor sonunda. \"Herkese aynı şeyi sordu: kırk dört yazında burada Almanca bilen bir oğlan varmış, tanıyan var mı? Kimse tanımadı.\" Duruyor. \"Kimse tanımadı.\"");
+      return p;
+    },
+    choices: [
+      { t: "Nuri'ye neden titrediğini sor", to: "a3", fx: (s) => { flag(s, "SORDU"); note(s, "Nuri Reis: «Babamı o sularda kaybettim. Kırk dört yazı. Kayığımızı batırdılar.» Kimin batırdığını söylemedi."); } },
+      { t: "Soru sorma. Tüpleri doldur, Nuri'yi teknesine çek", to: "a3", fx: (s) => { s.via = "acele"; } },
+      { t: "Sahil güvenlik karakoluna git, dalışı onlar yapsın", to: "e_kiyi" }
+    ]
+  },
+
+  a3: {
+    act: 1, time: "08:10", acik: true, img: "karaada", imgLabel: "Karaada açığı",
+    title: "Karaada açığı",
+    text: (s) => {
+      const p = [];
+      if (has(s, "SORDU")) p.push("\"Babamı o sularda kaybettim,\" demişti Nuri iskelede. \"Kırk dört yazı. Kayığımızı batırdılar.\" Kimin batırdığını sorduğunda motoru çalıştırmıştı. Şimdi o motor susuyor ve Nuri denize uzun uzun bakıyor, sanki dibi görebilirmiş gibi.");
+      else p.push("Nuri bütün yol tek kelime etmedi. Kompresör tüpleri doldururken bile başını kaldırmadı. Şimdi motoru durduruyor ve denize uzun uzun bakıyor, sanki dibi görebilirmiş gibi.");
+      if (has(s, "HARITA")) p.push("Rıza'nın haritası sende ama Nuri ona bir kez bile bakmadı. Dümeni karanın iki kayasını üst üste getirerek kırdı, sonra Bodrum kalesinin kulesini Karaada'nın ucuna oturttu ve durdu. Kendi evinin kapısını bulur gibi.");
+      else p.push("Harita yok, işaret yok. Nuri dümeni karanın iki kayasını üst üste getirerek kırdı, sonra Bodrum kalesinin kulesini Karaada'nın ucuna oturttu ve durdu. Kendi evinin kapısını bulur gibi.");
+      p.push("Su öyle berrak ki tekne havada asılıymış gibi duruyor. Aşağıda, mavinin karardığı yerde, uzun, düz bir gölge var. Kaya değil. Kayalar böyle düz olmaz.");
+      p.push("Çift tüpü sırtlıyorsun. Manometre iki yüz bar gösteriyor. Nuri kemerini bağlarken kuralını söylüyor, babanın da söylediği kuralı: \"Kırk metrede yirmi dakika. Çıkarken altı metrede dur, beş dakika bekle. Acele çıkan bir daha dalamaz.\"");
+      p.push("Teknede üç şey daha var: Rıza'nın levyesi, yedek bir tüp ve geçen yaz İzmir'den aldığınız su geçirmez fener. \"İki elin var,\" diyor Nuri. \"Birini kendine ayır. Birini seç.\"");
+      return p;
+    },
+    choices: [
+      { t: "Levyeyi al", to: "a4", fx: (s) => { flag(s, "LEVYE"); s.hava = 160; } },
+      { t: "Yedek tüpü al", to: "a4", fx: (s) => { flag(s, "YEDEK"); s.hava = 160; } },
+      { t: "Feneri al", to: "a4", fx: (s) => { flag(s, "FENER"); s.hava = 160; } }
+    ]
+  },
+
+  a4: {
+    act: 1, time: "08:30", derin: 38, img: "batik", imgLabel: "Batık",
+    title: "Gölge",
+    text: (s) => {
+      const p = [];
+      p.push("Çapa ipinden aşağı iniyorsun. On metrede kırmızı kayboluyor; elinin sırtındaki çizik kara görünüyor. Yirmi metrede sarı gidiyor. Otuzda dünya maviden ibaret ve kafanın içinde tatlı, ılık bir şey dolaşmaya başlıyor, bir kadeh rakı gibi. Derinlik sarhoşluğu. Rıza buna «denizin şakası» derdi.");
+      if (has(s, "LEVYE")) p.push("Levye kemerine sıkıca bağlı, her kulaçta kalçana vuruyor.");
+      if (has(s, "YEDEK")) p.push("Yedek tüp göğsüne kayışla bağlı, seni hafifçe öne çekiyor.");
+      if (has(s, "FENER")) p.push("Fener bileğinde. Henüz yakmıyorsun; ışık daha var.");
+      p.push("Ve o, kumun üstünde yatıyor. Bir denizaltı. Elli metre kadar, ince, uzun, sırtında bir kule, kulenin önünde paslı bir top. Gövdesini otuz yılın süngerleri kaplamış; Rıza böyle yerlere «para bahçesi» derdi. Kulenin yan yüzündeki numara boyanın altında kalmış. Biri onu silmek istemiş. Hiçbir kayıtta adı geçmeyen bir gemi mi bu?");
+      p.push("Saniye'nin çapası güverte topuna dolanmış. Halatı bir kulaç yukarıdan kesilmiş, teknede gördüğün kesik gibi temiz.");
+      p.push("Bıçağının sapıyla gövdeye vuruyorsun. Bir kez. Boş, ağır bir ses.");
+      p.push("İçeriden cevap geliyor. Üç kısa. Üç uzun. Üç kısa.");
+      p.push("Çocukken Rıza'yla aynı odada, aranızdaki duvara vurduğunuz işaret bu. Mors'ta imdat. Rıza sana onu yedi yaşında öğretmişti. Ama otuz yıllık bir batığın içinden kim vurabilir?");
+      return p;
+    },
+    choices: [
+      { t: "Aynı işaretle cevap ver", to: "a5", fx: (s) => { s.via = "cevap"; flag(s, "CEVAP"); hava(s, 10); } },
+      { t: "Kuleye çık, içeri bir giriş ara", to: "a5", fx: (s) => { s.via = "kule"; hava(s, 20); } }
+    ]
+  },
+
+  a5: {
+    act: 1, time: "08:38", derin: 40, img: "kule", imgLabel: "Kontrol odası",
+    title: "Kapak",
+    text: (s) => {
+      const p = [];
+      if (s.via === "cevap") p.push("Üç kısa, üç uzun, üç kısa vuruyorsun. İçeriden bir an hiçbir şey. Sonra hızlı, telaşlı vuruşlar, artık işaret değil, yumruk. Kuleye çıkıyorsun.");
+      else p.push("Kulenin tepesine çıkıyorsun. İçeriden vuruşlar arkandan geliyor, inatla, aynı işaret, aynı işaret.");
+      p.push("Kule kapağı açık. Menteşesi pırıl pırıl: yeni sürtünmüş. Biri burayı birkaç gün önce açmış. İçeri, dar bir merdivenle kontrol odasına iniyorsun.");
+      if (has(s, "FENER")) p.push("Feneri yakıyorsun. Işık suyun içinde bir mızrak gibi: göstergeler, borular, dümen tekerleri, yerde bir subay kasketi. Kemiklere ışığı çevirmiyorsun. Duvardaki pirinç levhanın da üstü kazınmış, harfleri tek tek silinmiş.");
+      else p.push("Fenerin yok. Kuleden süzülen mavi ışık kontrol odasının yarısını gösteriyor, gerisi kara. Göstergeler, borular, dümen tekerleri. Yerde bir subay kasketi. Kafanın içindeki ılıklık büyüyor. Bir an kendini çok iyi hissediyorsun, hiçbir şeyden korkmuyorsun. Bu kötü bir işaret.");
+      p.push("Ön tarafta yuvarlak, çelik bir kapak. Önüne borular, bir raf yığılmış ama yığın bir çökmeden olamayacak kadar düzgün. Kapağın koluna kalın bir demir çubuk geçirilmiş, ucu kenara takozlanmış. Kapak içeriden açılamasın diye.");
+      p.push("Bıçak sapıyla kapağa vuruyorsun. Cevap bu kez yavaş geliyor, harf harf, sabırla, askerde muhabereci olan birinin elinden: R-I-Z-A.");
+      if (has(s, "CEVAP")) p.push("Sonra, arkasından: Y-U-S. Seni ilk vuruşundan tanımış.");
+      p.push("Sonra: İ-K-İ K-İ-Ş-İ. H-A-V-A A-Z. K-A-P-A-K D-I-Ş-T-A-N.");
+      p.push("İki kişi. Rıza'nın yanında biri daha var. Manometreye bakıyorsun.");
+      return p;
+    },
+    choices: [
+      { t: "Levyeyle kapağı kilitleyen demiri sök", to: "a6", if: (s) => has(s, "LEVYE"), fx: (s) => { flag(s, "KAPAK_GEVSEK"); hava(s, 40); note(s, "Kapağı kilitleyen demiri söktün. Kapak hâlâ boruların altında ama artık içeriden itilebilir."); } },
+      { t: "Yedek tüpü kapağın yanına bağla, dönüşte lazım olacak", to: "a6", if: (s) => has(s, "YEDEK"), fx: (s) => { flag(s, "YEDEK_BIRAKTI"); } },
+      { t: "Fenerle kontrol odasını tara", to: "a6", if: (s) => has(s, "FENER"), fx: (s) => { flag(s, "PLAKA"); hava(s, 20); note(s, "Kontrol odasında yerdeki büyük valf tekerleri sonuna kadar açık çevrilmiş. Pirinç levhadaki ad kazınmış ama altında bir tarih okunuyor: 1943."); } },
+      { t: "Kapağa vur: D-A-Y-A-N-I-N. D-Ö-N-E-C-E-Ğ-İ-M.", to: "a6", fx: (s) => { flag(s, "SOZ"); hava(s, 10); } },
+      { t: "Arka bölmede bir ışık kıpırdıyor. Rıza orada olmalı. Işığa yüz", to: "e_narkoz", if: (s) => !has(s, "FENER") }
+    ]
+  },
+
+  a6: {
+    act: 1, time: "08:52", derin: 6, img: "durak", imgLabel: "Altı metre",
+    title: "Altı metre",
+    text: (s) => {
+      const p = [];
+      if (has(s, "KAPAK_GEVSEK")) p.push("Levyeyi demirin altına sokup bütün ağırlığınla asılıyorsun. Demir bir çığlıkla yerinden çıkıyor, kumun üstüne düşüyor. Kapak hâlâ boruların altında ama artık kilitli değil. Nefesin hızlandı; manometrenin iğnesi gözünün önünde düşüyor.");
+      if (has(s, "YEDEK_BIRAKTI")) p.push("Yedek tüpü kapağın yanındaki boruya kayışıyla bağlıyorsun. Bir sonraki dalışta ilk iş onu alacaksın.");
+      if (has(s, "PLAKA")) p.push("Fenerle kontrol odasını taradın. Yerdeki büyük valf tekerleri sonuna kadar açık çevrilmiş. Pirinç levhadaki ad kazınmış ama altında bir yıl okunuyor: 1943.");
+      if (has(s, "SOZ")) p.push("Kapağa harf harf vurdun: DAYANIN. DÖNECEĞİM. İçeriden tek bir vuruş geldi. Anladım.");
+      p.push("Çapa ipinden yukarı çıkıyorsun, kabarcıklarından yavaş, Nuri'nin öğrettiği gibi. Renkler geri geliyor: önce sarı, sonra kırmızı. Altı metrede ipi kavrayıp duruyorsun. Beş dakika.");
+      p.push("Yukarıda, yüzeyin gümüş tavanında Nuri'nin teknesinin karnı. Ve onun yanına doğru gelen ikinci bir karın: daha büyük, beyaz. Bir motor sesi suyun içinde büyüyor, sonra kesiliyor. Beyaz teknenin çapası yanından süzülüp geçiyor, dibe iniyor.");
+      p.push("Yukarıda sesler. Boğuk, anlaşılmaz. Biri bağırıyor mu, gülüyor mu? Nuri yukarıda yalnız.");
+      return p;
+    },
+    choices: [
+      { t: "Altı metrede kal, beş dakikayı doldur", to: "act1_end", fx: (s) => { hava(s, 10); } },
+      { t: "Bekleme. Nuri yalnız, hemen yukarı çık", to: "e_vurgun" }
+    ]
+  },
+
+  e_kiyi: {
+    act: 1, time: "07:30",
+    end: { id: "kiyi", kind: "Erken son" },
+    title: "Liman",
+    text: () => [
+      "Sahil güvenlik karakolunda tek bir astsubay var, telsizin başında, ter içinde. Bütün botlar sabahtan beri açıkta; Kıbrıs'tan haber geldiğinden beri Ege'de Yunan gemisi arıyorlar.",
+      "Seni dinliyor. Not alıyor. \"Dalgıç ekibi İzmir'den gelir,\" diyor. \"Yarın. Belki öbür gün. Sakın kendi başınıza dalmayın, iki kişi daha kaybetmeyelim.\"",
+      "Karakolun önündeki bankta bütün gün oturuyorsun. Nuri Reis yanına geliyor, bir şey söylemeden oturuyor, sonra gidiyor."
+    ],
+    sabah: "Donanmanın dalgıçları iki gün sonra geliyor. Karaada açığında bir denizaltı buluyorlar ve ön bölmesinin kapağı dışarıdan, bir demirle kilitli.",
+    akibet: () => [
+      ["Rıza", "Ön bölmede, kapağın hemen dibinde bulundu. Yanında Kostas adında bir Yunan dalgıç. İkisinin de eli kapağın üstündeydi."],
+      ["Brandt", "Bodrum'dan çıkmış bir beyaz motor, aynı gece İstanköy'e yanaşmış. Sonrası bilinmiyor."],
+      ["Nuri Reis", "Cenazeden sonra teknesini sattı. Kimse sebebini sormadı."],
+      ["Sen", "Bir daha dalmadın. Gece, duvara vurulan her sesi duyuyorsun."]
+    ],
+    yil: "Bir yıl sonra Münih'ten imzasız bir mektup geliyor, içinde para var. Zarfı açmadan sobaya atıyorsun."
+  },
+
+  e_narkoz: {
+    act: 1, time: "08:46", derin: 40,
+    end: { id: "narkoz", kind: "Erken son" },
+    title: "Mavi Sarhoşluk",
+    text: () => [
+      "Kontrol odasının arkasındaki karanlıkta bir ışık kıpırdıyor. Küçük, sarı, tıpkı bir fener gibi. Rıza orada. Elbette orada. Kapağın arkasından vuran o değilmiş, burada, arkada, seni bekliyor.",
+      "Işığa doğru yüzüyorsun. Dar bir geçit, bir başka geçit, ranzalar, kemikler. Işık hep bir kulaç ileride. Gülmek istiyorsun; ağzındaki regülatörü çıkarmak istiyorsun, bu kadar güzel bir şeyi kendi ağzınla söylemek için.",
+      "Işık manometrenin camı. Kendi fenerin bile değil: kuleden düşen son mavi, camda yansıyor. İğne sıfırda.",
+      "Nefes çekiyorsun. Hiçbir şey gelmiyor."
+    ],
+    sabah: "Gözlerini teknenin güvertesinde açıyorsun. Nuri Reis tüpsüz, eski sünger dalgıçları gibi tek nefesle inmiş, seni kuleden çekip çıkarmış. Burnu kanıyor. Ağlıyor.",
+    akibet: () => [
+      ["Sen", "Üç gün ateşler içinde yattın. O üç gün boyunca meltem durmadan esti; Karaada açığına kimse çıkamadı."],
+      ["Rıza", "Dördüncü gün indiğinizde ön bölmenin kapağı açıktı. İçeride kimse yoktu."],
+      ["Brandt", "Beyaz motoru o gece İstanköy açıklarında, rotası batıya dönük görenler oldu."],
+      ["Nuri Reis", "O dalıştan sonra kulağı hiç düzelmedi. Sana bir kez bile kızmadı."]
+    ],
+    yil: "Bir yıl sonra Almanya'dan pulsuz bir kartpostal geliyor. Bir göl, dağlar. Arkasında tek satır, Rıza'nın el yazısıyla: «Merak etme. Anneme söyleme.»"
+  },
+
+  e_vurgun: {
+    act: 1, time: "09:05",
+    end: { id: "vurgun", kind: "Erken son" },
+    title: "Vurgun",
+    text: () => [
+      "İpi bırakıp yukarı tekmeliyorsun. Yüzeye çıktığında Nuri'nin teknesine beyaz bir motor bordalamış. Güvertesinde gözlüklü, kırçıl saçlı bir adam, yanında tüfekli bir başkası. Nuri dümenin başında, dimdik.",
+      "\"Yaşıyorlar,\" diye bağırıyorsun. \"Rıza yaşıyor!\"",
+      "Gözlüklü adamın yüzünden bir şey geçiyor. Sonra on dakika içinde dirseğin sızlamaya başlıyor. Sonra dizlerin. Sonra sırtın, sanki biri omurganın içine kırık cam dökmüş gibi. Güverteye çöküyorsun.",
+      "Vurgun. Babanı bu öldürmüştü."
+    ],
+    sabah: "Alman, \"Benim motorum hızlı,\" diyor. \"Sizi Bodrum'a ben götürürüm. Ama bana kapağın yerini söyleyeceksiniz.\" Söylüyorsun. Sonra bayılıyorsun.",
+    akibet: () => [
+      ["Sen", "Bir ay hastanede yattın. Sol bacağını hep biraz sürükleyerek yürüyorsun."],
+      ["Rıza", "Almanın adamları onu o gece çıkardı, sandıklarla beraber. Güvertede vurgun yedi. Yaşıyor, o da topal. İkiniz limanda yan yana yürüdüğünüzde çocuklar gülüyor."],
+      ["Brandt", "Sandıklarla birlikte Ege'den kayboldu. Ağabeyine bir zarf para bıraktı. Rıza zarfı açmadı."],
+      ["Kostas", "Rıza'nın yanındaki öbür adam. Güverteye çıkarıldıktan bir saat sonra öldü. Rıza adını hâlâ her gece bir kere söylüyor."]
+    ],
+    yil: "Rıza bir akşam, rakının üçüncü kadehinde, kutudan söz ediyor. Kurşun bir kutu, mektuplarla dolu. «Almana onu da verdim,» diyor. Bir daha hiç söz etmiyor."
+  },
+
+  act1_end: {
+    act: 1, time: "09:20", acik: true, img: "brandt", imgLabel: "Beyaz motor",
+    actEnd: true, next: { t: "2. Perde'ye geç", to: "b1" },
+    title: "Beyaz motor",
+    text: (s) => {
+      const p = [];
+      p.push("Yüzeye çıktığında Nuri'nin teknesine beyaz bir motor bordalamış. Kıçında Almanca bir ad: SEESTERN. Güvertesinde kırçıl saçlı, gözlüklü, elli yaşlarında bir adam bir fincan kahve tutuyor. Yanında yanık yüzlü, iri biri dikiliyor, kucağında av tüfeği: Güllüklü Cemil. Limanda ondan iş yapan herkes korkar.");
+      if (has(s, "PANSIYON")) p.push("Motorun güvertesinde, branda altında tahta bir sandık duruyor. Kenarından hâlâ su damlıyor. Saffet Hanım'ın merdivenlerini ıslatan sandık bu.");
+      p.push("\"Dieter Brandt,\" diyor adam, Türkçesi düzgün, kitap gibi. \"Ağabeyinizi ben de arıyorum. Ne yazık, iki gündür arıyorum.\"");
+      p.push("Maskeni çıkarıyorsun. \"Yaşıyor,\" diyorsun.");
+      p.push("Brandt'ın elindeki fincan durmuyor ama kahvesi duruyor. \"İkisi de mi?\" diye soruyor. Sonra kendini toparlıyor, gülümsüyor. \"Benim dalgıcım da aşağıda. Kostas. İstanköylü.\" Fincanı yavaşça bırakıyor. \"Bir Yunan.\"");
+      p.push("Radyoyu hatırlıyorsun. Kıbrıs. Bu sabah.");
+      p.push("\"Sahil güvenlik bugün Türk sularında bir Yunan dalgıç bulsa ne der, sizce?\" diyor Brandt. \"Bir Alman, bir Yunan ve bir Türk, kayıtlarda olmayan bir batıkta. Ağabeyiniz casusla beraber çıkar oradan. Çıkarsa.\"");
+      p.push("Sonra Brandt başını çeviriyor ve Nuri Reis'e bakıyor. Uzun uzun. Gözlüklerinin arkasında bir şey kımıldıyor.");
+      p.push("\"Reis,\" diyor. \"Sizi bir yerden tanıyor muyum?\"");
+      p.push("Nuri'nin dümendeki eli beyazlıyor.");
+      return p;
+    }
+  }
+};
+
+/* ================= 2. PERDE: HAVA CEBİ ================= */
+const ACT2 = {
+  b1: {
+    act: 2, time: "09:40", acik: true, img: "brandt", imgLabel: "Teklif",
+    title: "Teklif",
+    text: (s) => {
+      const p = [];
+      p.push("Nuri cevap vermiyor. Brandt üstelemiyor; tanıyormuş gibi yapmanın tadını çıkaran biri gibi gülümsüyor, sonra sana dönüyor. Cemil'e bir işaret ediyor; Cemil tüfeği omzuna asıp iki teknenin arasına bir iskele tahtası uzatıyor.");
+      p.push("\"Açık konuşayım,\" diyor Brandt. \"Dümeni ben bağladım. İki gün önce ön bölmede bir raf çöktü. Ağabeyinizle Kostas'ın öldüğünü sandım. Tekne ailesine dönsün, bir kaza gibi görünsün istedim. Kötü bir karardı. Kabul ediyorum.\"");
+      p.push("Raf çökmesi. Kapağın koluna geçirilmiş, ucu takozlanmış demiri sen gördün. Raf çökünce demir kendi kendine kola geçmez.");
+      p.push("\"Teklifim şu,\" diyor Brandt. \"Bende vinç var, altı dolu tüp var. Aşağıda sandıklar var; bunları çıkarmama yardım edin, iki adamı birlikte çıkaralım. Ağabeyinize beş yüz lira söz vermiştim. Size bunun on katını veririm.\"");
+      p.push("Nuri yanına sokuluyor. Sesi bir fısıltı: \"Kapağı o kilitledi, Yusuf. Gözünden okunuyor. Bu adama sırtını dönme.\"");
+      p.push("Teknenin kabinindeki eski telsiz cızırdıyor. Sahil güvenliğin kanalı bütün sabah Kıbrıs'tan haber okuyor.");
+      return p;
+    },
+    choices: [
+      { t: "Teklifi kabul et", to: "b2", fx: (s) => { s.via = "kabul"; flag(s, "ANLASMA"); } },
+      { t: "Reddet: «Önce adamlar. Sandıkların umurumda değil.»", to: "b2", fx: (s) => { s.via = "red"; } },
+      { t: "Telsizi aç, sahil güvenliği çağır", to: "e_telsiz" }
+    ]
+  },
+
+  b2: {
+    act: 2, time: "10:30", acik: true, img: "sandik", imgLabel: "Sandık",
+    title: "Yüzey aralığı",
+    text: (s) => {
+      const p = [];
+      if (s.via === "kabul") p.push("Brandt'ın elini sıkıyorsun. Eli kuru ve soğuk. Cemil'e Almanca bir şey söylüyor; Cemil anlamıyor ama sırıtıyor. Brandt sana bin liralık bir deste uzatıyor: \"Avans.\"");
+      else p.push("\"Önce adamlar,\" diyorsun. Brandt omuz silkiyor. \"O halde kendi tüplerinizle.\" Kendi kendine Almanca bir şey söylüyor, sana değil, denize. Nuri'nin başı bir an ona dönüyor. Anlamış gibi.");
+      p.push("Kırk metreden sonra yüzeyde en az bir saat beklemek gerek; Nuri'nin kuralı. Kompresör tıkırdıyor, tüplerini dolduruyor. Güneş tahtaları ısıtıyor.");
+      if (has(s, "YEDEK_BIRAKTI")) p.push("Aşağıda, kapağın yanında bıraktığın yedek tüp seni bekliyor. Bu dalışta fazladan kırk bar demek.");
+      p.push("Brandt cüzdanından eski bir fotoğraf çıkarıp sana gösteriyor. Bir denizaltının güvertesinde, üniformalı, gözlüklü bir subay. Yüzü Brandt'ın yüzü, otuz yaş genç. \"Babam,\" diyor. \"Kaptan Ernst Brandt. Kırk dört ağustosunda bu sularda kayboldu. Son mektubunda bir Türk balıkçı oğlanından bahsediyor. On beş yaşında. Kılavuzları. Almancası iyiymiş.\"");
+      p.push("Fotoğrafın kenarında, güvertenin ucunda, ince bir oğlan bir halatı sarıyor. Yüzü gölgede. Nuri fotoğrafa bakmıyor.");
+      if (has(s, "SORDU")) p.push("\"Kayığımızı batırdılar,\" demişti Nuri sabah. Kırk dört yazı.");
+      if (has(s, "PANSIYON")) p.push("Seestern'in güvertesindeki sandık hâlâ branda altında, hâlâ damlıyor.");
+      return p;
+    },
+    choices: [
+      { t: "Nuri'yi teknenin kıçına çek, baş başa konuş", to: "b3", fx: (s) => { flag(s, "NURI_KONUSTU"); s.hava = 160 + (has(s, "YEDEK_BIRAKTI") ? 40 : 0); note(s, "Nuri Reis: «Kırk dörtte babamın kayığını bir denizaltı batırdı. Ben de oradaydım. Gerisini sorma. Önce Rıza'yı çıkar, sonra hepsini anlatırım.»"); } },
+      { t: "Brandt kamaraya inince Seestern'deki sandığa bak", to: "b3", fx: (s) => { flag(s, "SANDIK"); s.hava = 160 + (has(s, "YEDEK_BIRAKTI") ? 40 : 0); note(s, "Brandt'ın sandığında ıslak torbalar: altın sikkeler, kolyeler, küçük bir çocuk bileziği. Bileziğin içinde İbranice harfler. Ve İtalyanca basılmış, fotoğraflı bir kimlik: «Rodi»."); } }
+    ]
+  },
+
+  b3: {
+    act: 2, time: "11:30", derin: 40, img: "torpido", imgLabel: "İkinci dalış",
+    title: "İkinci dalış",
+    text: (s) => {
+      const p = [];
+      if (has(s, "NURI_KONUSTU")) p.push("Nuri'nin sözleri kulağında, ipten aşağı iniyorsun: «Ben de oradaydım.» On beş yaşında bir oğlan. Almancası iyi.");
+      if (has(s, "SANDIK")) p.push("Brandt'ın sandığında gördüğün çocuk bileziği gözünün önünden gitmiyor. Rodi. İtalyanların Rodos'a verdiği ad.");
+      if (has(s, "ANLASMA")) p.push("Bu kez yalnız değilsin. Cemil de iniyor, Brandt'ın tüplerinden birini sırtlamış, belinde vinç kancası. Cemil bir zamanlar sünger dalgıcıymış; kırk metreyi bilir. Kancayı sana gösteriyor, sonra kontrol odasının arkasını: sandıklar orada.");
+      p.push("Renkler yine teker teker gidiyor. Denizaltı yine kumun üstünde, yine sessiz. Ama bu kez onun ne olduğunu biliyorsun ve gövdesine dokunduğunda içeriden hemen cevap geliyor: üç kısa, üç uzun, üç kısa. Daha zayıf. Sabahkinden daha zayıf.");
+      if (has(s, "YEDEK_BIRAKTI")) p.push("Kapağın yanındaki yedek tüpü çözüp regülatörünü çift tüpün yanına bağlıyorsun.");
+      if (has(s, "KAPAK_GEVSEK")) p.push("Sabah söktüğün demir kumun üstünde duruyor. Kapak kilitsiz; yalnızca önündeki boruların kenara çekilmesi gerek.");
+      else if (has(s, "LEVYE")) p.push("Kapağın kolundaki demir hâlâ yerinde. Levyen kemerinde; demiri sökmek bir dakikanı alır. Ya da dışarıdan, gövdenin burnundaki torpido kovanının kapağı. Dar. Ama açık duruyor.");
+      else p.push("Kapağın kolundaki demir hâlâ yerinde. Levye yok; demiri iki elinle, ayaklarını kapağa dayayıp sökmen gerekecek. Ya da dışarıdan, gövdenin burnundaki torpido kovanının kapağı. Dar. Ama açık duruyor.");
+      return p;
+    },
+    choices: [
+      { t: "Brandt'ın dediği gibi önce sandıkları vince bağla", to: "e_pay", if: (s) => has(s, "ANLASMA") },
+      { t: "Cemil sandıklarla uğraşırken kapağa dal", to: "b4", if: (s) => has(s, "ANLASMA"), fx: (s) => { s.via = "kacis"; hava(s, has(s, "KAPAK_GEVSEK") ? 10 : has(s, "LEVYE") ? 20 : 40); } },
+      { t: "Kapaktan gir", to: "b4", if: (s) => !has(s, "ANLASMA"), fx: (s) => { s.via = "kapak"; hava(s, has(s, "KAPAK_GEVSEK") ? 10 : has(s, "LEVYE") ? 20 : 40); } },
+      { t: "Burundaki torpido kovanından içeri sürün", to: "b4", if: (s) => !has(s, "ANLASMA"), fx: (s) => { s.via = "kovan"; hava(s, 20); } }
+    ]
+  },
+
+  b4: {
+    act: 2, time: "11:40", derin: 40, img: "cep", imgLabel: "Hava cebi",
+    title: "Hava cebi",
+    text: (s) => {
+      const p = [];
+      if (s.via === "kovan") p.push("Torpido kovanı bir tabut kadar dar. Tüpler tavana sürtüyor, omuzların iki yana değiyor. Kollarınla çeke çeke ilerliyorsun. Kovanın iç kapağı yarı açık; kendini başın önde ön bölmenin suyuna bırakıyorsun.");
+      else if (s.via === "kacis") p.push("Cemil sırtını dönüp kancayı ilk sandığa geçirirken kapağa dalıyorsun. Boruları kenara çekiyorsun" + (has(s, "KAPAK_GEVSEK") ? "" : has(s, "LEVYE") ? ", demiri levyeyle söküyorsun" : ", demiri ayaklarını dayayıp söküyorsun") + ". Kapak içeri doğru açılıyor. Arkandan Cemil'in kabarcıkları bir an duruyor, sonra yine sandıklara dönüyor.");
+      else p.push("Boruları teker teker kenara çekiyorsun" + (has(s, "KAPAK_GEVSEK") ? "" : has(s, "LEVYE") ? ", sonra demiri levyeyle söküyorsun" : ", sonra demiri ayaklarını kapağa dayayıp, nefesini harcayarak söküyorsun") + ". Kapak içeri doğru, ağır ağır açılıyor.");
+      p.push("Yukarı süzülüyorsun ve başın sudan çıkıyor. Karanlık. Leş gibi, ağır bir hava; ilk nefeste başın zonkluyor. " + (has(s, "FENER") ? "Fenerinin ışığında" : "Biri karanlıkta, son pilleriyle titreyen bir el fenerini yakıyor. Işığında") + " tavanın altında, suyun üstünde kalmış bir avuç boşluk. Hava cebi.");
+      p.push("\"Yusuf?\"");
+      p.push("Rıza. Sakalı uzamış, dudakları çatlamış, gözleri çukurda. Bir torpido rafına tutunuyor. Yanında, suyun içinde, rafın demirine bacağı sıkışmış, sapsarı bir adam. Kostas. Sana bir şey söylemeye çalışıyor; Rumca mı, Türkçe mi, anlamıyorsun.");
+      if (has(s, "SOZ")) p.push("\"Vuruşunu duyunca Kostas ağladı,\" diyor Rıza. \"Dönecek, dedim. Bizim Yusuf dediğini yapar.\"");
+      p.push("Rıza her şeyi hızlı, kesik anlatıyor; havayı boşa harcamamak için. Brandt sandıkların yarısını çıkardıktan sonra ikisini kalanları toplamaya göndermiş. Döndüklerinde kapak kapanmış. Dört tüpleri vardı, havayı cebe boşalta boşalta iki gün dayandılar. Kırk dörtten kalma teneke kutulardan su içtiler.");
+      p.push("Sonra " + (has(s, "FENER") ? "senin fenerini alıp" : "kendi fenerini") + " bir köşeye çeviriyor. Rafların arasında açık bir sandık, altın ışıltısı. Yanında kurşundan, küçük bir kutu. Kapağı açık. İçi kâğıtla dolu.");
+      p.push("\"Mektuplar,\" diyor Rıza. \"Fotoğraflar, kimlikler. Kostas İtalyanca okuyor. İlki şöyle başlıyor: Rodos, Temmuz 1944.\" Sesi çatlıyor. \"Bunlar Rodos'tan sürülen ailelerin. Altınları da onların. Almanlar hepsini toplamış, bir daha hiçbiri yerine varmamış.\"");
+      if (has(s, "SANDIK")) p.push("Brandt'ın sandığında gördüğün bileziği hatırlıyorsun. İçindeki harfleri. Aynı ellerden.");
+      p.push("Rıza bileğini tutuyor. \"Dinle. İki gündür kırk metredeyiz. Kanımız azotla dolu. Bizi bir saatte yukarı çıkarırsan güvertede ölürüz. Hatta saatlerce durmamız lazım, çok tüp lazım. Nuri Reis bilir. Yukarı çık, hazırla, sonra gel al bizi. Acele et. Bu havayla akşama dayanmayız.\"");
+      p.push("Manometre sende " + s.hava + " bar diyor. Çıkmadan önce yapabileceğin tek bir şey var.");
+      return p;
+    },
+    choices: [
+      { t: "Kostas'ın bacağını rafın altından kurtar", to: "b5", fx: (s) => { s.via = "kostas"; flag(s, "KOSTAS_KURTAR"); hava(s, 60); } },
+      { t: "Kurşun kutuyu kucakla", to: "b5", fx: (s) => { s.via = "kutu"; flag(s, "KUTU"); hava(s, 20); } },
+      { t: "Sandıktan bir avuç altın al: Brandt'a karşı elinde bir şey olsun", to: "b5", fx: (s) => { s.via = "kulce"; flag(s, "KULCE"); hava(s, 20); } }
+    ]
+  },
+
+  b5: {
+    act: 2, time: "11:55", derin: 40, img: "kingston", imgLabel: "Valfler",
+    title: "Valfler",
+    text: (s) => {
+      const p = [];
+      if (s.via === "kostas") p.push("Suya dalıp rafın altına giriyorsun. Kostas'ın bacağı iki demirin arasında, mosmor. Bıçağını kaldıraç yapıyorsun, omzunu rafa veriyorsun, nefesin hırıltıya dönüyor. Raf bir parmak kalkıyor. Kostas bacağını çekiyor ve çığlığı cebin tavanında yankılanıyor. Kurtuldu. Yüzebilir.");
+      else if (s.via === "kutu") p.push("Kurşun kutuyu kucaklıyorsun. Küçük ama ağır, bir çocuk kadar. Rıza kapağını kapatıp bir halatla göğsüne bağlamana yardım ediyor. Kostas başını sallıyor, gözleri kapalı. Bacağı hâlâ rafın altında.");
+      else p.push("Açık sandığa uzanıp bir avuç sikke alıyorsun, dalış ceketinin cebine dolduruyorsun. Rıza sana bakıyor ama bir şey demiyor. Kostas'ın bacağı hâlâ rafın altında.");
+      p.push("Rıza'nın elini sıkıp geri dalıyorsun. Kontrol odasından geçerken" + (has(s, "FENER") ? " fenerinin ışığı" : " kuleden düşen mavi ışık") + " yerdeki valf tekerlerine vuruyor.");
+      if (has(s, "PLAKA")) p.push("Sabah gördüğün tekerler. Hepsi sonuna kadar açık.");
+      p.push("Bunlar denizaltının deniz valfleri; askerde Rıza anlatmıştı, kingston derler. Açıldı mı, deniz içeri dolar. Kendiliğinden açılmazlar. Bu denizaltı bir saldırıyla batmamış. Birisi onu içeriden batırmış. Kayıtlarda olmamasının sebebi bu: kimse ona ne olduğunu bilmiyor.");
+      p.push("Kaptanın küçük bölmesinde, rafın üstünde mumlu bir beze sarılı bir defter. Seyir defteri. Otuz yıldır kuru kalmış olabilir.");
+      p.push("Manometre " + s.hava + " bar.");
+      return p;
+    },
+    choices: [
+      { t: "Seyir defterini al", to: "act2_end", fx: (s) => { flag(s, "DEFTER"); hava(s, 20); } },
+      { t: "Geri dön, kurşun kutuyu da al", to: "act2_end", if: (s) => has(s, "KOSTAS_KURTAR") && !has(s, "KUTU") && s.hava >= 80, fx: (s) => { flag(s, "KUTU"); flag(s, "IKISI"); hava(s, 20); } },
+      { t: "Geri dön, Kostas'ın bacağını da kurtar", to: "act2_end", if: (s) => !has(s, "KOSTAS_KURTAR") && s.hava >= 120, fx: (s) => { flag(s, "KOSTAS_KURTAR"); flag(s, "IKISI"); hava(s, 60); } },
+      { t: "Hiçbir şeye dokunma, hava bitmeden çık", to: "act2_end", fx: (s) => { s.via = "hemen"; } }
+    ]
+  },
+
+  act2_end: {
+    act: 2, time: "12:20", acik: true, img: "itiraf", imgLabel: "İtiraf",
+    actEnd: true, next: { t: "3. Perde'ye geç", to: "c1" },
+    title: "İtiraf",
+    text: (s) => {
+      const p = [];
+      if (has(s, "IKISI")) p.push(s.via === "kostas" ? "Geri dönüp kurşun kutuyu da aldın; Rıza onu göğsüne bağladı. Kostas artık yüzebiliyor, kutu da seninle." : "Geri dönüp omzunu bir kez daha rafa verdin. Kostas'ın bacağı kurtuldu; artık yüzebilir. " + (s.via === "kutu" ? "Kutu göğsünde." : "Sikkeler cebinde."));
+      if (has(s, "DEFTER")) p.push("Seyir defterini ceketinin içine, göğsüne bastırıyorsun.");
+      p.push("Altı metrede beş dakika bekleyip yüzeye çıkıyorsun. Nuri seni güverteye çekiyor. Seestern hâlâ bordada.");
+      if (has(s, "ANLASMA")) p.push("Cemil senden önce çıkmış; Seestern'in güvertesinde vinçle çektiği sandıkların yanında oturmuş, sana ters ters bakıyor.");
+      if (has(s, "KUTU")) p.push("Kurşun kutuyu güverteye bırakıyorsun. Brandt'ın gözleri ona dikiliyor.");
+      if (has(s, "DEFTER")) {
+        p.push("Mumlu bezi açıp defteri Nuri'ye uzatıyorsun. Sayfalar sararmış ama mürekkep yerinde. Nuri son sayfayı açıyor. Okumaya başlıyor; Almanca. Sonra durup Türkçeye çeviriyor, yavaş, kelime kelime:");
+        p.push({ q: "On dört ağustos. Türk oğlan gece nöbetinde kaçtı. Kingstonlar açık. Su ön bölmeden geliyor. Tanrı bizi bağışlasın, ona da hak veriyorum." });
+        p.push("Brandt'ın yüzü kireç gibi. \"Almanca biliyorsunuz,\" diyor Nuri'ye. \"Ve o defteri okuyabiliyorsunuz.\"");
+      } else {
+        p.push("Brandt, babasının fotoğrafını çıkarıp Nuri'nin önüne koyuyor. Fotoğraftaki ince oğlanı parmağıyla gösteriyor. \"Bu çocuk,\" diyor. \"Bu çocuk yaşıyor mu, reis?\"");
+      }
+      if (has(s, "NURI_KONUSTU")) p.push("Nuri sana bakıyor. «Önce Rıza'yı çıkar, sonra hepsini anlatırım» demişti. Bekleyemedi.");
+      p.push("\"O çocuk bendim,\" diyor Nuri. Sesi titremiyor artık. \"Kayığımızı batırdılar. Babamı sudan çıkarmadılar. Beni kılavuz diye aldılar. Dördüncü gece, Karaada'nın dibinde, herkes uyurken kingstonları açtım. Kuleden kaçtım, Karaada'ya kadar yüzdüm. Otuz bir adam.\"");
+      p.push("Kimse kımıldamıyor. Sonra Brandt Cemil'in elinden tüfeği alıyor. Namluyu Nuri'nin göğsüne doğrultuyor.");
+      p.push("\"Babam,\" diyor. \"Otuz yıldır babamı arıyorum.\"");
+      p.push("Ve aşağıda, kırk metrede, iki adam bir avuç havanın içinde senin dönmeni bekliyor. Rıza'nın son sözü kulağında: «Akşama dayanmayız.»");
+      return p;
+    }
+  },
+
+  e_telsiz: {
+    act: 2, time: "10:20",
+    end: { id: "telsiz", kind: "Erken son" },
+    title: "Telsiz",
+    text: () => [
+      "Telsizin ahizesini kapıyorsun. \"Sahil güvenlik, sahil güvenlik. Karaada açığı. Batıkta iki kişi sıkıştı. Yaşıyorlar.\"",
+      "Brandt bir an kıpırdamıyor. Sonra Cemil'e bir şey söylüyor; Cemil iskele tahtasını çekiyor. Seestern'in motoru homurdanıyor. Beyaz motor batıya, İstanköy'e doğru açılıyor. Sandığı güvertesinde.",
+      "Kırk dakika sonra gri bir sahil güvenlik botu geliyor. Ardından donanmanın dalgıçları. İki adamı saatlerce duraklarla çıkarıyorlar, İzmir'e basınç odasına götürüyorlar. Rıza yaşıyor."
+    ],
+    sabah: "Gazeteler bir gün yazıyor, sonra Kıbrıs haberleri her şeyi siliyor: «Karaada'da Yunan casus yakalandı.»",
+    akibet: () => [
+      ["Rıza", "Sorgudan bir hafta sonra çıktı. Bir daha kimse ona iş vermedi. Bir Yunanla aynı delikte iki gün kalmıştı."],
+      ["Kostas", "Casuslukla yargılandı. Mübadelede, bir yıl sonra İstanköy'e iade edildi. Rıza'ya bir mektup yazdı; Rıza her yıl bir kez okuyor."],
+      ["Brandt", "Seestern'i İstanköy limanında boş buldular. Kendisi o hafta Münih'e uçmuş."],
+      ["Altın", "Batıktan kalan sandıklar bir depoya götürüldü. Sonrası bir tutanakta bile yok."]
+    ],
+    yil: "Nuri Reis o yazdan sonra Karaada açığına hiç gitmedi. Sorduğunda tek bir şey dedi: «Orada benim bir borcum var. Sen onu ödemedin, ben de ödemedim.»"
+  },
+
+  e_pay: {
+    act: 2, time: "11:50",
+    end: { id: "pay", kind: "Erken son" },
+    title: "Pay",
+    text: () => [
+      "Cemil'le birlikte sandıkları kontrol odasının arkasından çıkarıp vince bağlıyorsunuz. Biri, iki, beş. Her biri yukarı çekilirken kabarcıklar arasında kayboluyor. Manometrenin iğnesi düşüyor.",
+      "Altıncı sandığı bağladığında Cemil'e dönüyorsun. Cemil yok. Vinç halatı da gevşemiş; ucunu çekiyorsun, kumun üstüne bir yılan gibi kıvrılarak düşüyor. Kesilmiş.",
+      "Kırk barla yukarı çıkıyorsun. Yüzeyde Seestern'in yerinde köpük var. Beyaz motor ufukta, İstanköy'e doğru, güvertesinde sandıklarla."
+    ],
+    sabah: "Nuri'yle akşama kadar kendi tüplerinizle iniyorsunuz. Rıza'yı ve Kostas'ı saatlerce duraklarla çıkarıyorsunuz. Güvertede Kostas'ın nefesi kesiliyor. Vurgun.",
+    akibet: () => [
+      ["Rıza", "Yaşıyor. Kostas'ın son sözünü sana söylemiyor, kimseye söylemiyor."],
+      ["Brandt", "Nuri'nin güvertesine bir zarf bırakmıştı: beş bin lira. Sözünü tuttu."],
+      ["Nuri Reis", "Zarfı denize attı. Sana bir şey demedi. Demesi gerekmedi."],
+      ["Kurşun kutu", "Ön bölmede, rafların arasında kaldı. İçindeki mektuplar hâlâ orada."]
+    ],
+    yil: "Bir yıl sonra İsviçre'de bir müzayedede, Rodos'tan geldiği yazan bir kolye satılıyor. Gazetede fotoğrafını görüyorsun. Sayfayı yırtıp saklıyorsun."
+  }
+};
+Object.assign(S, ACT2);
+
+/* ================= 3. PERDE: KIRK METRE ================= */
+
+function brandtSonu(s) {
+  if (has(s, "OKUDU")) return "Defteri Bodrum'daki savcıya kendi eliyle teslim etti, ifadesini verdi, sonra Münih'e döndü. Her yıl ağustosta Nuri Reis'e bir mektup yazıyor. Nuri hiçbirini açmadı ama hiçbirini atmadı.";
+  if (has(s, "MEKTUP")) return "Mektubu katlayıp kutuya geri koydu. Sandıkları kendi eliyle sahil güvenliğe teslim etti. Münih'e döndü; bir yıl sonra Rodos'ta bir anma töreninde, en arka sırada görüldü.";
+  if (has(s, "ZORLA")) return "Ellerini Cemil'in halatıyla bağladınız. Akşam sahil güvenliğe teslim edildi, bir hafta sonra sınır dışı edildi. Havaalanında gazetecilere tek kelime etmedi.";
+  return "Sandıklarla İstanköy'e geçti. Sonrası bilinmiyor; bazıları İsviçre'de bir müzayededen söz ediyor.";
+}
+const ACT3 = {
+  c1: {
+    act: 3, time: "12:40", acik: true, img: "tufek", imgLabel: "Tüfek",
+    title: "Otuz bir adam",
+    text: (s) => {
+      const p = [];
+      p.push("Namlu Nuri'nin göğsünde. Brandt'ın parmağı tetikte, gözlükleri buğulu. Cemil iki adım geri çekilmiş; bu iş onun pazarlığında yoktu.");
+      if (has(s, "ANLASMA")) p.push("\"Anlaşmıştık,\" diyor Brandt sana, gözlerini Nuri'den ayırmadan. \"Cemil sandıkları bağlarken sen kayboldun. Bütün Türkler sözünü böyle mi tutar?\"");
+      if (has(s, "KULCE")) p.push("Ceketinin cebinden bir sikke kayıp güverteye düşüyor, tahtaların üstünde dönüp duruyor. Brandt'ın gözü bir an ona kayıyor.");
+      if (has(s, "KUTU")) p.push("Kurşun kutu ayaklarının dibinde duruyor. Kapağının kenarından sararmış bir kâğıdın ucu görünüyor.");
+      if (has(s, "DEFTER")) p.push("Seyir defteri hâlâ Nuri'nin elinde.");
+      p.push("\"Vur,\" diyor Nuri sakin. \"Ama önce o iki adamı çıkaralım. Tüpler sende, vinç sende. Rıza'nın akşama dayanacak havası yok. Ondan sonra istediğini yap.\"");
+      p.push("Brandt'ın elleri titriyor. Aşağıda, kırk metrede, saat işliyor.");
+      return p;
+    },
+    choices: [
+      { t: "Defteri Brandt'a ver, son sayfaları kendisi okusun", to: "c2", if: (s) => has(s, "DEFTER"), fx: (s) => { s.via = "defter"; flag(s, "OKUDU"); } },
+      { t: "Kurşun kutuyu aç, ilk mektubu Brandt'a uzat", to: "c2", if: (s) => has(s, "KUTU"), fx: (s) => { s.via = "mektup"; flag(s, "MEKTUP"); } },
+      { t: "Tüfeğin namlusunu yakala", to: "c2", fx: (s) => { s.via = "zorla"; flag(s, "ZORLA"); } },
+      { t: "«Sandıklar senin. Tüplerini bırak, git.»", to: "c2", fx: (s) => { s.via = "pazarlik"; flag(s, "PAZARLIK"); } }
+    ]
+  },
+
+  c2: {
+    act: 3, time: "13:20", acik: true, img: "hat", imgLabel: "Duraklar",
+    title: "Üçüncü dalış",
+    text: (s) => {
+      const p = [];
+      if (s.via === "defter") {
+        p.push("Nuri'nin elinden defteri alıp Brandt'a uzatıyorsun. Brandt tüfeği bir eline alıyor, öbürüyle sayfaları çeviriyor. Babasının el yazısı. Bir sayfada duruyor. Dudakları kıpırdıyor. Sonra sesli okuyor, Türkçe, kendine:");
+        p.push({ q: "On ağustos. Bir balıkçı kayığına çarptık. Yaşlı adamı sudan almadım; tanık istemiyorum. Oğlunu kılavuz yaptık. Bana bakmıyor." });
+        p.push("Brandt tüfeği indiriyor. Uzun bir süre denize bakıyor. \"Babanızı benim babam öldürmüş,\" diyor Nuri'ye. Nuri bir şey söylemiyor.");
+      } else if (s.via === "mektup") {
+        p.push("Kutuyu açıp en üstteki mektubu çıkarıyorsun. Katlanmış, küçük, kurşun kalemle yazılmış. Brandt'a uzatıyorsun. İtalyanca. Brandt okuyor, sonra yavaşça, sesli çeviriyor:");
+        p.push({ q: "Sevgili nineciğim, bizi bir gemiye bindiriyorlar. Annem korkmayın diyor. Sana bilezikle bu mektubu bırakıyorum. Rachel, dokuz yaşında." });
+        p.push("Brandt'ın eli tüfekle birlikte aşağı iniyor. \"Bilezik,\" diyor. \"Sandıkta bir bilezik var.\" Kimse ona cevap vermiyor.");
+      } else if (s.via === "zorla") {
+        p.push("Namluyu iki elinle yakalayıp gökyüzüne çeviriyorsun. Tüfek patlıyor; saçmalar Karaada'nın üstüne bir sürü martıyı havalandırıyor. Brandt'la birlikte güverteye düşüyorsunuz. Tüfek bordadan kayıp denize gidiyor. Cemil ellerini kaldırıyor: \"Ben karışmam, abi.\"");
+        p.push("Cemil'in kendi halatıyla Brandt'ın ellerini bağlıyorsunuz. Brandt direnmiyor. Gözleri Nuri'de.");
+      } else {
+        p.push("\"Sandıklar senin,\" diyorsun. Sesin kendine yabancı. \"Tüplerini bırak, git.\" Brandt sana bakıyor, sonra Nuri'ye. Bir süre kimse kımıldamıyor. Sonra Brandt tüfeği Cemil'e geri veriyor.");
+        if (has(s, "KULCE")) p.push("Cebindeki sikkeleri çıkarıp Seestern'in güvertesine fırlatıyorsun. \"Bunlar da.\" Brandt eğilip tek tek topluyor.");
+        p.push("Cemil altı dolu tüpü iskele tahtasından Nuri'nin teknesine itiyor. Seestern'in motoru çalışıyor. Beyaz motor sandıklarla birlikte İstanköy'e doğru açılıyor.");
+      }
+      p.push("Nuri hemen işe girişiyor. Çapa ipine dokuz, altı ve üç metreye dolu tüpler asıyor, yanlarına su geçirmez bir yazı tahtası. \"Saatlerce,\" diyor. \"Her durakta bir saat, belki daha fazla. Yoksa yukarıda kanları köpürür.\"");
+      if (!has(s, "KOSTAS_KURTAR")) p.push("\"Kostas'ın bacağı hâlâ rafın altında,\" diyorsun. Nuri yüzünü buruşturuyor: \"O rafı tek başına kaldırmak zor. Ama aşağıda başka kimse yok.\"");
+      p.push("Biri inip onları ön bölmeden çıkarmalı, tüpleri taktırmalı ve hatta onlarla kalmalı. Sen bugün iki kez kırk metreye indin. \"Üçüncüsü seni öldürebilir,\" diyor Nuri. \"Ben inerim. Benim borcum.\"");
+      if (has(s, "OKUDU") || has(s, "MEKTUP")) p.push("Brandt dalış ceketini giyiyor. \"Hayır,\" diyor. \"Babamın gemisi. Bana bırakın.\"");
+      return p;
+    },
+    choices: [
+      { t: "Üçüncü kez sen in", to: "c3" },
+      { t: "Nuri'nin inmesine izin ver", to: "e_kilavuz" },
+      { t: "Brandt'ın inmesine izin ver", to: "e_babalar", if: (s) => has(s, "OKUDU") || has(s, "MEKTUP") }
+    ]
+  },
+
+  c3: {
+    act: 3, time: "18:40", derin: 3, img: "gunbatimi", imgLabel: "Gün batımı",
+    title: "Kırk metre",
+    text: (s) => {
+      const p = [];
+      p.push("Üçüncü kez iniyorsun. Kulakların uğulduyor, dizlerinde ince bir sızı var; bunu Nuri'ye söylemedin. Kapaktan geçip hava cebine çıkıyorsun. Rıza'nın gözleri kapalı. Dürtünce açılıyor.");
+      if (has(s, "KOSTAS_KURTAR")) p.push("Kostas'ın bacağı şişmiş ama kurtardığın günden beri oynatabiliyor. Ona tüp takıyorsunuz, maskesini yüzüne bastırıyorsunuz. Üçünüz birden kapaktan geçiyorsunuz, Kostas'ı aranıza alarak.");
+      else p.push("Rıza'yla birlikte rafa omuz veriyorsunuz. Bir kez. İki kez. Raf bir parmak bile kalkmıyor. Manometren kırmızıya yaklaşıyor. Kostas elini senin elinin üstüne koyuyor, sonra seni yavaşça itiyor. Yazı tahtasını gösteriyor: üstüne Rumca bir şey yazmış, altına bir adres. Çantasından suya dayanıklı bir zarf çıkarıp sana veriyor. Gözlerini kapıyor.");
+      p.push("Sonra saatler. Dokuz metrede, altı metrede, üç metrede. Nuri tüpleri değiştiriyor, yazı tahtasına sorular yazıp sallıyor: AĞRI? SOĞUK? Rıza tankına bıçağıyla vuruyor, eski işaretleri: YAŞIYORUM. YAŞIYORUM. Güneş batarken üç metrede, suyun yüzeyi kızıl bir tavan.");
+      if (has(s, "ZORLA")) p.push("Bordada Brandt hâlâ bağlı oturuyor; Nuri arada bir ona su veriyor.");
+      else if (has(s, "PAZARLIK")) p.push("Seestern çoktan gitti. Ufukta yalnızca İstanköy'ün ışıkları.");
+      else p.push("Brandt bütün öğleden sonra Nuri'nin yanında, tüpleri birlikte indirip çıkardılar. Tek kelime etmeden.");
+      p.push("Saat altıyı kırk geçe yüzeye çıkıyorsunuz. Rıza güverteye uzanıp gökyüzüne bakıyor ve gülüyor, sesi hırıltılı. Sonra ağlıyor.");
+      p.push("Ön bölmede hâlâ bir sandık altın var. Bir saat sonra karanlık basacak. Ve batığın yerini artık bilen tek kişi Nuri değil.");
+      return p;
+    },
+    choices: [
+      { t: "Batığın yerini sahil güvenliğe bildir; Nuri her şeyi anlatsın", to: (s) => has(s, "KOSTAS_KURTAR") ? "e_kirkmetre" : "e_mektup" },
+      { t: "Kimseye söyleme. Kalan altını gece gelip çıkaralım", to: "e_altin" }
+    ]
+  },
+
+  e_kirkmetre: {
+    act: 3, time: "19:10", img: "mektuplar", imgLabel: "Mektuplar",
+    end: { id: "kirkmetre", kind: "Son" },
+    title: "Kırk Metre",
+    text: (s) => [
+      "Önce Kostas. Nuri onu o gece, ışıkları kapalı, İstanköy'ün kıyısına götürüyor. Savaşın ortasında, iki ülkenin arasındaki karanlık suda, motoru en kısıkta. Kostas kıyıya yürürken bir kez dönüp el sallıyor.",
+      "Sabah Nuri Reis karakola gidiyor ve otuz yıldır kimseye anlatmadığını, baştan sona, tutanağa geçiriyor. Babasını. Kingstonları. Otuz bir adamı.",
+      has(s, "KUTU") ? "Kurşun kutu masanın üstünde duruyor. Astsubay mektuplardan birini açmaya kalkıyor; Nuri elini tutuyor. \"Onlar sahiplerine gidecek,\" diyor." : "Kurşun kutu hâlâ ön bölmede. Nuri bir hafta sonra donanmanın dalgıçlarına yerini gösterip onunla birlikte iniyor ve kutuyu kendi kucağında çıkarıyor."
+    ],
+    sabah: "Rıza bir hafta yatıyor. Sonra bir sabah kalkıp limana iniyor ve Saniye'nin dümenine bağlı ipi bıçağıyla kesiyor.",
+    akibet: (s) => [
+      ["Rıza", "Kendi teknesini almadı. Saniye'yle sünger çıkarmaya devam ediyor; seni yanından ayırmıyor."],
+      ["Kostas", "İstanköy'de yaşıyor. Her bayram adına bir kartpostal geliyor, Türkçe, hatalarla dolu."],
+      ["Nuri Reis", "Savcı dosyayı açtı, bir ay sonra kapattı. On beş yaşında bir çocuğu kimse yargılamak istemedi. O artık Karaada açığından geçerken motorunu durduruyor."],
+      ["Brandt", brandtSonu(s)],
+      ["Mektuplar", "İzmir'deki cemaat aracılığıyla Rodos'tan sağ dönenlere, çocuklarına, torunlarına dağıtıldı. Kırk iki mektuptan on dokuzunun bir sahibi bulundu."]
+    ],
+    yil: "1975 baharında New York'tan bir mektup geliyor. «Kız kardeşim Rachel'ın el yazısını otuz bir yıl sonra ilk kez gördüm. Bileziğini kızımın koluna taktım.» Zarfın içinde bir fotoğraf: küçük bir kız, kolunda bir bilezik."
+  },
+
+  e_mektup: {
+    act: 3, time: "19:10",
+    end: { id: "mektup", kind: "Son" },
+    title: "Teslim Edilmeyen",
+    text: (s) => [
+      "Kostas'ın zarfı göğsünde, ceketinin içinde. Suya dayanıklı, mumla kapatılmış. Üstünde bir isim ve İstanköy'de bir adres. Annesine.",
+      "Nuri Reis karakolda otuz yıldır kimseye anlatmadığını tutanağa geçiriyor. Sonra sana dönüp soruyor: \"O zarfı ne yapacaksın?\"",
+      "Kıbrıs'ta savaş var. İstanköy iki mil ötede ama o iki mil şimdi dünyanın en geniş suyu."
+    ],
+    sabah: "Bir gece, ışıklar kapalı, Nuri'yle İstanköy'e geçiyorsunuz. Kıyıda bir ev, avluda bir yaşlı kadın. Zarfı veriyorsun. Kadın okuyor, sonra seni içeri çağırıp kahve pişiriyor. Ortak tek bir kelimeniz yok.",
+    akibet: (s) => [
+      ["Rıza", "Kostas'ın son gününü kimseye anlatmıyor. Her ağustos Karaada açığında denize bir karanfil bırakıyor."],
+      ["Kostas", "Donanmanın dalgıçları onu bir ay sonra çıkardı. İstanköy'deki kilisenin bahçesine gömüldü. Mezar taşında Türkçe bir satır var; Rıza yazdırdı."],
+      ["Nuri Reis", "Savcı dosyayı kapattı. Nuri kendi dosyasını hiç kapatmadı."],
+      ["Brandt", brandtSonu(s)],
+      ["Mektuplar", has(s, "KUTU") ? "Kurşun kutudaki mektuplar İzmir'deki cemaat aracılığıyla sahiplerine dağıtıldı." : "Kurşun kutu dalgıçların getirdiği yüklerin arasındaydı; bir depoya kaldırıldı. Nuri yıllarca peşinden koştu."]
+    ],
+    yil: "Bir yıl sonra İstanköy'den Türkçe bir mektup geliyor, birine yazdırılmış, harfleri titrek: «Oğlumun son mektubunu getiren Türk çocuğa. Kapımız açık.»"
+  },
+
+  e_altin: {
+    act: 3, time: "19:10",
+    end: { id: "altin", kind: "Son" },
+    title: "Altın",
+    text: (s) => [
+      "Nuri bir şey demiyor. Rıza'nın yüzüne bakıyor, sonra senin. Sonra dümene geçip teknesini Bodrum'a çeviriyor ve bütün yol tek kelime etmiyor.",
+      "Üç gece sonra Rıza'yla Saniye'yle çıkıyorsunuz. Ön bölmedeki sandığı halatla, tek tek torbalarla çıkarıyorsunuz. Sikkeler, bilezikler, kolyeler. Güvertede fenerin ışığında parlıyorlar.",
+      has(s, "KUTU") ? "Kurşun kutu evin tavan arasında duruyor. Açmıyorsun." : "Kurşun kutuyu ön bölmede bırakıyorsunuz. Rıza ona uzun uzun bakıyor ama bir şey söylemiyor."
+    ],
+    sabah: "İzmir'de bir kuyumcu sikkeleri tartıyor, soru sormuyor. Bir yıl içinde iki tekne, bir arsa, bir dükkân.",
+    akibet: (s) => [
+      ["Rıza", "Zengin. Her gece rakıyı tek başına içiyor. Kapıya her vurulduğunda irkiliyor."],
+      ["Kostas", has(s, "KOSTAS_KURTAR") ? "Nuri onu bir gece, ışıkları kapalı, İstanköy'e bıraktı. Payını istemedi." : "Ön bölmede kaldı. Rıza'nın rüyalarında hâlâ orada."],
+      ["Nuri Reis", "Sizinle bir daha konuşmadı. Cenazesine çağrılmadınız."],
+      ["Brandt", has(s, "PAZARLIK") ? brandtSonu(s) : has(s, "ZORLA") ? "Gece onu Güllük'te kıyıya bıraktınız. Ertesi gün Münih'e uçtu, kimseye bir şey söylemedi." : "Münih'e döndü. Batığın yerini kimseye söylemedi. Her ağustos size bir kartpostal yolluyor, üstünde tek kelime: «Warum?»"],
+      ["Mektuplar", "Hiçbiri sahibine varmadı."]
+    ],
+    yil: "Yıllar sonra oğlun bir okul ödevi için büyükbabasının hikâyesini soruyor. Ona sünger dalgıçlarını anlatıyorsun. Rodos'u anlatmıyorsun."
+  },
+
+  e_kilavuz: {
+    act: 3, time: "17:50",
+    end: { id: "kilavuz", kind: "Son" },
+    title: "Kılavuz",
+    text: (s) => [
+      "Nuri Reis çift tüpü sırtlıyor. Yıllardır dalmıyordu; kayışları sıkarken parmakları beceriksiz. Sana dönüp gülümsüyor, otuz yılda gördüğün en hafif yüzle. \"Kılavuz benim, Yusuf,\" diyor. \"O gemiyi oraya ben götürdüm.\"",
+      "Saatlerce çapa ipinin dibinde, altı metrede bekliyorsun. Önce Rıza geliyor, yüzü bembeyaz, sonra " + (has(s, "KOSTAS_KURTAR") ? "Kostas, Rıza'nın koluna tutunarak." : "Kostas, bacağı sargılı, bir başına yüzemeyecek halde; Nuri onu rafın altından tek başına kurtarmış.") + " Nuri ikisine tüpleri taktırıyor, yazı tahtasına bir şey yazıyor, sana uzatıyor.",
+      "Tahtada üç kelime: BABAMIN YANINA GİDİYORUM. Sonra Nuri'nin kabarcıkları geri, aşağı, karanlığa iniyor."
+    ],
+    sabah: "Gün batarken Rıza ve Kostas'la yüzeye çıkıyorsun. Nuri'nin kabarcıkları öğleden sonradan beri gelmiyor.",
+    akibet: (s) => [
+      ["Nuri Reis", "Donanmanın dalgıçları onu bir hafta sonra kontrol odasında, valf tekerlerinin başında buldu. Çıkarmalarına izin vermedin."],
+      ["Rıza", "Yaşıyor. Nuri'nin teknesini aldı. Adını değiştirmedi."],
+      ["Kostas", "İstanköy'e döndü. Nuri'nin adını oğluna verdi."],
+      ["Brandt", brandtSonu(s)],
+      ["Mektuplar", has(s, "KUTU") ? "Kurşun kutuyu Nuri'nin vasiyetiyle İzmir'deki cemaate sen götürdün." : "Kurşun kutu ön bölmede kaldı. Nuri onu kucaklamış buldular."]
+    ],
+    yil: "Her yıl on dört ağustosta Karaada açığında motoru durdurup denize iki çiçek bırakıyorsun. Biri Nuri'ye. Biri onun babasına."
+  },
+
+  e_babalar: {
+    act: 3, time: "17:50",
+    end: { id: "babalar", kind: "Son" },
+    title: "Babalar",
+    text: (s) => [
+      "Brandt dalış ceketinin fermuarını çekiyor. Gözlüklerini çıkarıp sana veriyor. \"Bunu saklayın,\" diyor. Sonra Nuri'ye dönüyor, bir şey söyleyecek gibi oluyor, söylemiyor. Bordadan sırtüstü suya düşüyor.",
+      "Saatler sonra altı metrede Rıza'yı ve Kostas'ı karşılıyorsun. " + (has(s, "KOSTAS_KURTAR") ? "Brandt ikisini de kapaktan çıkarmış, tüplerini taktırmış." : "Brandt Kostas'ı rafın altından tek başına kurtarmış; Kostas'ın bacağı sargılı, Rıza onu çekiyor.") + " Brandt yazı tahtasına Almanca bir şey yazıp ipe asmış.",
+      "Brandt'ın kendisi yok. Kabarcıkları kontrol odasının oradan yükseliyor, sonra seyrekleşiyor, sonra duruyor."
+    ],
+    sabah: "Nuri tahtayı okuyor, sonra uzun süre konuşmuyor. Sonunda çeviriyor: «Babamın yanında kalıyorum. Sandıklar sahiplerinin. Reis, özür dilerim.»",
+    akibet: (s) => [
+      ["Brandt", "Donanmanın dalgıçları onu kaptanın bölmesinde, babasının ranzasında buldu. Elinde o eski fotoğraf. Münih'teki ailesi naaşını istedi; Nuri Reis götürdü."],
+      ["Rıza", "Yaşıyor. Brandt'ın gözlükleri senin masanda duruyor; ikiniz de dokunmuyorsunuz."],
+      ["Kostas", "İstanköy'e döndü. Sana her yıl bir şişe zeytinyağı yolluyor."],
+      ["Nuri Reis", "Ağustos sonunda karakola gidip her şeyi anlattı. Savcı dosyayı kapattı."],
+      ["Mektuplar", has(s, "KUTU") ? "Sandıklar ve kurşun kutu, Brandt'ın tahtadaki sözüyle, Rodos'tan sağ dönenlere teslim edildi." : "Kurşun kutuyu dalgıçlar çıkardı. Brandt'ın tahtasıyla birlikte İzmir'deki cemaate teslim edildi."]
+    ],
+    yil: "Münih'ten Brandt'ın kızı geliyor, bir yıl sonra. Karaada açığına onu Nuri götürüyor. Nuri motoru durduruyor ve ona, babasının dilinde, o son geceyi anlatıyor."
+  }
+};
+Object.assign(S, ACT3);
+
+/* KIRK METRE: kitaba özel ayarlar */
+const BOOK = {
+  start: "a1",
+  rel: {},
+  acts: { 1: ["Birinci Perde", "Boş Tekne"], 2: ["İkinci Perde", "Hava Cebi"], 3: ["Üçüncü Perde", "Kırk Metre"] },
+  coverText: [
+    "Bodrum, 14 Ağustos 1974. Ağabeyin Rıza iki gün önce bir Almanla denize açıldı ve dönmedi.",
+    "Bu sabah teknesi limana kendi kendine girdi. Motoru çalışıyor, dümeni iple bağlı. Karaada açığında, kırk metrede, hiçbir kayıtta adı geçmeyen bir denizaltı yatıyor. Ve içinden biri vuruyor.",
+    "Bu kitap baştan sona okunmaz. Her bölümün sonunda sen karar verirsin, hikâye senin kararlarınla yön değiştirir."
+  ],
+  missedTitle: "Bu perdede kaçırdıkların",
+  actEndHead: (sec) => sec.act === 1 ? "Hava azalıyor" : "Yüzeyde biri bekliyor",
+  againText: "Limana yeniden in",
+  rule: ["Nuri Reis'in kuralı:", "Kırk metreden acele çıkan, bir daha dalamaz."],
+  ledger: (sec, time) => {
+    const t = time.replace(":", ".");
+    const d = val(sec.derin) || 0;
+    if (!d) return { title: sec.act === 1 && !sec.acik ? "Bodrum · 14.8.1974" : "Karaada açığı", html: `Saat ${t}<br>Yüzey` };
+    const bar = typeof state !== "undefined" && state.hava != null ? state.hava : 200;
+    return { title: "Karaada açığı · dalış", html: `Saat ${t} · ${d} m<br>Tüpte ${bar} bar` };
+  },
+  atmos: (sec) => { deniz.derin = Math.min(1, (val(sec.derin) || 0) / 40); return sec.dalga ?? 0.2; },
+  hour: (sec, time) => { const [h, m] = time.split(":").map(Number); return h + m / 60; },
+  coverAtmos: 0.3,
+  items: (s) => {
+    const list = ["Bıçak", "Brandt'ın kartviziti"];
+    if (s.hava != null) list.push("Çift tüp (" + s.hava + " bar)");
+    if (has(s, "HARITA")) list.push("Rıza'nın haritası (Karaada, «38»)");
+    if (has(s, "LEVYE")) list.push("Levye");
+    if (has(s, "FENER")) list.push("Su geçirmez fener");
+    if (has(s, "YEDEK") && !has(s, "YEDEK_BIRAKTI")) list.push("Yedek tüp");
+    if (has(s, "KUTU")) list.push("Kurşun kutu (Rodos, 1944)");
+    if (has(s, "KULCE")) list.push("Bir avuç altın sikke");
+    if (has(s, "DEFTER")) list.push("Denizaltının seyir defteri");
+    return list;
+  },
+  hints: (s, act) => {
+    const m = [];
+    if (act === 1) {
+      if (!has(s, "SORDU")) m.push("Nuri Reis'e neden titrediğini sormadın.");
+      if (!has(s, "PANSIYON")) m.push("Brandt'ın pansiyonuna hiç uğramadın.");
+    }
+    if (act === 2) {
+      if (!has(s, "KUTU")) m.push("Kurşun kutu hava cebinde kaldı.");
+      if (!has(s, "DEFTER")) m.push("Seyir defteri kontrol odasında kaldı.");
+    }
+    return m;
+  }
+};
+
+
+
+/* ---------------- Kitap motoru ---------------- */
+const META = JSON.parse(document.getElementById("book-meta").textContent);
+const ACTS = BOOK.acts;
+/* Arayüz dili: meta.json'da "dil": "en" olan kitaplar İngilizce arayüzle açılır. */
+const DIL = META.dil || "tr";
+const UI = {
+  tr: { kapagi: (t) => `${t} kitabının kapağı`, kitap: "Kitap", yazar: "Yazar", tur: "Tür", okuma: "Okuma", sonlar: "Sonlar",
+        farkliSon: (n) => `${n} farklı son`, buldugun: (f, n) => ` · bulduğun: ${f} / ${n}`, basla: "Okumaya başla",
+        sonYazdigin: "Defterine son yazdığın:", sabah: "Sabah", akibet: "Kimin başına ne geldi", yil: "Bir yıl sonra", son: "SON",
+        bulunan: (f, n) => `Bulduğun sonlar: ${f} / ${n}`, takip: "Yazarı takip et:", kacirdiklar: "Bu gece kaçırdıkların",
+        perdeSonu: (a) => `${a}nin sonu`, kapatmadan: "Kitabı kapatmadan önce", geceDevam: "Gece devam ediyor", neYapacaksin: "Ne yapacaksın?",
+        bolum: (n) => `Bölüm ${n}`, kapagaDon: "kapağa dön", sayfayaGit: "sayfaya git", bastan: "Geceyi baştan yaşa", KapagaDon: "Kapağa dön",
+        bosDefter: "Henüz bir şey yazmadın.", sozlukIpucu: "İpucu: anlamını görmek için bir kelimeye dokun." },
+  en: { kapagi: (t) => `Cover of ${t}`, kitap: "Book", yazar: "Author", tur: "Genre", okuma: "Reading time", sonlar: "Endings",
+        farkliSon: (n) => `${n} different endings`, buldugun: (f, n) => ` · found: ${f} / ${n}`, basla: "Start reading",
+        sonYazdigin: "Last thing you wrote down:", sabah: "Morning", akibet: "What became of them", yil: "A year later", son: "THE END",
+        bulunan: (f, n) => `Endings found: ${f} / ${n}`, takip: "Follow the author:", kacirdiklar: "What you missed tonight",
+        perdeSonu: (a) => `End of the ${a}`, kapatmadan: "Before you close the book", geceDevam: "The night goes on", neYapacaksin: "What will you do?",
+        bolum: (n) => `Section ${n}`, kapagaDon: "back to cover", sayfayaGit: "turn to section", bastan: "Live the night again", KapagaDon: "Back to cover",
+        bosDefter: "You haven't written anything down yet.", sozlukIpucu: "Tip: tap any word to see its Turkish meaning." }
+}[DIL];
+const END_KEY = META.sonAnahtari || (META.id + "-sonlar");
+const fresh = () => ({ sec: BOOK.start, f: {}, r: Object.assign({}, BOOK.rel), notes: [], talked: [], num: null, steps: 0 });
+let state = Object.assign(fresh(), { sec: "cover" });
+const val = (v) => (typeof v === "function" ? v(state) : v);
+const $ = (id) => document.getElementById(id);
+const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/* § numaraları: başlangıç 1, gerisi sabit tohumla karıştırılmış (klasik oyun kitabı gibi) */
+const NUM = (() => {
+  let seed = 1962;
+  const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const keys = [];
+  Object.keys(S).forEach((k) => {
+    keys.push(k);
+    (S[k].choices || []).forEach((c, i) => keys.push(k + "#" + i));
+    if (S[k].next) keys.push(k + "#next");
+  });
+  const pool = []; for (let n = 2; n <= 240; n++) pool.push(n);
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const map = { a1: 1 }; let p = 0;
+  keys.forEach((k) => { if (k !== "a1") map[k] = pool[p++]; });
+  return map;
+})();
+
+let MUTE = false, toastTimer = null;
+function toast(msg) {
+  if (MUTE) return;
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
+}
+function loadEndings() { try { return JSON.parse(localStorage.getItem(END_KEY) || "[]"); } catch (e) { return []; } }
+function saveEnding(id) {
+  const list = loadEndings();
+  if (!list.includes(id)) { list.push(id); try { localStorage.setItem(END_KEY, JSON.stringify(list)); } catch (e) {} }
+}
+
+const missedHints = (s, act) => (BOOK.hints ? BOOK.hints(s, act) : []).slice(0, 3);
+
+/* ---------- kapak ---------- */
+function renderCover() {
+  const found = loadEndings().length;
+  $("view").innerHTML = `
+  <section class="cover-wrap">
+    <div class="cover" style="background-image:url('${META.kapak}'),url('${META.kapakYedek}')" role="img" aria-label="${esc(UI.kapagi(META.baslik))}">
+      <div>
+        <div class="band">${esc(META.seri)} · ${UI.kitap} ${META.kitapNo}</div>
+        <h1>${esc(META.baslik.toLocaleUpperCase(DIL))}</h1>
+      </div>
+      <div><div class="subt">${esc(META.altBaslik)}</div><div class="author">${esc(META.yazar)}</div></div>
+    </div>
+    <div class="backcover">
+      <p class="slogan">${esc(META.slogan)}</p>
+      ${BOOK.coverText.map((p) => `<p>${esc(p)}</p>`).join("")}
+      <dl class="colophon">
+        <dt>${UI.yazar}</dt><dd>${esc(META.yazar)} · <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></dd>
+        <dt>${UI.tur}</dt><dd>${esc(META.tur)}</dd>
+        <dt>${UI.okuma}</dt><dd>${esc(META.okumaSuresi)}</dd>
+        <dt>${UI.sonlar}</dt><dd>${UI.farkliSon(META.sonSayisi)}${found ? UI.buldugun(found, META.sonSayisi) : ""}</dd>
+      </dl>
+      ${typeof SOZLUK !== "undefined" ? `<p class="sozluk-ipucu">${esc(UI.sozlukIpucu)}</p>` : ""}
+      <button class="btn" id="btn-start" type="button">${UI.basla}</button>
+    </div>
+  </section>`;
+  $("btn-start").addEventListener("click", () => { state = fresh(); render(true); });
+}
+
+/* ---------- sayfa ---------- */
+function choiceNum(secId, c, i) { return NUM[secId + "#" + i]; }
+
+function renderPage(turn) {
+  const sec = S[state.sec];
+  const act = val(sec.act) || 1;
+  const time = val(sec.time);
+  const num = state.num || NUM[state.sec];
+
+  // sol sayfa
+  let left = `<div class="plate"><div class="act-title">${ACTS[act][0]}<span>${ACTS[act][1]}</span></div>`;
+  const imgKey = val(sec.img);
+  const imgLabel = val(sec.imgLabel) || "";
+  const hasImg = !!(imgKey && IMG[imgKey]);
+  if (hasImg) left += `<figure class="ill"><div class="kb"><img src="${IMG[imgKey]}" alt="${esc(imgLabel)}"></div><figcaption>${esc(imgLabel.replace(/ \(.*\)/, ""))}</figcaption></figure>`;
+  const lg = BOOK.ledger(sec, time);
+  left += `<div class="ledger" aria-label="${esc(lg.title)}"><div class="lh">${esc(lg.title)}</div><div class="lv">${lg.html}</div></div>`;
+  if (!hasImg) {
+    const last = state.notes[state.notes.length - 1];
+    left += `<div class="fleuron">✦ ✦ ✦</div>`;
+    left += last ? `<div class="margin-note hand"><span class="lbl">${UI.sonYazdigin}</span>${esc(last)}</div>` : `<div class="margin-note hand"><span class="lbl">${esc(BOOK.rule[0])}</span>${esc(BOOK.rule[1])}</div>`;
+  }
+  const page = 2 * state.steps + 6;
+  left = `<div class="runhead">${esc(META.baslik)}</div>` + left + `</div><div class="folio">${page}</div>`;
+
+  // sağ sayfa
+  let right = `<div class="runhead">${ACTS[act][1]}</div><div class="sect">§ ${num}</div>`;
+  if (sec.end) right += `<div class="kind">${esc(val(sec.end.kind))}</div>`;
+  if (sec.actEnd) right += `<div class="kind">${UI.perdeSonu(ACTS[act][0])}</div>`;
+  right += `<h2>${esc(sec.title)}</h2><div class="text">`;
+  let leadDone = false;
+  sec.text(state).forEach((para) => {
+    if (typeof para === "object") right += `<p class="quote">${DIL === "en" ? "“" : "«"}${esc(para.q)}${DIL === "en" ? "”" : "»"}</p>`;
+    else {
+      const cap = !leadDone && /^[A-Za-zÇĞİÖŞÜçğıöşü]/.test(para);
+      right += `<p class="${cap ? "lead" : (!leadDone ? "first" : "")}">${esc(para)}</p>`; leadDone = true;
+    }
+  });
+  right += `</div>`;
+
+  if (sec.end) {
+    right += `<div class="sub">${UI.sabah}</div><div class="text"><p class="first">${esc(val(sec.sabah))}</p></div>`;
+    right += `<div class="sub">${UI.akibet}</div><ul class="fates">`;
+    val(sec.akibet).forEach(([w, t]) => { right += `<li><b>${esc(w)}.</b> ${esc(t)}</li>`; });
+    right += `</ul><div class="sub">${UI.yil}</div><div class="text"><p class="first">${esc(val(sec.yil))}</p></div>`;
+    right += `<div class="the-end">${UI.son}</div>`;
+    saveEnding(sec.end.id);
+    right += `<div class="tally">${UI.bulunan(loadEndings().length, META.sonSayisi)}</div>`;
+    right += `<div class="tally">${UI.takip} <a class="ig" href="${META.instagram}" target="_blank" rel="noopener">@${esc(META.instagramKullanici)}</a></div>`;
+  }
+  /* Perde sonundaki "Bu gece kaçırdıkların" kutusu okur isteğiyle kaldırıldı (2026-11-21).
+     Kitaplardaki BOOK.hints verisi duruyor; geri açmak için bu bloğu eski haline getirmek yeterli. */
+
+  right += `<div class="choices" id="choices"></div><div class="folio">${page + 1}</div>`;
+
+  const read = Math.min(14, 3 + Math.round(state.steps * 0.8)), rest = Math.max(3, 16 - read);
+  $("view").innerHTML = `<div class="binding"><div class="edges l" style="width:${read}px"></div><div class="edges r" style="width:${rest}px"></div><article class="book" id="book"><div class="leaf left" id="leaf-l">${left}</div><div class="leaf right" id="leaf-r">${right}</div></article><div class="ribbon"></div></div>`;
+
+  const box = $("choices");
+  const dh = document.createElement("div"); dh.className = "decide";
+  dh.textContent = sec.end ? UI.kapatmadan : sec.actEnd ? ((typeof BOOK.actEndHead === "function" ? BOOK.actEndHead(sec) : BOOK.actEndHead) || UI.geceDevam) : UI.neYapacaksin;
+  box.appendChild(dh);
+  const addBtn = (text, n, onClick, id) => {
+    const b = document.createElement("button");
+    b.className = "choice"; b.type = "button"; if (id) b.id = id;
+    b.innerHTML = (n == null ? `<span class="seal blank" aria-hidden="true">❧</span>` : `<span class="seal" aria-label="${UI.bolum(n)}">${n}</span>`)
+      + `<span class="ct">${esc(text)}</span><span class="go" aria-hidden="true">${n == null ? UI.kapagaDon : UI.sayfayaGit}</span>`;
+    b.addEventListener("click", onClick);
+    box.appendChild(b);
+  };
+  if (sec.end || sec.actEnd) {
+    if (sec.next) addBtn(sec.next.t, NUM[state.sec + "#next"], () => go(sec.next, NUM[state.sec + "#next"]), "c-next");
+    if (sec.end) {
+      addBtn(BOOK.againText || UI.bastan, 1, () => { state = fresh(); render(true); }, "c-again");
+      addBtn(UI.KapagaDon, null, () => { state = Object.assign(fresh(), { sec: "cover" }); render(); }, "c-cover");
+    }
+  } else {
+    sec.choices.forEach((c, i) => {
+      if (c.if && !c.if(state)) return;
+      const n = choiceNum(state.sec, c, i);
+      addBtn(c.t, n, () => go(c, n), "c-" + i);
+    });
+  }
+}
+
+function go(choice, shownNum) {
+  const oldRight = $("leaf-r") ? $("leaf-r").innerHTML : null;
+  const oldLeft = $("leaf-l") ? $("leaf-l").innerHTML : null;
+  const oldBook = $("book") ? $("book").innerHTML : null;
+  state.steps = (state.steps || 0) + 1;
+  if (choice.fx) choice.fx(state);
+  state.sec = typeof choice.to === "function" ? choice.to(state) : choice.to;
+  state.num = shownNum || null;
+  const next = S[state.sec];
+  if (next.enter) next.enter(state);
+  render(true);
+  flipFrom(oldRight, oldBook, oldLeft);
+  if (next.end && window.ATM) ATM.flash = 1;
+}
+
+function flipFrom(oldRight, oldBook, oldLeft) {
+  const book = $("book");
+  if (!book || !oldRight || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const twoPage = getComputedStyle(book).gridTemplateColumns.split(" ").length > 1;
+  if (twoPage) {
+    const newLeft = $("leaf-l");
+    const fl = document.createElement("div");
+    fl.className = "flip";
+    fl.innerHTML = `<div class="face front leaf right">${oldRight}</div><div class="face back leaf left">${newLeft.innerHTML}</div>`;
+    // çevrilen sayfa üstünü örtene kadar altta eski sol sayfa görünür, gerçek kitaptaki gibi
+    const newLeftHTML = newLeft.innerHTML;
+    if (oldLeft) newLeft.innerHTML = oldLeft; else newLeft.classList.add("hide-under");
+    book.appendChild(fl);
+    setTimeout(() => { newLeft.innerHTML = newLeftHTML; newLeft.classList.remove("hide-under"); fl.remove(); }, 860);
+  } else {
+    const lf = document.createElement("div");
+    lf.className = "lift book";
+    lf.innerHTML = oldBook;
+    lf.style.display = "block";
+    book.appendChild(lf);
+    setTimeout(() => lf.remove(), 620);
+  }
+}
+
+function render(turn) {
+  if (window.sozlukKapat) sozlukKapat();
+  const onCover = state.sec === "cover";
+  ["btn-book", "btn-cover"].forEach((id) => { $(id).style.visibility = onCover ? "hidden" : "visible"; });
+  if (window.ATM) ATM.target = onCover ? (BOOK.coverAtmos ?? 0.6) : BOOK.atmos(S[state.sec]);
+  if (window.ATM && !onCover && BOOK.hour) ATM.hour = BOOK.hour(S[state.sec], val(S[state.sec].time));
+  if (onCover) renderCover(); else renderPage(turn);
+  renderDrawer();
+  $("main").scrollTop = 0;
+}
+
+function renderDrawer() {
+  const items = $("items"); items.innerHTML = "";
+  BOOK.items(state).forEach((x) => { const li = document.createElement("li"); li.textContent = x; items.appendChild(li); });
+
+  const notes = $("notes"); notes.innerHTML = "";
+  if (!state.notes.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = UI.bosDefter; notes.appendChild(li); }
+  state.notes.forEach((n) => { const li = document.createElement("li"); li.textContent = n; notes.appendChild(li); });
+  $("note-count").textContent = state.notes.length ? "(" + state.notes.length + ")" : "";
+
+  const ends = $("endings"); ends.innerHTML = "";
+  const found = loadEndings();
+  ENDINGS.forEach((e) => {
+    const li = document.createElement("li");
+    li.textContent = found.includes(e.id) ? e.title : "· · ·";
+    if (!found.includes(e.id)) li.className = "empty";
+    ends.appendChild(li);
+  });
+}
+
+if (META.kutuphane) { const l = $("lnk-lib"); l.href = META.kutuphane; l.hidden = false; }
+$("btn-book").addEventListener("click", () => $("drawer").classList.add("open"));
+$("btn-close").addEventListener("click", () => $("drawer").classList.remove("open"));
+$("btn-cover").addEventListener("click", () => { $("confirm").classList.add("show"); $("btn-cover").style.display = "none"; });
+const closeConfirm = () => { $("confirm").classList.remove("show"); $("btn-cover").style.display = ""; };
+$("btn-no").addEventListener("click", closeConfirm);
+$("btn-yes").addEventListener("click", () => { closeConfirm(); state = Object.assign(fresh(), { sec: "cover" }); render(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("drawer").classList.remove("open"); });
+
+
+/* ---------- Sözlük: bir kelimeye dokununca kitaptaki anlamı (books/<id>/sozluk.js varsa) ---------- */
+if (typeof SOZLUK !== "undefined") (function () {
+  const st = document.createElement("style");
+  st.textContent = `
+  #sozluk { position: fixed; z-index: 60; max-width: 300px; padding: 10px 14px 11px; border-radius: 8px; background: #fbf6ea; color: #2a2118;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35), 0 0 0 1px rgba(120,90,50,.35); font-family: "EB Garamond", Georgia, serif; font-size: 18px; line-height: 1.35;
+    opacity: 0; transform: translateY(4px); transition: opacity .15s, transform .15s; pointer-events: none; }
+  #sozluk.acik { opacity: 1; transform: none; pointer-events: auto; }
+  #sozluk b { font-weight: 600; } #sozluk .an { display: block; margin-top: 2px; }
+  #sozluk .kal { display: block; margin-top: 7px; padding-top: 6px; border-top: 1px solid rgba(120,90,50,.25); font-size: 15px; }
+  #sozluk .dil { display: block; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #8a6a3a; margin-bottom: 3px; }
+  #sozluk-isaret { position: fixed; z-index: 59; border-radius: 3px; background: rgba(233,179,79,.35); pointer-events: none; display: none; }
+  .text p, .quote, .cover-wrap p { -webkit-tap-highlight-color: transparent; }
+  .sozluk-ipucu { font-style: italic; font-size: 15px; opacity: .8; margin: 10px 0 4px; }`;
+  document.head.appendChild(st);
+  const balon = document.createElement("div"); balon.id = "sozluk"; balon.setAttribute("role", "status"); document.body.appendChild(balon);
+  const isaret = document.createElement("div"); isaret.id = "sozluk-isaret"; document.body.appendChild(isaret);
+  const HARF = /[\p{L}'’]/u;
+  const temiz = (w) => w.toLocaleLowerCase("en").replace(/̇/g, "").replace(/’/g, "'").replace(/^'+|'+$/g, "");
+  const kok = (w) => (w.length > 4 ? w.replace(/(ing|ed|s)$/, "") : w);
+  const KAL = {}; Object.keys(SOZLUK.kaliplar || {}).forEach((k) => { KAL[k.split(" ").map(kok).join(" ")] = k; });
+  function anlam(w) { const t = temiz(w); return SOZLUK.kelimeler[t] || (t.endsWith("'s") && SOZLUK.kelimeler[t.slice(0, -2)]) || null; }
+  function kalip(metin, bas, son) {
+    // dokunulan kelimeyi içeren 2-3 kelimelik kalıp var mı
+    const ws = []; const re = /[\p{L}'’]+/gu; let m;
+    while ((m = re.exec(metin))) ws.push({ w: kok(temiz(m[0])), a: m.index, b: m.index + m[0].length });
+    const i = ws.findIndex((x) => x.a === bas); if (i < 0) return null;
+    for (const n of [3, 2]) for (let j = i - n + 1; j <= i; j++) {
+      if (j < 0 || j + n > ws.length) continue;
+      const k = KAL[ws.slice(j, j + n).map((x) => x.w).join(" ")]; if (k) return k;
+    }
+    return null;
+  }
+  function noktadan(x, y) {
+    if (document.caretPositionFromPoint) { const p = document.caretPositionFromPoint(x, y); return p && { node: p.offsetNode, off: p.offset }; }
+    if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); return r && { node: r.startContainer, off: r.startOffset }; }
+    return null;
+  }
+  window.sozlukKapat = () => { balon.classList.remove("acik"); isaret.style.display = "none"; };
+  document.addEventListener("click", (e) => {
+    const hedef = e.target.closest && e.target.closest(".text p, .quote, .cover-wrap p");
+    if (!hedef || e.target.closest("a, button") || String(window.getSelection())) { sozlukKapat(); return; }
+    const c = noktadan(e.clientX, e.clientY);
+    if (!c || c.node.nodeType !== 3) { sozlukKapat(); return; }
+    const t = c.node.textContent; let a = c.off, b = c.off;
+    while (a > 0 && HARF.test(t[a - 1])) a--;
+    while (b < t.length && HARF.test(t[b])) b++;
+    const kelime = t.slice(a, b).replace(/^['’]+|['’]+$/g, "");
+    if (!kelime) { sozlukKapat(); return; }
+    const an = anlam(kelime); const kl = kalip(t, a, b);
+    if (!an && !kl) { sozlukKapat(); return; }
+    const r = document.createRange(); r.setStart(c.node, a); r.setEnd(c.node, b);
+    const k = r.getBoundingClientRect();
+    if (k.width === 0 || e.clientX < k.left - 4 || e.clientX > k.right + 4) { sozlukKapat(); return; }
+    balon.innerHTML = `<span class="dil" lang="tr">${esc(SOZLUK.baslik || "")}</span><b>${esc(kelime)}</b>` + (an ? `<span class="an" lang="tr">${esc(an)}</span>` : "") +
+      (kl ? `<span class="kal"><b>${esc(kl)}</b> → ${esc(SOZLUK.kaliplar[kl])}</span>` : "");
+    isaret.style.cssText = `display:block;left:${k.left - 2}px;top:${k.top - 1}px;width:${k.width + 4}px;height:${k.height + 2}px`;
+    balon.classList.add("acik");
+    const bw = balon.offsetWidth, bh = balon.offsetHeight;
+    let x = Math.min(Math.max(8, k.left + k.width / 2 - bw / 2), window.innerWidth - bw - 8);
+    let y = k.top - bh - 10; if (y < 8) y = k.bottom + 10;
+    balon.style.left = x + "px"; balon.style.top = y + "px";
+    e.stopPropagation();
+  });
+  ["scroll", "resize"].forEach((ev) => window.addEventListener(ev, () => sozlukKapat(), true));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") sozlukKapat(); });
+})();
+
+/* ---------------- Kırk Metre sahnesi: yüzeyde Bodrum koyu ve Karaada, su altında derinleştikçe kararan mavi ---------------- */
+const deniz = { level: 0.2, target: 0.2, flash: 0, hour: 7, h: 7, derin: 0, d: 0 };
+window.ATM = deniz;
+(function scene() {
+  const cv = $("sea"), ctx = cv.getContext("2d");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, dpr, ada, kabarcik = [], kar = [];
+  let seed = 11;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const mix = (c1, c2, t) => c1.map((v, i) => Math.round(lerp(v, c2[i], t)));
+  const rgb = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+  const SKY = [
+    [0, [6, 10, 16], [14, 22, 34]], [5, [12, 18, 30], [44, 46, 58]], [6.2, [58, 74, 96], [222, 156, 104]],
+    [8, [98, 140, 170], [196, 210, 214]], [12, [104, 152, 186], [206, 222, 226]], [16.5, [92, 128, 160], [214, 196, 160]],
+    [18.6, [62, 54, 78], [222, 124, 72]], [19.6, [16, 20, 30], [44, 36, 40]], [24, [6, 10, 16], [14, 22, 34]]
+  ];
+  function skyAt(h) {
+    for (let i = 0; i < SKY.length - 1; i++) {
+      const [a, t1, b1] = SKY[i], [b, t2, b2] = SKY[i + 1];
+      if (h >= a && h <= b) { const t = (h - a) / (b - a); return [mix(t1, t2, t), mix(b1, b2, t)]; }
+    }
+    return [SKY[0][1], SKY[0][2]];
+  }
+  const nightness = (h) => (h < 5 || h > 19.8) ? 1 : (h < 6.5 ? 1 - (h - 5) / 1.5 : (h > 18.4 ? (h - 18.4) / 1.4 : 0));
+
+  function makeAda() {
+    const c = document.createElement("canvas"); c.width = W * dpr; c.height = H * dpr;
+    const g = c.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const ufuk = H * 0.56;
+    // Karaada: alçak, uzun bir sırt
+    g.fillStyle = "rgb(30,40,50)"; g.beginPath(); g.moveTo(W * 0.48, ufuk);
+    for (let x = 0; x <= 1; x += 0.05) g.lineTo(W * (0.48 + x * 0.42), ufuk - Math.sin(x * Math.PI) * (34 + rnd() * 8));
+    g.lineTo(W * 0.9, ufuk); g.fill();
+    // Bodrum kıyısı ve kale
+    g.fillStyle = "rgb(22,30,38)"; g.beginPath(); g.moveTo(0, ufuk);
+    for (let x = 0; x <= 0.32; x += 0.04) g.lineTo(W * x, ufuk - 18 - rnd() * 14);
+    g.lineTo(W * 0.32, ufuk); g.fill();
+    const kx = W * 0.14; g.fillRect(kx - 26, ufuk - 52, 52, 30); g.fillRect(kx - 8, ufuk - 74, 16, 26); g.fillRect(kx + 14, ufuk - 64, 12, 18);
+    return c;
+  }
+  function size() {
+    dpr = Math.min(2, window.devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    seed = 11; ada = makeAda();
+    kabarcik = Array.from({ length: 70 }, () => ({ x: Math.random() * W, y: Math.random() * H, r: 1 + Math.random() * 3.5, v: 0.4 + Math.random() * 1.2, p: Math.random() * 6.28 }));
+    kar = Array.from({ length: 160 }, () => ({ x: Math.random() * W, y: Math.random() * H, r: 0.5 + Math.random() * 1.4, v: 0.05 + Math.random() * 0.2, p: Math.random() * 6.28 }));
+  }
+  window.addEventListener("resize", size); size();
+
+  function yuzey(time, h, n, L) {
+    const [top, bot] = skyAt(h), ufuk = H * 0.56;
+    const sky = ctx.createLinearGradient(0, 0, 0, ufuk);
+    sky.addColorStop(0, rgb(top)); sky.addColorStop(1, rgb(bot));
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, ufuk + 1);
+    const sx = W * (0.2 + 0.6 * Math.min(1, Math.max(0, (h - 6) / 13))), sy = ufuk - H * 0.42 * Math.sin(Math.PI * Math.min(1, Math.max(0, (h - 6) / 13)));
+    const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, 240);
+    glow.addColorStop(0, n > 0.5 ? "rgba(200,215,230,0.10)" : "rgba(255,230,170,0.38)"); glow.addColorStop(1, "rgba(255,230,170,0)");
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, ufuk);
+    ctx.drawImage(ada, 0, 0, W, H);
+    const sea = ctx.createLinearGradient(0, ufuk, 0, H);
+    sea.addColorStop(0, rgb(mix(bot, [20, 70, 96], 0.6))); sea.addColorStop(1, rgb([6, 26, 40]));
+    ctx.fillStyle = sea; ctx.fillRect(0, ufuk, W, H - ufuk);
+    // güneş yolu ve dalga çizgileri
+    ctx.strokeStyle = `rgba(255,232,190,${0.12 * (1 - n)})`; ctx.lineWidth = 1;
+    for (let i = 0; i < 46; i++) {
+      const y = ufuk + 4 + i * i * 0.22, a = (i * 37) % 100 / 100, len = 20 + i * 3;
+      const x = (sx + Math.sin(time * 0.6 + i) * (6 + i) + (a - 0.5) * (40 + i * 6));
+      ctx.beginPath(); ctx.moveTo(x - len / 2, y); ctx.lineTo(x + len / 2, y); ctx.stroke();
+    }
+    ctx.strokeStyle = `rgba(200,225,235,${0.06 + 0.1 * L})`;
+    for (let i = 0; i < 30; i++) {
+      const y = ufuk + 10 + i * 9, o = (time * (14 + L * 30) + i * 53) % W;
+      ctx.beginPath(); for (let x = -40; x < W + 40; x += 40) ctx.lineTo(x + o % 40, y + Math.sin(x * 0.02 + time + i) * (1 + L * 3)); ctx.stroke();
+    }
+  }
+  function altinda(time, h, n, d) {
+    const ust = mix([46, 128, 150], [8, 34, 52], d), alt = mix([10, 50, 70], [2, 6, 12], d);
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, rgb(mix(ust, [8, 14, 22], n * 0.7))); g.addColorStop(1, rgb(mix(alt, [1, 3, 6], n * 0.7)));
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    // ışık hüzmeleri: derinleştikçe sönük
+    const isik = (1 - d) * (1 - n) * 0.16;
+    if (isik > 0.005) for (let i = 0; i < 7; i++) {
+      const x = W * (0.1 + i * 0.14) + Math.sin(time * 0.2 + i * 1.7) * 30, w = 30 + (i % 3) * 26;
+      const r = ctx.createLinearGradient(0, 0, 0, H * 0.9);
+      r.addColorStop(0, `rgba(210,240,240,${isik})`); r.addColorStop(1, "rgba(210,240,240,0)");
+      ctx.fillStyle = r; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + w, 0); ctx.lineTo(x + w * 2.4 + 80, H); ctx.lineTo(x + 60, H); ctx.fill();
+    }
+    // dipte batığın gölgesi (derinlerde)
+    if (d > 0.6) {
+      ctx.fillStyle = `rgba(2,8,12,${(d - 0.6) * 1.6})`;
+      ctx.beginPath(); ctx.ellipse(W * 0.55, H * 0.93, W * 0.38, H * 0.05, -0.04, 0, Math.PI * 2); ctx.fill();
+      ctx.fillRect(W * 0.5, H * 0.84, W * 0.06, H * 0.08);
+    }
+    // deniz karı
+    ctx.fillStyle = `rgba(210,230,230,${0.18 + d * 0.15})`;
+    kar.forEach((k) => {
+      const x = k.x + Math.sin(time * 0.3 + k.p) * 6; ctx.beginPath(); ctx.arc(x, k.y, k.r, 0, Math.PI * 2); ctx.fill();
+      if (!reduce) { k.y += k.v; if (k.y > H) { k.y = -4; k.x = Math.random() * W; } }
+    });
+    // kabarcıklar
+    ctx.strokeStyle = `rgba(220,245,250,${0.35 - d * 0.15})`; ctx.lineWidth = 1;
+    kabarcik.forEach((b) => {
+      const x = b.x + Math.sin(time * 2 + b.p) * 3; ctx.beginPath(); ctx.arc(x, b.y, b.r, 0, Math.PI * 2); ctx.stroke();
+      if (!reduce) { b.y -= b.v; if (b.y < -6) { b.y = H + 6; b.x = Math.random() * W; } }
+    });
+  }
+
+  function frame(t) {
+    const time = t / 1000;
+    deniz.level += (deniz.target - deniz.level) * 0.02;
+    deniz.h += (deniz.hour - deniz.h) * 0.02;
+    deniz.d += (deniz.derin - deniz.d) * 0.025;
+    const h = deniz.h, n = nightness(h), d = deniz.d, u = Math.min(1, d * 6);
+    if (u < 1) yuzey(time, h, n, deniz.level);
+    if (u > 0) { ctx.globalAlpha = u; altinda(time, h, n, d); ctx.globalAlpha = 1; }
+    ctx.fillStyle = `rgba(2,6,10,${0.2 + n * 0.45})`; ctx.fillRect(0, 0, W, H);
+    if (deniz.flash > 0) { ctx.fillStyle = `rgba(210,235,240,${deniz.flash * 0.3})`; ctx.fillRect(0, 0, W, H); deniz.flash *= 0.86; if (deniz.flash < 0.02) deniz.flash = 0; }
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  if (reduce) { frame(0); window.addEventListener("resize", () => frame(0)); }
+  else requestAnimationFrame(frame);
+})();
+
+/* ---------------- Başlat ---------------- */
+function start(data) {
+  if (data && data.sec && (data.sec === "cover" || S[data.sec])) state = Object.assign(fresh(), data);
+  else if (location.hash === "#oku") state = fresh();
+  render();
+}
+window.claude?.hot?.snapshot?.(() => state);
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>
