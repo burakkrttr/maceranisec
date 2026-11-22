@@ -502,7 +502,7 @@ const S = {
     title: "Karaada açığı",
     text: (s) => {
       const p = [];
-      if (has(s, "SORDU")) p.push("\"Babamı o sularda kaybettim,\" demişti Nuri iskelede. \"Kırk dört yazı. Kayığımızı batırdılar.\" Kimin batırdığını sorduğunda cevap vermemiş, motoru çalıştırmıştı. Şimdi o motor susuyor ve Nuri denize uzun uzun bakıyor, sanki dibi görebilirmiş gibi.");
+      if (has(s, "SORDU")) p.push("İskelede Nuri'ye neden titrediğini sordun. \"Babamı o sularda kaybettim,\" dedi. \"Kırk dört yazı. Kayığımızı batırdılar.\" Kimin batırdığını sorduğunda cevap vermedi, motoru çalıştırdı. Şimdi o motor susuyor ve Nuri denize uzun uzun bakıyor, sanki dibi görebilirmiş gibi.");
       else p.push("Nuri bütün yol tek kelime etmedi. Kompresör tüpleri doldururken bile başını kaldırmadı. Şimdi motoru durduruyor ve denize uzun uzun bakıyor, sanki dibi görebilirmiş gibi.");
       if (has(s, "HARITA")) p.push("Rıza'nın haritası sende ama Nuri ona bir kez bile bakmıyor. Balıkçıların yer bulma yöntemiyle gidiyor: kıyıdaki iki kayayı birbirinin arkasına hizalıyor, sonra Bodrum kalesinin kulesini Karaada'nın ucuyla aynı çizgiye getiriyor ve motoru durduruyor. O noktayı ezbere biliyor.");
       else p.push("Elinizde harita yok, ama Nuri'nin buna ihtiyacı yok. Balıkçıların yer bulma yöntemiyle gidiyor: kıyıdaki iki kayayı birbirinin arkasına hizalıyor, sonra Bodrum kalesinin kulesini Karaada'nın ucuyla aynı çizgiye getiriyor ve motoru durduruyor. O noktayı ezbere biliyor.");
@@ -715,11 +715,20 @@ const ACT2 = {
     title: "İkinci dalış",
     text: (s) => {
       const p = [];
+      if (has(s, "SANDIK")) {
+        p.push("Brandt bir şey almak için kamarasına iniyor. Cemil kıçta, sırtı sana dönük, sigarasını yakıyor. İskele tahtasından sessizce Seestern'e geçip sandığın üstündeki brandanın ucunu kaldırıyorsun.");
+        p.push("Sandığın içinde ıslak bez torbalar var. Birinin ağzı yırtılmış; içinden altın sikkeler, kolyeler ve küçük bir çocuk bileziği dökülüyor. Bileziği çeviriyorsun: iç yüzüne İbranice harfler kazınmış. Torbaların arasında, suyla kabarmış bir kimlik kartı duruyor. İtalyanca basılmış, üstünde küçük bir kızın fotoğrafı var. Okuyabildiğin tek kelime «Rodi». İtalyanlar Rodos'a böyle derdi.");
+        p.push("Kamaranın merdiveninde ayak sesleri. Brandayı yerine çekip kendi teknene dönüyorsun. Kalbin hâlâ küt küt atıyor.");
+      }
+      if (has(s, "NURI_KONUSTU")) {
+        p.push("Nuri'yi teknenin arkasına, Brandt'ın duyamayacağı yere çekiyorsun. \"O fotoğraftaki oğlan...\" diye başlıyorsun.");
+        p.push("Nuri sözünü kesiyor. Sesi çok alçak: \"Kırk dörtte babamın kayığını bir denizaltı batırdı. Ben de oradaydım.\" Bir an susuyor, sonra başını iki yana sallıyor. \"Gerisini şimdi sorma, Yusuf. Önce Rıza'yı çıkar. Sonra hepsini anlatırım, söz.\"");
+      }
       p.push("Nuri dolu tüpleri sırtına geçirip kayışlarını kendi eliyle sıkıyor. Bu kez hiçbir şey söylemiyor. Bordadan ikinci kez suya düşüyorsun.");
       if (has(s, "NURI_KONUSTU")) p.push("İpten aşağı inerken Nuri'nin sözü kulağında çınlıyor: «Ben de oradaydım.» Brandt'ın anlattığı oğlan da on beş yaşındaydı ve Almanca biliyordu.");
-      if (has(s, "SANDIK")) p.push("Brandt'ın sandığında gördüğün çocuk bileziği gözünün önünden gitmiyor. Kimlikteki «Rodi» yazısını düşünüyorsun: İtalyanlar Rodos'a böyle derdi.");
+      if (has(s, "SANDIK")) p.push("İnerken o çocuk bileziği gözünün önünden gitmiyor.");
       if (has(s, "ANLASMA")) p.push("Bu kez yalnız değilsin. Cemil de iniyor, Brandt'ın tüplerinden birini sırtlamış, belinde vinç kancası. Cemil bir zamanlar sünger dalgıcıymış; kırk metreyi bilir. Kancayı sana gösteriyor, sonra kontrol odasının arkasını: sandıklar orada.");
-      p.push("Renkler yine teker teker gidiyor. Denizaltı yine kumun üstünde, yine sessiz. Ama bu kez onun ne olduğunu biliyorsun ve gövdesine dokunduğunda içeriden hemen cevap geliyor: üç kısa, üç uzun, üç kısa. Ama vuruşlar sabahkinden çok daha zayıf.");
+      p.push("Renkler yine teker teker gidiyor. Denizaltı yine kumun üstünde, yine sessiz. Ama bu kez onun ne olduğunu biliyorsun ve gövdesine dokunduğunda içeriden hemen cevap geliyor: üç kısa, üç uzun, üç kısa. Yalnız vuruşlar sabahkinden çok daha zayıf.");
       if (has(s, "YEDEK_BIRAKTI")) p.push("Kapağın yanındaki yedek tüpü çözüp regülatörünü çift tüpün yanına bağlıyorsun.");
       if (has(s, "KAPAK_GEVSEK")) p.push("Sabah söktüğün demir kumun üstünde duruyor. Kapak kilitsiz; yalnızca önündeki boruların kenara çekilmesi gerek.");
       else if (has(s, "LEVYE")) p.push("Kapağın kolundaki demir hâlâ yerinde. Levyen kemerinde; demiri sökmek bir dakikanı alır. Bir yol daha var: gövdenin burnundaki torpido kovanı. Dar, ama ağzı açık.");
