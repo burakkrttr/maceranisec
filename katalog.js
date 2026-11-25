@@ -9,8 +9,8 @@ window.KATALOG = {
   kutuphane: {
     ad: "Macera Kütüphanesi",
     slogan: "Okumadığın, yaşadığın kitaplar.",
-    instagram: "https://www.instagram.com/burakkrttr/",
-    instagramKullanici: "burakkrttr"
+    instagram: "https://www.instagram.com/maceranisec/",
+    instagramKullanici: "maceranisec"
   },
   kitaplar: [
     {
