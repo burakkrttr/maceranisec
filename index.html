@@ -18,7 +18,7 @@
 <script src="begeni.js"></script>
 <style>
 /* Macera Kütüphanesi: gece, ahşap raflar, tek bir lamba ışığı.
-   Düzen: tam ekran ışıklı giriş → yeni gelen vitrini → 3D kitap sırtlı raf → nasıl okunur → künye. */
+   Düzen: tam ekran ışıklı giriş → yeni gelen vitrini → lamba ışığında vitrin rafı ve kütüphane fişi → nasıl okunur → künye. */
 :root {
   --night: #160f0a;        /* oda: sıcak koyu kahve */
   --wood: #3b2618;         /* raf ahşabı */
@@ -148,19 +148,70 @@ section { position: relative; }
 .ring .fg { stroke: var(--lamp); stroke-linecap: round; transition: stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1); }
 .ring b { font-family: var(--display); font-size: 22px; color: var(--paper); display: block; line-height: 1; }
 
-/* ---------- raf ---------- */
-.library { padding: 100px 0 120px; background: linear-gradient(var(--night), #1d140d 30%, var(--night)); }
+/* ---------- raf: lamba ışığındaki vitrin rafı + kütüphane fişi ---------- */
+.library { padding: 100px 0 110px; background: linear-gradient(var(--night), #1d140d 30%, var(--night)); }
 .tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-.filter { font-family: var(--display); font-weight: 600; font-size: 16px; letter-spacing: 0.08em; padding: 7px 16px; border-radius: 999px; border: 0; cursor: pointer;
+.filter { font-family: var(--display); font-weight: 600; font-size: 16px; letter-spacing: 0.08em; padding: 7px 16px; min-height: 40px; border-radius: 999px; border: 0; cursor: pointer;
   background: rgba(239,230,209,0.06); color: #d8ccb4; transition: background .2s, color .2s; }
 .filter[aria-pressed="true"] { background: var(--lamp); color: #1c1407; }
-.search { font-family: var(--body); font-size: 17px; padding: 8px 16px; border-radius: 999px; border: 0; background: rgba(239,230,209,0.06); color: var(--paper); min-width: 200px; }
+.search { font-family: var(--body); font-size: 17px; padding: 8px 16px; min-height: 42px; border-radius: 999px; border: 0; background: rgba(239,230,209,0.06); color: var(--paper); min-width: 200px; }
 .search::placeholder { color: var(--mute); }
-.case { position: relative; border-radius: 6px; padding: 40px 30px 0; background: linear-gradient(180deg, #1d140e, #24180f); box-shadow: inset 0 30px 60px rgba(0,0,0,0.6), inset 0 0 0 10px #2f2015, inset 0 0 0 12px #1a110a; overflow-x: auto; overflow-y: hidden; }
-.case::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(600px 260px at 50% 0%, rgba(233,179,79,0.14), transparent 70%); }
-.row { display: flex; align-items: flex-end; justify-content: center; gap: 6px; min-height: 360px; padding: 0 20px; perspective: 1400px; position: relative; z-index: 1; width: max-content; min-width: 100%; }
-.shelf-label { position: relative; z-index: 2; width: max-content; margin: 0 auto 14px; font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase; color: #2a1a10; background: linear-gradient(#e9c27a, #b98a3e); padding: 4px 16px 3px 19px; border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.4); }
-#shelf-en { padding-top: 46px; scroll-margin-top: 90px; }
+.dil-sek { display: flex; gap: 6px; background: #2a1d13; padding: 5px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(119,95,62,.4); }
+.dil-sek button { font: 600 18px var(--display); letter-spacing: .04em; border: 0; border-radius: 999px; padding: 8px 20px; min-height: 42px; background: none; color: var(--mute); cursor: pointer; transition: background .16s, color .16s; }
+.dil-sek button[aria-selected="true"] { background: var(--lamp); color: #1c1407; }
+#filters { margin-bottom: 8px; }
+.rafsahne { --lx: 50%; position: relative; isolation: isolate; overflow: hidden; border-radius: 6px;
+  background: radial-gradient(ellipse 60% 70% at 50% 0%, #2a1d13 0%, transparent 70%), linear-gradient(#1f150e, #160e09); }
+.rafsahne::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; mix-blend-mode: screen;
+  background: radial-gradient(ellipse 230px 420px at var(--lx) 30%, rgba(233,179,79,.30), rgba(233,179,79,.08) 55%, transparent 75%); }
+.lamba { position: absolute; top: 0; left: var(--lx); translate: -50% 0; width: 120px; height: 58px; z-index: 2; transition: left .38s cubic-bezier(.2,.8,.2,1); pointer-events: none; }
+.lamba::before { content: ""; position: absolute; left: 50%; top: -40px; width: 2px; height: 44px; background: #3a2a1c; translate: -50% 0; }
+.lamba::after { content: ""; position: absolute; inset: 0; border-radius: 60px 60px 10px 10px; background: linear-gradient(#5b4128, #2c1f14); box-shadow: 0 10px 30px rgba(233,179,79,.35), inset 0 -6px 0 #f1c46b; }
+#toz { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+.rafic { position: relative; z-index: 3; padding-top: 96px; }
+.raf { display: flex; align-items: flex-end; gap: clamp(14px, 2vw, 24px); overflow-x: auto; scroll-snap-type: x mandatory; padding: 20px max(4vw, 24px) 0; scrollbar-width: none; justify-content: safe center; perspective: 1100px; }
+.raf::-webkit-scrollbar { display: none; }
+.raf-tahta { height: 30px; margin-top: -2px; background: linear-gradient(#7a5636, #4a3320 45%, #2a1d13); box-shadow: 0 18px 30px rgba(0,0,0,.6), inset 0 2px 0 rgba(255,220,160,.18); }
+.kt { flex: none; scroll-snap-align: center; width: clamp(118px, 10vw, 140px); border: 0; padding: 0; background: none; cursor: pointer; position: relative; transform-style: preserve-3d;
+  transform: rotateY(-4deg); transition: transform .38s cubic-bezier(.2,.8,.2,1), filter .38s; filter: brightness(.62) saturate(.8); }
+.library.on .kt { animation: kt-in .9s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--n) * 90ms); }
+@keyframes kt-in { from { opacity: 0; transform: translateY(-40px) rotateY(-4deg); } }
+.kt img { display: block; width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 2px 4px 4px 2px; box-shadow: 0 14px 30px rgba(0,0,0,.45); }
+.kt::before { content: ""; position: absolute; left: -9px; top: 3px; bottom: 3px; width: 10px; background: linear-gradient(90deg, color-mix(in srgb, var(--sirt) 60%, #000), var(--sirt)); transform: rotateY(-70deg); transform-origin: right; border-radius: 2px 0 0 2px; }
+.kt::after { content: ""; position: absolute; left: 8%; right: 8%; bottom: -6px; height: 10px; background: radial-gradient(ellipse, rgba(0,0,0,.65), transparent 70%); }
+.kt .no { position: absolute; top: 8px; left: 8px; font: 700 15px var(--display); background: rgba(27,18,12,.78); color: var(--lamp); border-radius: 999px; width: 28px; height: 28px; display: grid; place-items: center; }
+.kt:hover, .kt:focus-visible { filter: brightness(.85); }
+.kt[aria-pressed="true"] { filter: none; transform: translateY(-14px) rotateX(4deg); }
+.kt[aria-pressed="true"] img { box-shadow: 0 30px 60px rgba(0,0,0,.6), 0 0 0 2px var(--lamp); }
+.kt.soon img { filter: grayscale(.6) brightness(.6); }
+.kt.soon .yk { position: absolute; left: 50%; top: 50%; translate: -50% -50%; rotate: -8deg; font: 700 18px var(--display); letter-spacing: .18em; text-transform: uppercase; color: #e7dcc0; border: 2px solid #e7dcc0; padding: 4px 10px; white-space: nowrap; }
+.kt.hidden { display: none; }
+.kt.wiggle { animation: wiggle .5s; }
+@keyframes wiggle { 25% { rotate: -3deg; } 75% { rotate: 3deg; } }
+.raf-ok { position: absolute; top: 50%; z-index: 4; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(233,179,79,.5); background: rgba(27,18,12,.85); color: var(--lamp); font-size: 22px; cursor: pointer; display: grid; place-items: center; }
+.raf-ok.prev { left: 8px; } .raf-ok.next { right: 8px; }
+.raf .empty-msg { color: var(--mute); font-style: italic; padding: 70px 0; text-align: center; width: 100%; margin: 0; }
+.fis { position: relative; max-width: 860px; margin: 28px auto 0; color: #2a1d13; border-radius: 8px; box-shadow: 0 30px 60px rgba(0,0,0,.6); padding: clamp(22px, 3.4vw, 40px) clamp(20px, 4vw, 48px);
+  background-image: repeating-linear-gradient(transparent 0 37px, rgba(111,155,176,.22) 37px 38px), linear-gradient(#f3ebd8, #e7dcc2); background-position: 0 92px, 0 0; animation: fis-cik .38s cubic-bezier(.2,.8,.2,1); }
+.fis[hidden] { display: none; }
+.fis::before { content: ""; position: absolute; left: 50%; top: -6px; width: 26px; height: 26px; margin-left: -13px; border-radius: 50%; background: var(--night); box-shadow: inset 0 2px 4px rgba(0,0,0,.6); }
+.fis::after { content: ""; position: absolute; left: 0; right: 0; top: 86px; height: 2px; background: rgba(192,87,62,.55); }
+@keyframes fis-cik { from { opacity: 0; transform: translateY(-18px); } }
+.fis-ust { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; min-height: 58px; }
+.fis h3 { font: 700 clamp(30px, 4.4vw, 44px)/1.05 var(--display); margin: 0; }
+.fis .kimlik { font: 600 16px var(--display); letter-spacing: .06em; color: #7a5a3a; white-space: nowrap; }
+.fis .alt { font: italic 500 21px/1.4 var(--display); margin: 18px 0 6px; color: #5a4128; }
+.fis .slogan { font: italic 600 clamp(24px, 3vw, 32px)/1.25 var(--display); margin: 0 0 14px; }
+.fis p.tan { margin: 0 0 20px; font-size: 18px; line-height: 38px; max-width: 62ch; }
+.satirlar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 20px; margin: 0 0 24px; font-size: 16px; }
+.satirlar dt { font: 600 14px var(--display); letter-spacing: .06em; color: #7a5a3a; }
+.satirlar dd { margin: 0; font-weight: 500; }
+.alt-sira { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; }
+.fis .btn { background: #2a1d13; color: var(--paper); }
+.fis .btn:hover { background: #3b2a1c; box-shadow: 0 10px 24px rgba(0,0,0,.3); }
+.damga { margin-left: auto; font: 700 18px var(--display); letter-spacing: .08em; color: #c0573e; border: 2px solid #c0573e; border-radius: 6px; padding: 4px 12px; rotate: -6deg; opacity: .85; white-space: nowrap; }
+.fis[lang="en"] .like .l { display: none; }
+.shelf-note { color: var(--mute); font-style: italic; margin-top: 18px; text-align: center; font-size: 17px; }
 #nav-en { color: var(--lamp); }
 .en-pill { display: inline-flex; align-items: center; gap: 12px; margin-top: 26px; padding: 9px 20px 9px 10px; border-radius: 40px; text-decoration: none;
   color: var(--paper); font-family: var(--display); font-weight: 600; font-size: 19px; letter-spacing: 0.04em;
@@ -168,62 +219,6 @@ section { position: relative; }
 .en-pill:hover { background: rgba(233,179,79,0.2); transform: translateY(-2px); }
 .en-pill b { font-size: 13px; letter-spacing: 0.2em; background: var(--lamp); color: #1a1209; padding: 5px 10px; border-radius: 30px; }
 .en-pill i { font-style: italic; color: var(--lamp); }
-.plank { height: 34px; margin: 0 -30px; position: relative; z-index: 0; background: linear-gradient(#5a3a22, #3b2618 45%, #2a1a10); box-shadow: 0 14px 24px rgba(0,0,0,0.6), inset 0 2px 0 rgba(255,220,170,0.15); }
-.bookend { width: 18px; height: 150px; align-self: flex-end; margin: 0 14px; border-radius: 3px 3px 0 0; background: linear-gradient(90deg, #8a6a3c, #c9a063 50%, #7a5a30); box-shadow: 4px 0 10px rgba(0,0,0,0.5); }
-.deco { align-self: flex-end; margin: 0 18px; }
-.deco.glass { width: 56px; height: 86px; position: relative; }
-.deco.glass::before { content: ""; position: absolute; inset: 0; border-radius: 4px; background: linear-gradient(#c9a063 0 7px, transparent 7px calc(100% - 7px), #c9a063 calc(100% - 7px)); }
-.deco.glass::after { content: ""; position: absolute; left: 8px; right: 8px; top: 9px; bottom: 9px; clip-path: polygon(0 0, 100% 0, 55% 50%, 100% 100%, 0 100%, 45% 50%); background: linear-gradient(rgba(220,230,240,0.18) 0 50%, rgba(233,179,79,0.75) 50%); animation: sand 6s linear infinite; }
-@keyframes sand { to { filter: hue-rotate(10deg); } }
-.deco.stack { display: flex; flex-direction: column-reverse; gap: 2px; }
-.deco.stack i { display: block; height: 16px; border-radius: 2px; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.25); }
-
-.bk { position: relative; flex: none; cursor: pointer; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.7,.2,1); border: 0; padding: 0; background: none; margin: 0 4px; }
-.bk .face { position: absolute; top: 0; left: 0; backface-visibility: hidden; }
-.bk .spine { width: 100%; height: 100%; border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 16px 0 14px;
-  box-shadow: inset 3px 0 6px rgba(255,255,255,0.08), inset -6px 0 10px rgba(0,0,0,0.45), inset 0 22px 0 -18px rgba(201,160,99,0.8), inset 0 -22px 0 -18px rgba(201,160,99,0.8); }
-.bk .spine .st { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--display); font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; font-size: 22px; white-space: nowrap; }
-.bk .spine .sn { font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: 0.1em; }
-.bk .spine .sa { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--display); font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.75; }
-.bk .cover { border-radius: 2px 6px 6px 2px; overflow: hidden; background-size: cover; background-position: center; }
-.bk .pages { background: repeating-linear-gradient(90deg, #e9dfc7 0 1px, #cdbf9e 1px 2px); }
-.bk:hover, .bk:focus-visible, .bk.peek { transform: translateZ(40px) translateY(-12px) rotateY(-70deg); outline: none; z-index: 5; }
-.bk:focus-visible .spine { box-shadow: 0 0 0 3px var(--lamp); }
-.bk .tag { position: absolute; left: 50%; bottom: calc(100% + 12px); transform: translateX(-50%) translateZ(1px); white-space: nowrap; font-family: var(--display); font-weight: 600; font-size: 15px; letter-spacing: 0.08em;
-  padding: 4px 12px; border-radius: 999px; background: var(--lamp); color: #1c1407; opacity: 0; transition: opacity .3s; pointer-events: none; }
-
-.bk.soon .spine::after { content: ""; position: absolute; left: -4px; right: -4px; top: 48%; height: 7px; background: linear-gradient(#b89a62, #8d7343); box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
-.bk.soon .cover { filter: grayscale(0.6) brightness(0.55); display: grid; place-items: center; }
-.bk.soon .cover span { font-family: var(--display); font-weight: 700; font-size: 26px; letter-spacing: 0.2em; color: #e7dcc0; text-transform: uppercase; transform: rotate(-8deg); border: 2px solid #e7dcc0; padding: 6px 14px; }
-.slot { position: relative; flex: none; display: flex; align-items: flex-end; }
-.case.on .slot { animation: shelfin .9s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--n, 0) * 110ms + 150ms); }
-/* üzerine gelinen kitabın kapağı yanındaki kitapların önünde açılsın */
-.slot:hover, .slot:has(.peek), .slot:has(.bk:focus-visible) { z-index: 10; }
-@keyframes shelfin { from { transform: translateY(70px); opacity: 0; } to { transform: none; opacity: 1; } }
-.slot::before { content: ""; position: absolute; left: 50%; bottom: -10px; width: 160px; height: 60px; transform: translateX(-50%); pointer-events: none; border-radius: 50%;
-  background: radial-gradient(closest-side, var(--c, #e9b34f), transparent); opacity: 0; transition: opacity .4s; filter: blur(6px); }
-.slot:hover::before, .slot:has(.peek)::before { opacity: 0.55; }
-.slot.hidden { display: none; }
-.slot .tag { position: absolute; left: 50%; bottom: calc(100% + 14px); transform: translateX(-50%) translateY(6px); white-space: nowrap; font-family: var(--display); font-weight: 600; font-size: 15px; letter-spacing: 0.08em;
-  padding: 4px 12px; border-radius: 999px; background: var(--lamp); color: #1c1407; opacity: 0; transition: opacity .3s, transform .3s; pointer-events: none; z-index: 6; }
-.slot:has(.soon) .tag { background: #3a3a2c; color: #e7dcc0; }
-.slot:hover .tag, .slot:has(.bk:focus-visible) .tag, .slot:has(.peek) .tag { opacity: 1; transform: translateX(-50%); }
-.bk .cover .ct { position: absolute; left: 0; right: 0; top: 18px; text-align: center; font-family: var(--display); font-weight: 600; font-size: 34px; letter-spacing: 0.16em; padding-left: 0.16em; color: #f3e9d2; text-shadow: 0 2px 14px rgba(0,0,0,0.7); }
-.slot .plate { position: absolute; left: 50%; top: calc(100% + 3px); transform: translateX(-50%); z-index: 3; }
-.slot .plate .like { --c: #2a1a0e; gap: 6px; padding: 4px 10px 4px 8px; font-size: 15px; color: #2a1a0e; border-radius: 3px;
-  background: linear-gradient(#e2c48a, #b98f50 60%, #9c7438); box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,245,220,0.6); white-space: nowrap; }
-.slot .plate .like:hover { box-shadow: 0 3px 8px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,245,220,0.6), 0 0 0 2px rgba(233,179,79,0.6); }
-.slot .plate .like svg { width: 16px; height: 16px; stroke-width: 2.2; }
-.slot .plate .like .l { display: none; }
-.slot .plate .like.on { background: linear-gradient(#f0d49a, #c99a55 60%, #a97d3e); }
-.slot .plate .like.on svg { fill: #8d2a1a; stroke: #8d2a1a; }
-.slot .plate .like .burst { left: 16px; }
-.old { flex: none; align-self: flex-end; border-radius: 2px; opacity: 0.7; margin: 0 1px;
-  box-shadow: inset 3px 0 5px rgba(255,255,255,0.05), inset -5px 0 8px rgba(0,0,0,0.5), inset 0 26px 0 -22px rgba(201,160,99,0.35), inset 0 -26px 0 -22px rgba(201,160,99,0.35); }
-.bk.wiggle { animation: wiggle .5s; }
-@keyframes wiggle { 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
-.shelf-note { color: var(--mute); font-style: italic; margin-top: 18px; text-align: center; font-size: 17px; }
-.empty-msg { color: var(--mute); font-style: italic; align-self: center; padding: 0 30px; }
 
 /* ---------- nasıl okunur ---------- */
 .how { padding: 110px 0; }
@@ -263,12 +258,15 @@ footer .big em { color: var(--lamp); }
   .feat { grid-template-columns: 1fr; }
   .tilt { max-width: 320px; margin: 0 auto; }
   .steps { grid-template-columns: 1fr; }
-  .case { padding: 30px 16px 0; }
-  .row { min-height: 330px; }
-  .bk:hover { transform: none; }
-  .old, .deco { display: none; }
-  .row { padding: 0 6px; }
-  .bk.peek { transform: translateZ(30px) translateY(-10px) rotateY(-70deg); }
+}
+@media (max-width: 600px) {
+  .rafic { padding-top: 78px; }
+  .raf { justify-content: flex-start; padding-inline: calc(50% - 64px); }
+  .raf-ok { display: none; }
+  .satirlar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .fis p.tan { line-height: 1.55; }
+  .damga { margin-left: 0; }
+  .search { min-width: 0; flex: 1; }
 }
 @media (max-width: 420px) {
   .nav .logo { font-size: 16px; }
@@ -293,7 +291,7 @@ footer .big em { color: var(--lamp); }
       <li><a href="#sahneler">Sahneler</a></li>
       <li><a href="#raf">Raflar</a></li>
       <li><a href="#nasil">Nasıl okunur?</a></li>
-      <li class="keep" id="nav-en-li" hidden><a id="nav-en" href="#shelf-en" lang="en">English</a></li>
+      <li class="keep" id="nav-en-li" hidden><a id="nav-en" href="#raf" data-dil="en" lang="en">English</a></li>
       <li class="keep"><a id="nav-ig" href="#" target="_blank" rel="noopener">Instagram</a></li>
     </ul>
   </div>
@@ -313,7 +311,7 @@ footer .big em { color: var(--lamp); }
       <a class="btn" href="#raf">Raflara göz at</a>
       <a class="btn ghost" href="#nasil">Nasıl okunur?</a>
     </div>
-    <a class="en-pill" id="en-pill" href="#shelf-en" lang="en" hidden></a>
+    <a class="en-pill" id="en-pill" href="#raf" data-dil="en" lang="en" hidden></a>
     <div class="stats" id="stats"></div>
   </div>
   <div class="cue" aria-hidden="true"></div>
@@ -329,27 +327,34 @@ footer .big em { color: var(--lamp); }
   <div class="marquee reveal" id="scenes"></div>
 </section>
 
-<section class="library" id="raf">
+<section class="library reveal" id="raf">
   <div class="wrap">
-    <div class="sec-head reveal">
+    <div class="sec-head">
       <div><p class="kicker">Raflar</p><h2>Bir kitap <em>seç</em>.</h2></div>
-      <div class="tools" role="group" aria-label="Kitapları süz">
-        <div id="filters" class="tools"></div>
+      <div class="tools">
+        <div class="dil-sek" id="dil-sek" role="tablist" aria-label="Raf dili" hidden>
+          <button type="button" role="tab" aria-selected="true" data-dil="tr">Türkçe</button>
+          <button type="button" role="tab" aria-selected="false" data-dil="en" lang="en">English</button>
+        </div>
         <label class="sr" for="q" style="position:absolute;left:-9999px">Kitap ara</label>
         <input class="search" id="q" type="search" placeholder="Kitap ara…" autocomplete="off">
       </div>
     </div>
-    <div class="case reveal">
-      <div class="shelf-label" id="lbl-tr" hidden>Türkçe</div>
-      <div class="row" id="row"></div>
-      <div class="plank"></div>
-      <div id="shelf-en" hidden>
-        <div class="shelf-label" lang="en">English</div>
-        <div class="row" id="row-en"></div>
-        <div class="plank"></div>
+    <div id="filters" class="tools" role="group" aria-label="Türe göre süz"></div>
+  </div>
+  <div class="wrap">
+    <div class="rafsahne" id="rafsahne" aria-label="Kitap rafı">
+      <canvas id="toz" aria-hidden="true"></canvas>
+      <div class="lamba" aria-hidden="true"></div>
+      <div class="rafic">
+        <button class="raf-ok prev" type="button" aria-label="Önceki kitap">‹</button>
+        <div class="raf" id="row" tabindex="0" aria-label="Kitaplar: sağa sola kaydır, ok tuşlarıyla seç"></div>
+        <button class="raf-ok next" type="button" aria-label="Sonraki kitap">›</button>
+        <div class="raf-tahta" aria-hidden="true"></div>
       </div>
     </div>
-    <p class="shelf-note" id="shelf-note">Bir kitabın üstüne gel, kapağını göster. Tıkla, açılsın. Beğendiğin kitabın rafındaki ♥ plakasına dokun.</p>
+    <article class="fis" id="fis" aria-live="polite" hidden></article>
+    <p class="shelf-note" id="shelf-note">Bir kitaba dokun, fişi açılsın. Okumaya başla ya da kapağa bir kez daha dokun.</p>
   </div>
 </section>
 
@@ -489,88 +494,149 @@ footer .big em { color: var(--lamp); }
     $("#feat-go").addEventListener("click", open);
   }
 
-  /* raflar: üstte Türkçe, altta İngilizce (katalogda "dil": "en") */
-  const deco = (html) => { const d = document.createElement("div"); d.innerHTML = html; return d.firstElementChild; };
+  /* raf: tek raf, Türkçe/English sekmesi. Seçilen kitaba lamba kayar, altta kütüphane fişi açılır. */
   const dilOf = (b) => b.dil || "tr";
-  const kaynakOf = (b) => books.find((x) => x.id === b.kaynak) || b;
   const enBooks = books.filter((b) => dilOf(b) === "en");
+  const RT = {
+    tr: { tum: "Tümü", oku: "Okumaya başla", yeniden: "Yeniden oku", son: "son", tur: "Tür", sure: "Okuma", bulunan: "Bulduğun", yakinda: "Yakında", ac: (b) => `${b.baslik} kitabını seç`,
+          not: "Bir kitaba dokun, fişi açılsın. Okumaya başla ya da kapağa bir kez daha dokun.", bos: "Bu aramaya uyan bir kitap yok. Başka bir kelime dene." },
+    en: { tum: "All", oku: "Start reading", yeniden: "Read again", son: "endings", tur: "Genre", sure: "Reading time", bulunan: "Found", yakinda: "Coming soon", ac: (b) => `Select ${b.baslik}`,
+          not: "Tap a book to open its card. Start reading, or tap the cover once more.", bos: "No book matches this search. Try another word." }
+  };
+  let dil = "tr", aktifTur = "Tümü", secili = null;
+  try { if (localStorage.getItem("raf-dil") === "en" && enBooks.length) dil = "en"; } catch (e) {}
+  if (location.hash === "#shelf-en" && enBooks.length) dil = "en";
+  const row = $("#row"), fis = $("#fis"), sahne = $("#rafsahne"), fbox = $("#filters"), note = $("#shelf-note");
+
   if (enBooks.length) {
-    $("#shelf-en").hidden = false; $("#lbl-tr").hidden = false; $("#nav-en-li").hidden = false;
+    $("#dil-sek").hidden = false; $("#nav-en-li").hidden = false;
     const enLive = enBooks.filter((b) => b.durum === "yayinda");
     if (enLive.length) {
       const pill = $("#en-pill"); pill.hidden = false;
       pill.innerHTML = `<b>NEW</b>Now in English: <i>${enLive.length <= 2 ? enLive.map((b) => esc(b.baslik)).join(" & ") : enLive.length + " books"}</i> →`;
     }
   }
-  const shelves = [[$("#row"), books.filter((b) => dilOf(b) === "tr")], [$("#row-en"), enBooks]];
-  shelves.forEach(([row, list], si) => {
-  const oldies = (l) => l.forEach(([w, h, c]) => row.appendChild(deco(`<div class="old" aria-hidden="true" style="width:${w}px;height:${h}px;background:${c}"></div>`)));
-  oldies(si ? [[38, 262, "#2b2631"], [30, 240, "#3a2a22"], [42, 270, "#26302f"]] : [[34, 250, "#3a2a22"], [42, 276, "#26302f"], [30, 232, "#40261f"], [38, 262, "#2b2631"]]);
-  row.appendChild(deco('<div class="bookend" aria-hidden="true"></div>'));
-  list.forEach((b) => {
-    const en = dilOf(b) === "en";
-    const s = b.sirt || {}, H = s.yukseklik || 290, T = s.kalinlik || 46, D = Math.round(H * 0.68);
-    const slot = document.createElement("div"); slot.className = "slot";
-    slot.style.setProperty("--n", row.querySelectorAll(".slot").length); slot.style.setProperty("--c", s.yazi || "#e9b34f");
-    const el = document.createElement("button");
-    el.type = "button";
-    el.className = "bk" + (b.durum === "yakinda" ? " soon" : "");
-    el.dataset.id = b.id;
-    if (en) el.lang = "en";
-    el.dataset.tags = (kaynakOf(b).tur || []).join("|");
-    el.dataset.text = [b.baslik, b.altBaslik, b.yazar, ...(b.tur || [])].join(" ").toLocaleLowerCase("tr");
-    el.style.width = T + "px"; el.style.height = H + "px";
-    el.setAttribute("aria-label", b.durum === "yakinda" ? (en ? `${b.baslik}: coming soon` : `${b.baslik}: ${b.cikis ? b.cikis + " rafta" : "yakında"}`) : (en ? `Open ${b.baslik}` : `${b.baslik} kitabını aç`));
-    const coverBg = b.kapak ? `background-image:url('${esc(b.kapak)}')` : `background:${s.renk}`;
-    el.innerHTML = `
-      <span class="face spine" style="background:${s.renk};color:${s.yazi}">
-        <span class="sn">${b.kitapNo}</span><span class="st"${s.yaziBoyu ? ` style="font-size:${s.yaziBoyu}px;letter-spacing:0.16em"` : ""}>${esc(b.baslik)}</span><span class="sa">${esc(b.yazar.split(" ").pop())}</span></span>
-      <span class="face cover" style="${coverBg};width:${D}px;height:${H}px;left:${T}px;transform-origin:left center;transform:rotateY(90deg)">${b.durum === "yakinda" ? `<span>${esc(b.cikis || (en ? "Soon" : "Yakında"))}</span>` : `<span class="ct">${esc(b.baslik.toLocaleUpperCase(dilOf(b)))}</span>`}</span>
-      <span class="face pages" style="width:${T - 4}px;height:${D - 4}px;left:2px;top:${-D + 4}px;transform-origin:bottom center;transform:rotateX(90deg)"></span>`;
-    el.addEventListener("click", () => {
-      if (b.durum === "yakinda") { el.classList.remove("wiggle"); void el.offsetWidth; el.classList.add("wiggle"); $("#shelf-note").textContent = `${b.baslik} ${b.cikis || "yakında"} rafta: “${b.slogan}”`; return; }
-      if (matchMedia("(hover: none)").matches && !el.classList.contains("peek")) { document.querySelectorAll(".row .peek").forEach((x) => x.classList.remove("peek")); el.classList.add("peek"); $("#shelf-note").textContent = "Açmak için bir kez daha dokun."; return; }
-      openBook(b, el.querySelector(".cover"));
-    });
-    if (en) slot.lang = "en";
-    slot.innerHTML = `<span class="tag">${b.durum === "yakinda" ? esc(b.cikis || (en ? "Coming soon" : "Yakında")) : (en ? `${found(b)} / ${b.sonSayisi} endings found` : `${found(b)} / ${b.sonSayisi} son buldun`)}</span>`;
-    if (b.durum !== "yakinda" && window.Begeni) {
-      const plate = document.createElement("span"); plate.className = "plate"; slot.appendChild(plate);
-      Begeni.mount(plate, b.id, { onCount: (n) => setTagLikes(b.id, n) });
-    }
-    slot.appendChild(el);
-    row.appendChild(slot);
-  });
-  row.appendChild(deco('<div class="deco stack" aria-hidden="true"><i style="width:120px;background:#3b2a3a"></i><i style="width:110px;background:#253447"></i><i style="width:126px;background:#4a2e22"></i></div>'));
-  row.appendChild(deco('<div class="deco glass" aria-hidden="true"></div>'));
-  row.appendChild(deco('<div class="bookend" aria-hidden="true"></div>'));
-  oldies(si ? [[44, 240, "#3c2420"], [32, 284, "#22303a"], [36, 250, "#2e2a20"]] : [[36, 268, "#2e2a20"], [44, 240, "#3c2420"], [32, 284, "#22303a"], [40, 256, "#352a1e"], [30, 230, "#2a2224"]]);
-  });
 
+  /* beğeni düğmeleri: her kitap için bir kez kurulur, fiş değişince fişe taşınır; toplam sayı girişte görünür */
+  const likeBtn = {}, likeHold = document.createElement("div");
+  if (window.Begeni) books.filter((b) => b.durum !== "yakinda").forEach((b) => { likeBtn[b.id] = Begeni.mount(likeHold, b.id, { paper: true, onCount: (n) => setTagLikes(b.id, n) }); });
   function setTagLikes(id, n) {
     likeTotals[id] = n; const sum = Object.values(likeTotals).reduce((a, c) => a + c, 0);
     const el = $("#stat-likes"); if (el) { el.hidden = false; el.querySelector("b").textContent = sum.toLocaleString("tr-TR"); }
   }
 
-  /* filtreler ve arama */
-  const tags = ["Tümü", ...new Set(books.filter((b) => !b.dil || b.dil === "tr").flatMap((b) => b.tur || []))];
-  let active = "Tümü";
-  const fbox = $("#filters");
-  tags.forEach((t) => {
-    const b = document.createElement("button"); b.type = "button"; b.className = "filter"; b.textContent = t; b.setAttribute("aria-pressed", t === active);
-    b.addEventListener("click", () => { active = t; fbox.querySelectorAll(".filter").forEach((x) => x.setAttribute("aria-pressed", x === b)); apply(); });
-    fbox.appendChild(b);
-  });
-  const apply = () => {
-    const q = $("#q").value.trim().toLocaleLowerCase("tr");
-    let shown = 0;
-    document.querySelectorAll(".row .bk").forEach((el) => {
-      const ok = (active === "Tümü" || el.dataset.tags.split("|").includes(active)) && (!q || el.dataset.text.includes(q));
-      el.parentElement.classList.toggle("hidden", !ok); if (ok) shown++;
+  const rafKitap = () => books.filter((b) => dilOf(b) === dil);
+  function cizFiltre() {
+    const tags = [RT[dil].tum, ...new Set(rafKitap().flatMap((b) => b.tur || []))];
+    if (!tags.includes(aktifTur)) aktifTur = RT[dil].tum;
+    fbox.innerHTML = tags.map((t) => `<button type="button" class="filter" aria-pressed="${t === aktifTur}" data-t="${esc(t)}"${dil === "en" ? ' lang="en"' : ""}>${esc(t)}</button>`).join("");
+  }
+  function cizRaf() {
+    const en = dil === "en";
+    row.innerHTML = rafKitap().map((b, i) => {
+      const soon = b.durum === "yakinda", s = b.sirt || {};
+      return `<button type="button" class="kt${soon ? " soon" : ""}" style="--n:${i};--sirt:${esc(s.renk || "#3b2618")}" data-id="${esc(b.id)}" aria-pressed="false" aria-label="${esc(RT[dil].ac(b))}"${en ? ' lang="en"' : ""}
+        data-tags="${esc((b.tur || []).join("|"))}" data-text="${esc([b.baslik, b.altBaslik, b.yazar, ...(b.tur || [])].join(" ").toLocaleLowerCase("tr"))}">
+        <img src="${esc(b.kapak)}" alt="" loading="lazy" decoding="async" width="400" height="600"><span class="no">${b.kitapNo}</span>${soon ? `<span class="yk">${esc(b.cikis || RT[dil].yakinda)}</span>` : ""}</button>`;
+    }).join("") + `<p class="empty-msg" hidden>${RT[dil].bos}</p>`;
+    sahne.setAttribute("lang", dil);
+    $("#q").placeholder = dil === "en" ? "Search books…" : "Kitap ara…";
+    suz();
+  }
+  function suz() {
+    const q = $("#q").value.trim().toLocaleLowerCase("tr"), tum = aktifTur === RT[dil].tum;
+    let gorunen = [];
+    row.querySelectorAll(".kt").forEach((el) => {
+      const ok = (tum || el.dataset.tags.split("|").includes(aktifTur)) && (!q || el.dataset.text.includes(q));
+      el.classList.toggle("hidden", !ok); if (ok) gorunen.push(books.find((b) => b.id === el.dataset.id));
     });
-    $("#shelf-note").textContent = shown ? "Bir kitabın üstüne gel, kapağını göster. Tıkla, açılsın. Beğendiğin kitabın rafındaki ♥ plakasına dokun." : "Bu aramaya uyan bir kitap yok. Başka bir kelime dene.";
-  };
-  $("#q").addEventListener("input", apply);
+    row.querySelector(".empty-msg").hidden = gorunen.length > 0;
+    note.textContent = gorunen.length ? RT[dil].not : RT[dil].bos;
+    const canli = gorunen.filter((b) => b.durum === "yayinda");
+    sec(secili && gorunen.includes(secili) ? secili : (canli.sort((a, b) => (b.eklenme || "").localeCompare(a.eklenme || "") || b.kitapNo - a.kitapNo)[0] || gorunen[0] || null), false);
+  }
+  function sec(b, kaydir) {
+    secili = b;
+    row.querySelectorAll(".kt").forEach((el) => el.setAttribute("aria-pressed", String(!!b && el.dataset.id === b.id)));
+    if (!b) { fis.hidden = true; return; }
+    const t = RT[dil], en = dil === "en", soon = b.durum === "yakinda", got = found(b);
+    fis.hidden = false; fis.lang = dil;
+    fis.style.animation = "none"; void fis.offsetWidth; fis.style.animation = "";
+    fis.innerHTML = `<div class="fis-ust"><h3>${esc(b.baslik)}</h3><span class="kimlik">No. ${b.kitapNo}</span></div>
+      <p class="alt">${esc(b.altBaslik)}</p>
+      <p class="slogan">${esc(b.slogan)}</p>
+      <p class="tan">${esc(b.tanitim)}</p>
+      <dl class="satirlar"><div><dt>${t.tur}</dt><dd>${esc((b.tur || []).join(" · "))}</dd></div><div><dt>${t.sure}</dt><dd>${esc(b.okumaSuresi)}</dd></div>${soon ? "" : `<div><dt>${t.bulunan}</dt><dd>${got} / ${b.sonSayisi} ${t.son}</dd></div>`}</dl>
+      <div class="alt-sira">${soon ? "" : `<button type="button" class="btn" id="fis-ac">${got ? t.yeniden : t.oku} <span aria-hidden="true">→</span></button><span class="fis-like"></span>`}
+        <span class="damga">${soon ? esc(b.cikis || t.yakinda) : `${b.sonSayisi} ${t.son.toLocaleUpperCase(en ? "en" : "tr")}`}</span></div>`;
+    if (!soon) {
+      $("#fis-ac").addEventListener("click", () => openBook(b, row.querySelector(`.kt[data-id="${CSS.escape(b.id)}"] img`)));
+      if (likeBtn[b.id]) fis.querySelector(".fis-like").appendChild(likeBtn[b.id]);
+    }
+    const el = row.querySelector(`.kt[data-id="${CSS.escape(b.id)}"]`);
+    if (el) {
+      const L = el.offsetLeft - row.offsetLeft - (row.clientWidth - el.offsetWidth) / 2;
+      row.scrollTo({ left: L, behavior: kaydir && !reduce ? "smooth" : "instant" });
+      requestAnimationFrame(isik);
+    }
+  }
+  function isik() {
+    const el = row.querySelector('.kt[aria-pressed="true"]'); if (!el) return;
+    const r = el.getBoundingClientRect(), s = sahne.getBoundingClientRect(); if (!s.width) return;
+    sahne.style.setProperty("--lx", Math.min(92, Math.max(8, (r.left + r.width / 2 - s.left) / s.width * 100)) + "%");
+  }
+  function adim(d) {
+    const L = [...row.querySelectorAll(".kt:not(.hidden)")]; if (!L.length) return;
+    const i = Math.max(0, L.findIndex((el) => el.getAttribute("aria-pressed") === "true"));
+    const n = L[Math.min(L.length - 1, Math.max(0, i + d))]; sec(books.find((b) => b.id === n.dataset.id), true);
+  }
+  function dilSec(d) {
+    if (d === dil || (d === "en" && !enBooks.length)) return;
+    dil = d; secili = null; $("#q").value = "";
+    document.querySelectorAll("#dil-sek button").forEach((x) => x.setAttribute("aria-selected", String(x.dataset.dil === dil)));
+    try { localStorage.setItem("raf-dil", dil); } catch (e) {}
+    cizFiltre(); cizRaf();
+  }
+
+  row.addEventListener("click", (e) => {
+    const el = e.target.closest(".kt"); if (!el) return;
+    const b = books.find((x) => x.id === el.dataset.id);
+    if (b.durum === "yakinda") { el.classList.remove("wiggle"); void el.offsetWidth; el.classList.add("wiggle"); sec(b, true); return; }
+    if (secili === b) openBook(b, el.querySelector("img")); else sec(b, true);
+  });
+  row.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") { e.preventDefault(); adim(1); } if (e.key === "ArrowLeft") { e.preventDefault(); adim(-1); } });
+  row.addEventListener("scroll", () => requestAnimationFrame(isik), { passive: true });
+  $(".raf-ok.prev").addEventListener("click", () => adim(-1));
+  $(".raf-ok.next").addEventListener("click", () => adim(1));
+  fbox.addEventListener("click", (e) => { const c = e.target.closest(".filter"); if (!c) return; aktifTur = c.dataset.t; fbox.querySelectorAll(".filter").forEach((x) => x.setAttribute("aria-pressed", String(x === c))); suz(); });
+  $("#q").addEventListener("input", suz);
+  document.querySelectorAll("#dil-sek button").forEach((x) => x.addEventListener("click", () => dilSec(x.dataset.dil)));
+  document.querySelectorAll('a[data-dil="en"]').forEach((a) => a.addEventListener("click", () => dilSec("en")));
+  document.querySelectorAll("#dil-sek button").forEach((x) => x.setAttribute("aria-selected", String(x.dataset.dil === dil)));
+  cizFiltre(); cizRaf();
+  if (location.hash === "#shelf-en") setTimeout(() => $("#raf").scrollIntoView(), 50);
+  new ResizeObserver(() => { isik(); tozBoyut(); }).observe(sahne);
+
+  /* rafın toz zerreleri: lamba konisinde parlar */
+  const tz = $("#toz"), tc = tz.getContext("2d");
+  let TW = 0, TH = 0, zerre = [], tozGorunur = false;
+  function tozBoyut() {
+    const d = Math.min(2, devicePixelRatio || 1); TW = tz.clientWidth; TH = tz.clientHeight;
+    tz.width = TW * d; tz.height = TH * d; tc.setTransform(d, 0, 0, d, 0, 0);
+    if (!zerre.length) zerre = Array.from({ length: 40 }, () => ({ x: Math.random(), y: Math.random(), r: .6 + Math.random() * 1.4, v: .0006 + Math.random() * .0012, p: Math.random() * 6.3 }));
+    if (reduce) tozKare(0);
+  }
+  function tozKare(t) {
+    tc.clearRect(0, 0, TW, TH);
+    const lxs = parseFloat(sahne.style.getPropertyValue("--lx")) / 100 || .5;
+    for (const z of zerre) {
+      const x = (z.x + Math.sin(t / 2400 + z.p) * .01) * TW, d = Math.abs(z.x - lxs) * TW;
+      tc.fillStyle = `rgba(241,196,107,${d < 160 ? .55 * (1 - d / 160) + .06 : .05})`; tc.beginPath(); tc.arc(x, z.y * TH, z.r, 0, 6.3); tc.fill();
+      if (!reduce) { z.y -= z.v; if (z.y < -.02) { z.y = 1.02; z.x = Math.random(); } }
+    }
+    if (!reduce && tozGorunur) requestAnimationFrame(tozKare);
+  }
+  new IntersectionObserver((es) => { const v = es[0].isIntersecting; if (v && !tozGorunur && !reduce) { tozGorunur = true; requestAnimationFrame(tozKare); } tozGorunur = v; }).observe(sahne);
 
   /* kitap açılışı: kapak ekranın ortasına uçar, açılır, sayfaya geçilir */
   function openBook(b, fromEl) {
