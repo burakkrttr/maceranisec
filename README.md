@@ -69,4 +69,4 @@ Sonra tarayıcıda `http://localhost:8000` adresini aç.
 - Okuyucunun bulduğu sonlar yalnızca kendi tarayıcısında (`localStorage`) saklanır. Hesap ya da sunucu gerekmez.
 - Yazı tipleri Google Fonts'tan yüklenir (Cormorant Garamond, EB Garamond, Caveat).
 - Hareketi azaltma ayarı açık olan cihazlarda animasyonlar kapanır.
-- **Zindan (özel vitrin):** Ana sayfada rafların altındaki `#zindan` bölümünde, camlı vitrinde dönen tek kitap: *Yedinci Kat* (`yedinci-kat/`). Zarla oynanan, kendi motoru olan bir kitap olduğu için katalogda (`katalog.js`) değil; raflara, aramaya ve sayaçlara girmez. Eski adres `emiriniyolu/` buraya yönlendirir.
+- **Özel vitrin (Yedinci Kat):** Ana sayfada girişin hemen altındaki `#vitrin` bölümü. Camlı kutuda dönen 3B kitap: Three.js ile çizilir, cam `MeshPhysicalMaterial` (vitrin3b/vitrin.js derlenmiş dosya, vitrin3b/kaynak.js okunur kaynak). WebGL yoksa kapak görseli kalır; hareket azaltma açıksa kitap dönmez. Kitap zarla oynanan ayrı bir tür olduğu için katalogda (`katalog.js`) değil; raflara, aramaya ve sayaçlara girmez. Oyun `yedinci-kat/` adresinde; eski adres `emiriniyolu/` buraya yönlendirir.

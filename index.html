@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="hareket/hareket.css">
 <style>
 /* Macera Kütüphanesi: gece, ahşap raflar, tek bir lamba ışığı.
-   Düzen: tam ekran ışıklı giriş → yeni gelen vitrini → lamba ışığında vitrin rafı ve kütüphane fişi → nasıl okunur → künye. */
+   Düzen: tam ekran ışıklı giriş → Yedinci Kat özel vitrini (Three.js) → lamba ışığında vitrin rafı ve kütüphane fişi → nasıl okunur → künye. */
 :root {
   --night: #160f0a;        /* oda: sıcak koyu kahve */
   --wood: #3b2618;         /* raf ahşabı */
@@ -332,81 +332,31 @@ footer .siradaki { display: block; width: max-content; margin-top: 18px; font-si
   .reveal.pre { transform: none; opacity: 1; }
   html { scroll-behavior: auto; }
 }
-/* Zindan: rafların altındaki özel vitrin. Camlı kutuda ağır ağır dönen tek kitap (Yedinci Kat). */
-.zindan { position: relative; padding: clamp(90px, 12vw, 150px) 0 clamp(80px, 10vw, 130px); overflow: hidden;
-  background: radial-gradient(ellipse 60% 45% at 30% 38%, rgba(233,179,79,.10), transparent 70%),
-    linear-gradient(#160f0a, #0b0806 18%, #0b0806 82%, #160f0a); }
-.zindan-basamak { position: absolute; inset: 0 0 auto; height: 70px; opacity: .5;
-  background: repeating-linear-gradient(180deg, transparent 0 13px, rgba(201,160,99,.10) 13px 14px);
-  -webkit-mask: linear-gradient(#000, transparent); mask: linear-gradient(#000, transparent); }
-.zindan-ic { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(36px, 6vw, 90px); align-items: center; }
-.zindan .kicker { color: var(--brass); }
-.zindan h2 { font-family: var(--display); font-weight: 600; font-size: clamp(40px, 6vw, 68px); line-height: 1; margin: 6px 0 22px; }
-.zindan h2 em { color: var(--lamp); font-weight: 500; }
-.zindan-giris { color: var(--paper); margin: 0 0 18px; max-width: 34em; }
-.zindan-ozellik { list-style: none; padding: 0; margin: 0 0 26px; color: var(--mute); }
-.zindan-ozellik li { padding: 5px 0 5px 22px; position: relative; }
-.zindan-ozellik li::before { content: ""; position: absolute; left: 2px; top: 15px; width: 8px; height: 8px; transform: rotate(45deg); border: 1px solid var(--brass); }
-.zindan-ozellik b { color: var(--paper); font-weight: 500; }
-.zindan-sinif { display: flex; gap: 18px; margin: 0 0 30px; flex-wrap: wrap; }
-.zindan-sinif figure { margin: 0; display: flex; align-items: center; gap: 10px; }
-.zindan-sinif img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(201,160,99,.55); }
-.zindan-sinif figcaption { font-family: var(--display); font-weight: 600; font-size: 18px; line-height: 1.1; }
-.zindan-sinif small { display: block; font-family: var(--body); font-weight: 400; font-size: 14px; color: var(--mute); }
-
-.cam-vitrin { position: relative; display: block; width: min(100%, 420px); margin: 0 auto; text-decoration: none; perspective: 1300px; }
-.cam-vitrin .spot { position: absolute; left: 50%; top: -120px; width: 460px; height: 640px; transform: translateX(-50%); pointer-events: none;
-  background: radial-gradient(ellipse 30% 55% at 50% 12%, rgba(255,226,170,.20), rgba(255,226,170,.06) 55%, transparent 72%); }
-.cam-vitrin::before { content: ""; position: absolute; z-index: 4; left: -6px; right: -6px; top: -14px; height: 16px; border-radius: 4px 4px 2px 2px;
-  background: linear-gradient(#4a3020, #2a1a10); box-shadow: inset 0 -1px 0 rgba(201,160,99,.6), 0 6px 14px rgba(0,0,0,.45); }
-.cam { position: relative; display: block; height: 470px; border-radius: 4px 4px 0 0;
-  border: 1px solid rgba(239,230,209,.22); border-bottom: 0;
-  background: linear-gradient(115deg, rgba(255,255,255,.07), rgba(255,255,255,.015) 40%, rgba(255,255,255,.05) 60%, rgba(255,255,255,.01));
-  box-shadow: inset 0 0 0 6px rgba(255,255,255,.02), inset 0 30px 60px rgba(0,0,0,.35), 0 0 60px rgba(233,179,79,.06);
-  overflow: hidden; }
-.cam::before { content: ""; position: absolute; inset: 0; border-left: 1px solid rgba(255,255,255,.28); border-right: 1px solid rgba(255,255,255,.12); pointer-events: none; z-index: 3; }
-.parilti { position: absolute; inset: -20% auto -20% -60%; width: 38%; transform: skewX(-18deg); z-index: 3; pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent); animation: parilti 7s ease-in-out infinite; }
-@keyframes parilti { 0%, 55% { left: -60%; } 85%, 100% { left: 130%; } }
-.kitap3b { --g: 210px; --y: 281px; --d: 40px; position: absolute; left: 50%; top: 82px; width: var(--g); height: var(--y); margin-left: calc(var(--g) / -2);
-  transform-style: preserve-3d; animation: kitap-don 22s linear infinite; }
-@keyframes kitap-don { from { transform: rotateX(-7deg) rotateY(0deg); } to { transform: rotateX(-7deg) rotateY(360deg); } }
-.cam-vitrin:hover .kitap3b, .cam-vitrin:focus-visible .kitap3b { animation-play-state: paused; }
-.yuz { position: absolute; display: block; backface-visibility: hidden; }
-.yuz.on, .yuz.arka { width: var(--g); height: var(--y); }
-.yuz.on { transform: translateZ(calc(var(--d) / 2)); }
-.yuz.on img { width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 1px 4px 4px 1px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.4); }
-.yuz.arka { transform: rotateY(180deg) translateZ(calc(var(--d) / 2)); border-radius: 4px 1px 1px 4px;
-  background: radial-gradient(circle at 50% 35%, #2c1f17, #120c09 75%); box-shadow: inset 0 0 0 6px #1a110c, inset 0 0 0 7px rgba(201,160,99,.4);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 30px; text-align: center; }
-.yuz.arka b { font-family: var(--display); font-size: 54px; color: var(--brass); line-height: 1; }
-.yuz.arka i { font-family: var(--body); font-size: 15px; color: var(--mute); }
-.yuz.sirt { width: var(--d); height: var(--y); left: calc(50% - var(--d) / 2); transform: rotateY(-90deg) translateZ(calc(var(--g) / 2));
-  background: linear-gradient(90deg, #120c09, #2c1f17 45%, #120c09); display: flex; align-items: center; justify-content: center; }
-.yuz.sirt b { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: .3em; color: var(--brass); }
-.yuz.kenar { width: var(--d); height: calc(var(--y) - 6px); top: 3px; left: calc(50% - var(--d) / 2); transform: rotateY(90deg) translateZ(calc(var(--g) / 2 - 3px));
-  background: repeating-linear-gradient(90deg, #e9dcbc 0 1px, #cfc09c 1px 2px); }
-.yuz.ust, .yuz.alt { width: calc(var(--g) - 3px); height: var(--d); top: calc(50% - var(--d) / 2); background: repeating-linear-gradient(0deg, #e9dcbc 0 1px, #cfc09c 1px 2px); }
-.yuz.ust { transform: rotateX(90deg) translateZ(calc(var(--y) / 2 - 2px)); }
-.yuz.alt { transform: rotateX(-90deg) translateZ(calc(var(--y) / 2 - 2px)); }
-.kul i { position: absolute; bottom: -10px; width: 3px; height: 3px; border-radius: 50%; background: rgba(239,230,209,.55); animation: kul-yuksel 9s linear infinite; }
-.kul i:nth-child(1) { left: 18%; animation-delay: 0s; } .kul i:nth-child(2) { left: 34%; animation-delay: -3s; } .kul i:nth-child(3) { left: 52%; animation-delay: -6s; }
-.kul i:nth-child(4) { left: 66%; animation-delay: -1.5s; } .kul i:nth-child(5) { left: 80%; animation-delay: -4.5s; } .kul i:nth-child(6) { left: 90%; animation-delay: -7.5s; }
-@keyframes kul-yuksel { from { transform: translateY(0); opacity: 0; } 15% { opacity: .8; } to { transform: translateY(-470px) translateX(14px); opacity: 0; } }
-.kaide { position: relative; display: flex; justify-content: center; height: 64px; border-radius: 0 0 6px 6px;
-  background: linear-gradient(#4a3020, #2a1a10 60%, #1c120b); box-shadow: 0 30px 50px rgba(0,0,0,.55), inset 0 1px 0 rgba(201,160,99,.45); }
-.kaide::before { content: ""; position: absolute; inset: -8px 6% auto; height: 8px; background: radial-gradient(ellipse at center, rgba(0,0,0,.55), transparent 70%); }
-.plaka { align-self: center; font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: #2a1a0c;
-  padding: 5px 16px; border-radius: 3px; background: linear-gradient(#e2c389, #b48a4c); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 2px 6px rgba(0,0,0,.5); }
-.cam-vitrin:hover .plaka { background: linear-gradient(#efd39c, #c49a58); }
-@media (max-width: 860px) {
-  .zindan-ic { grid-template-columns: minmax(0, 1fr); }
-  .cam { height: 400px; } .kitap3b { --g: 180px; --y: 241px; --d: 34px; top: 74px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .kitap3b { animation: none; transform: rotateX(-5deg) rotateY(-24deg); }
-  .parilti, .kul { display: none; }
-}
+/* Özel vitrin: en üstte, camlı kutuda dönen Yedinci Kat (Three.js, vitrin3b/). Raflardan ve katalogdan ayrı. */
+.ozel { position: relative; padding: clamp(60px, 9vw, 110px) 0; overflow: hidden; isolation: isolate;
+  background: linear-gradient(var(--night), #0c0907 22%, #0c0907 78%, var(--night)); }
+.ozel-ic { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 70px); align-items: center; }
+.ozel-sahne { position: relative; display: block; aspect-ratio: 1 / 1.08; width: 100%; max-width: 560px; margin: 0 auto; cursor: pointer; }
+.ozel-sahne canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block;
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 52%, #000 62%, transparent 100%); mask-image: radial-gradient(ellipse 50% 50% at 50% 52%, #000 62%, transparent 100%); }
+.ozel-sahne .yedek { position: absolute; left: 50%; top: 50%; width: 46%; height: auto; transform: translate(-50%, -50%) rotateY(-14deg); border-radius: 3px 8px 8px 3px;
+  box-shadow: -14px 24px 50px rgba(0,0,0,.65); transition: opacity .6s; }
+.ozel-sahne.hazir .yedek { opacity: 0; pointer-events: none; }
+.ozel .kicker { color: var(--brass); }
+.ozel h2 { font-family: var(--display); font-weight: 600; font-size: clamp(56px, 8vw, 104px); line-height: .95; margin: 6px 0 8px; }
+.ozel h2 em { color: var(--lamp); font-weight: 500; }
+.ozel-slogan { font-family: var(--display); font-size: clamp(24px, 2.6vw, 32px); color: var(--lamp); margin: 0 0 16px; font-style: italic; }
+.ozel-giris { margin: 0 0 18px; max-width: 34em; color: #d8ccb4; }
+.ozel-ozellik { list-style: none; padding: 0; margin: 0 0 24px; color: var(--mute); }
+.ozel-ozellik li { padding: 5px 0 5px 22px; position: relative; }
+.ozel-ozellik li::before { content: ""; position: absolute; left: 2px; top: 15px; width: 8px; height: 8px; transform: rotate(45deg); border: 1px solid var(--brass); }
+.ozel-ozellik b { color: var(--paper); font-weight: 500; }
+.ozel-sinif { display: flex; gap: 18px; margin: 0 0 28px; flex-wrap: wrap; }
+.ozel-sinif figure { margin: 0; display: flex; align-items: center; gap: 10px; }
+.ozel-sinif img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(201,160,99,.55); }
+.ozel-sinif figcaption { font-family: var(--display); font-weight: 600; font-size: 18px; line-height: 1.1; }
+.ozel-sinif small { display: block; font-family: var(--body); font-weight: 400; font-size: 14px; color: var(--mute); }
+@media (max-width: 860px) { .ozel-ic { grid-template-columns: minmax(0, 1fr); } .ozel-sahne { max-width: 440px; } }
 
 </style>
 </head>
@@ -418,10 +368,9 @@ footer .siradaki { display: block; width: max-content; margin-top: 18px; font-si
       Macera Kütüphanesi
     </a>
     <ul>
-      <li><a href="#vitrin">Yeni gelen</a></li>
+      <li><a href="#vitrin">Yedinci Kat</a></li>
       <li><a href="#sahneler">Sahneler</a></li>
       <li><a href="#raf">Raflar</a></li>
-      <li><a href="#zindan">Zindan</a></li>
       <li><a href="#nasil">Nasıl okunur?</a></li>
       <li class="keep" id="nav-en-li" hidden><a id="nav-en" href="#raf" data-dil="en" lang="en">English</a></li>
       <li class="keep"><a id="nav-ig" href="#" target="_blank" rel="noopener">Instagram</a></li>
@@ -449,9 +398,29 @@ footer .siradaki { display: block; width: max-content; margin-top: 18px; font-si
   <div class="cue" aria-hidden="true"></div>
 </header>
 
-<section class="featured" id="vitrin">
-  <div class="feat-bg" id="feat-bg" aria-hidden="true"></div>
-  <div class="wrap feat reveal" id="feat"></div>
+<section class="ozel" id="vitrin" aria-labelledby="ozel-baslik">
+  <div class="wrap ozel-ic">
+    <a class="ozel-sahne" href="yedinci-kat/" data-vitrin3b data-kapak="yedinci-kat/gorseller/kapak.webp" aria-label="Yedinci Kat: zindana in">
+      <img class="yedek" src="yedinci-kat/gorseller/kapak.webp" alt="" width="720" height="964">
+    </a>
+    <div class="ozel-yazi reveal">
+      <p class="kicker">Özel koleksiyon · Zarlı macera</p>
+      <h2 id="ozel-baslik">Yedinci <em>Kat</em></h2>
+      <p class="ozel-slogan">Rafta değil, vitrinde.</p>
+      <p class="ozel-giris">Ölmek üzere olan bir haritacı eline bir rulo tutuşturur: yedi kat aşağı inen bir zindanın haritası. En dipte, ıslak mürekkeple yazılmış bir ad var. Senin adın.</p>
+      <ul class="ozel-ozellik">
+        <li><b>Zarla</b> oynanır: sınamalar, dövüşler, şans</li>
+        <li><b>7 kat</b>, 12 son, biri gizli</li>
+        <li><b>Mürekkep</b>: zindanın yardımını aldıkça adın kurur</li>
+      </ul>
+      <div class="ozel-sinif">
+        <figure><img src="yedinci-kat/gorseller/sinif_savasci_kadin.webp" alt="" width="96" height="96" loading="lazy"><figcaption>Savaşçı<small>Kolay</small></figcaption></figure>
+        <figure><img src="yedinci-kat/gorseller/sinif_hirsiz_erkek.webp" alt="" width="96" height="96" loading="lazy"><figcaption>Hırsız<small>Orta</small></figcaption></figure>
+        <figure><img src="yedinci-kat/gorseller/sinif_buyucu_kadin.webp" alt="" width="96" height="96" loading="lazy"><figcaption>Büyücü<small>Orta</small></figcaption></figure>
+      </div>
+      <a class="btn" href="yedinci-kat/">Zindana in <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
 </section>
 
 <section class="scenes" id="sahneler">
@@ -488,44 +457,6 @@ footer .siradaki { display: block; width: max-content; margin-top: 18px; font-si
     </div>
     <article class="fis" id="fis" aria-live="polite" hidden></article>
     <p class="shelf-note" id="shelf-note">Bir kitaba dokun, fişi açılsın. Okumaya başla ya da kapağa bir kez daha dokun.</p>
-  </div>
-</section>
-
-<section class="zindan" id="zindan" aria-labelledby="zindan-baslik">
-  <div class="zindan-basamak" aria-hidden="true"></div>
-  <div class="wrap zindan-ic">
-    <a class="cam-vitrin reveal" href="yedinci-kat/" aria-label="Yedinci Kat: zindana in">
-      <span class="spot" aria-hidden="true"></span>
-      <span class="cam" aria-hidden="true">
-        <span class="parilti"></span>
-        <span class="kitap3b">
-          <span class="yuz on"><img src="yedinci-kat/gorseller/kapak.webp" alt="" width="720" height="964" loading="lazy" decoding="async"></span>
-          <span class="yuz arka"><b>VII</b><i>Yedi kat aşağıda, adın ıslak mürekkeple yazılı.</i></span>
-          <span class="yuz sirt"><b>YEDİNCİ KAT</b></span>
-          <span class="yuz kenar"></span>
-          <span class="yuz ust"></span>
-          <span class="yuz alt"></span>
-        </span>
-        <span class="kul" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
-      </span>
-      <span class="kaide" aria-hidden="true"><span class="plaka">Yedinci Kat · Zarlı macera</span></span>
-    </a>
-    <div class="zindan-yazi reveal">
-      <p class="kicker">Aşağı kat · Özel koleksiyon</p>
-      <h2 id="zindan-baslik">Rafta değil, <em>vitrinde</em>.</h2>
-      <p class="zindan-giris">Ölmek üzere olan bir haritacı eline bir rulo tutuşturur: yedi kat aşağı inen bir zindanın haritası. En dipte, ıslak mürekkeple yazılmış bir ad var. Senin adın.</p>
-      <ul class="zindan-ozellik">
-        <li><b>Zarla</b> oynanır: sınamalar, dövüşler, şans</li>
-        <li><b>7 kat</b>, 12 son, biri gizli</li>
-        <li><b>Mürekkep</b>: zindanın yardımını aldıkça adın kurur</li>
-      </ul>
-      <div class="zindan-sinif">
-        <figure><img src="yedinci-kat/gorseller/sinif_savasci_kadin.webp" alt="" width="96" height="96" loading="lazy"><figcaption>Savaşçı<small>Kolay</small></figcaption></figure>
-        <figure><img src="yedinci-kat/gorseller/sinif_hirsiz_erkek.webp" alt="" width="96" height="96" loading="lazy"><figcaption>Hırsız<small>Orta</small></figcaption></figure>
-        <figure><img src="yedinci-kat/gorseller/sinif_buyucu_kadin.webp" alt="" width="96" height="96" loading="lazy"><figcaption>Büyücü<small>Orta</small></figcaption></figure>
-      </div>
-      <a class="btn" href="yedinci-kat/">Zindana in <span aria-hidden="true">→</span></a>
-    </div>
   </div>
 </section>
 
@@ -618,52 +549,6 @@ footer .siradaki { display: block; width: max-content; margin-top: 18px; font-si
       track.appendChild(card);
     });
     sc.appendChild(track);
-  }
-
-  /* vitrin: en yeni yayındaki kitap */
-  const F = [...live].filter((b) => !b.dil || b.dil === "tr").sort((a, b) => (b.eklenme || "").localeCompare(a.eklenme || "") || (b.kitapNo || 0) - (a.kitapNo || 0))[0];
-  if (F) {
-    const got = found(F), total = F.sonSayisi || 0, C = 2 * Math.PI * 22;
-    $("#feat").innerHTML = `
-      <div class="tilt"><span class="damga-k yeni" aria-hidden="true">Yeni geldi</span><div class="cv" id="feat-cv" role="link" tabindex="0" aria-label="${esc(F.baslik)} kitabını aç">
-        <img src="${esc(F.kapak)}" alt="">
-        <div class="cv-text"><div><div class="band">${esc(F.seri)} · Kitap ${F.kitapNo}</div><div class="t" style="font-size:clamp(28px, ${Math.min(19, 85 / (Math.max(...F.baslik.split(/\s+/).map((w) => w.length)) * 0.92)).toFixed(1)}cqi, 84px)">${esc(F.baslik.toLocaleUpperCase("tr"))}</div></div>
-          <div><div class="s">${esc(F.altBaslik)}</div><div class="a">${esc(F.yazar)}</div></div></div>
-        <div class="shine"></div></div></div>
-      <div>
-        <p class="kicker">Yeni gelen · Kitap ${F.kitapNo}</p>
-        <h3>${esc(F.baslik)}</h3>
-        <p class="sub">${esc(F.altBaslik)} · ${esc(F.yazar)}</p>
-        <p class="slogan">${esc(F.slogan)}</p>
-        <p class="desc">${esc(F.tanitim)}</p>
-        <div class="chips">${F.tur.map((t) => `<span class="chip">${esc(t)}</span>`).join("")}<span class="chip">${esc(F.okumaSuresi)}</span><span class="chip">${total} son</span></div>
-        <div class="feat-actions">
-          <button class="btn" id="feat-go" type="button">${got ? "Yeniden oku" : "Okumaya başla"} <span aria-hidden="true">→</span></button>
-          <div class="ring" title="Bu tarayıcıda bulduğun sonlar">
-            <svg viewBox="0 0 52 52" aria-hidden="true"><circle class="bg" cx="26" cy="26" r="22"/><circle class="fg" id="ringfg" cx="26" cy="26" r="22" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg>
-            <div><b>${got} / ${total}</b>son buldun</div>
-          </div>
-        </div>
-      </div>`;
-    $("#vitrin").style.setProperty("--acc", (F.sirt && F.sirt.yazi) || "#e9b34f");
-    const fbg = $("#feat-bg"), fimgs = (F.gorseller || []).slice(0, 8);
-    if (fbg && fimgs.length) {
-      fbg.innerHTML = fimgs.map((g, k) => `<img src="${esc(g)}" alt=""${k ? ' loading="lazy"' : ""} class="${k ? "" : "on"}">`).join("");
-      const ims = fbg.querySelectorAll("img"); let cur = 0;
-      if (!reduce && ims.length > 1) setInterval(() => { ims[cur].classList.remove("on"); cur = (cur + 1) % ims.length; ims[cur].classList.add("on"); }, 6000);
-    }
-    const ring = $("#ringfg");
-    setTimeout(() => { ring.style.strokeDashoffset = C * (1 - (total ? got / total : 0)); }, 400);
-    const cv = $("#feat-cv");
-    cv.addEventListener("pointermove", (e) => {
-      const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-      cv.style.setProperty("--ry", (x * 22) + "deg"); cv.style.setProperty("--rx", (-y * 16) + "deg"); cv.style.setProperty("--sx", (100 - (x + 0.5) * 100) + "%");
-    });
-    cv.addEventListener("pointerleave", () => { cv.style.removeProperty("--ry"); cv.style.removeProperty("--rx"); cv.style.removeProperty("--sx"); });
-    const open = () => openBook(F, cv);
-    cv.addEventListener("click", open);
-    cv.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
-    $("#feat-go").addEventListener("click", open);
   }
 
   /* raf: tek raf, Türkçe/English sekmesi. Seçilen kitaba lamba kayar, altta kütüphane fişi açılır. */
@@ -877,5 +762,6 @@ footer .siradaki { display: block; width: max-content; margin-top: 18px; font-si
 <script src="hareket/gsap.min.js" defer></script>
 <script src="hareket/ScrollTrigger.min.js" defer></script>
 <script src="hareket/hareket.js" defer></script>
+<script type="module" src="vitrin3b/vitrin.js"></script>
 </body>
 </html>

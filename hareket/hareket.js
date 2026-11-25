@@ -74,16 +74,9 @@
       .to(".hero .stats", { y: -20, autoAlpha: 0, ease: "none" }, 0)
       .to(".reel", { y: 60, ease: "none" }, 0);
 
-    /* 3 · Vitrin: kapak hafif dönerek oturur; arka plan görselleri yavaş kayar */
-    const tilt = $("#feat .tilt");
-    if (tilt) {
-      gsap.from(tilt, { y: 60, rotationY: -14, rotationZ: -2, autoAlpha: 0, duration: YAVAS, transformPerspective: 1200,
-        scrollTrigger: { trigger: "#vitrin", start: "top 75%", toggleActions: "play none none none" } });
-      gsap.from("#feat > div:last-child > *", { y: 24, autoAlpha: 0, stagger: 0.05, delay: 0.15,
-        scrollTrigger: { trigger: "#vitrin", start: "top 75%", toggleActions: "play none none none" } });
-    }
-    gsap.fromTo("#feat-bg", { yPercent: -6 }, { yPercent: 6, ease: "none",
-      scrollTrigger: { trigger: "#vitrin", start: "top bottom", end: "bottom top", scrub: true } });
+    /* 3 · Özel vitrin (Yedinci Kat): yazı sütunu kademeyle yükselir; 3B sahne kendi kendini çizer (vitrin3b/) */
+    gsap.from(".ozel-yazi > *", { y: 24, autoAlpha: 0, stagger: 0.06, duration: STANDART,
+      scrollTrigger: { trigger: "#vitrin", start: "top 75%", toggleActions: "play none none none" } });
 
     /* 4 · Bölüm başlıkları kelime kelime yükselir (kademe 0.06 sn, toplam ≤ 0.4 sn) */
     $$(".sec-head h2").forEach((h2) => {
