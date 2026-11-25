@@ -232,6 +232,40 @@ main{max-width:1240px;margin:0 auto;padding:clamp(16px,3vw,36px) max(4vw,16px) 6
 .harita .islak{font:italic 700 13px Alegreya,serif;fill:#1d2f5a;text-anchor:middle;animation:islak 2.6s ease-in-out infinite}
 @keyframes islak{50%{fill:#3b5aa8}}
 
+/* Yeni harita: yırtık parşömen, elle çizilmiş odalar, Mürekkep'e göre mürekkep rengi */
+.yeni-harita{--ink:#2b2118;padding:14px 12px 10px;border-radius:0;
+  background:radial-gradient(circle at 22% 14%,#fff7,transparent 45%),radial-gradient(circle at 86% 78%,#a0844f55,transparent 55%),
+    radial-gradient(circle at 12% 88%,#7b5a2a33,transparent 30%),#e6d5ab;
+  clip-path:polygon(0 1.5%,5% 0,13% 1.2%,24% 0,37% .8%,51% 0,63% 1.3%,76% 0,88% 1%,100% 0,99.2% 10%,100% 24%,98.8% 39%,100% 54%,99.1% 69%,100% 84%,99% 100%,85% 99%,71% 100%,56% 99.1%,42% 100%,28% 99%,13% 100%,0 99.2%,1% 85%,0 69%,1.2% 53%,0 38%,.9% 22%)}
+.yeni-harita.m-islak{--ink:#1f2b4d}.yeni-harita.m-kuruyor{--ink:#3a2c25}.yeni-harita.m-kurumus{--ink:#6e3f18}
+.yeni-harita h3{text-align:center;font:700 15px Cinzel,serif;color:#3a2a1a;letter-spacing:.04em;margin:0}
+.yeni-harita .harita-alt{text-align:center;font:italic 13px Alegreya,serif;color:#6b5434;margin:0 0 2px}
+.yeni-harita .yol{stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;fill:none;stroke-dasharray:none}
+.yeni-harita .yol.yeni{animation:mur-ciz 1.1s ease-out both;stroke-dasharray:1;stroke-dashoffset:1}
+@keyframes mur-ciz{to{stroke-dashoffset:0}}
+.yeni-harita .oda .kutu{fill:#f3e6c4;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round}
+.yeni-harita .oda use{fill:none;stroke:var(--ink);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.yeni-harita .oda text{font:600 11px Alegreya,serif;fill:var(--ink);text-anchor:middle;dominant-baseline:middle}
+.yeni-harita .oda.simdi .kutu{fill:#f2c3a0;stroke:#9b2f12;stroke-width:2.4}
+.yeni-harita .oda.simdi text{fill:#6b1f0a}
+.yeni-harita .burada{fill:#9b2f12;animation:burada 1.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes burada{50%{transform:scale(1.35);opacity:.65}}
+.yeni-harita .cikis path{stroke:#8a7354;stroke-width:1.5;stroke-dasharray:2 4;fill:none}
+.yeni-harita .cikis circle{fill:#efe2bf;stroke:#8a7354;stroke-width:1.2;stroke-dasharray:2 2}
+.yeni-harita .cikis text{font:700 10px Alegreya,serif;fill:#8a7354;text-anchor:middle;dominant-baseline:middle}
+.yeni-harita .basamak text{font:700 10px Cinzel,serif;text-anchor:middle;fill:#a08a63}
+.yeni-harita .basamak path{stroke:#b49a6e;stroke-width:1.4}
+.yeni-harita .basamak.gecti text{fill:var(--ink)}.yeni-harita .basamak.gecti path{stroke:var(--ink)}
+.yeni-harita .basamak.bu rect{fill:#9b2f12}.yeni-harita .basamak.bu text{fill:#fbeadb}
+.yeni-harita .pusula{stroke:#6b5434;stroke-width:1;fill:none;opacity:.8}
+.yeni-harita .pusula .dolu{fill:#6b5434}.yeni-harita .pusula text{font:700 9px Cinzel,serif;fill:#6b5434;stroke:none;text-anchor:middle}
+.yeni-harita .sus{stroke:#7a6446;stroke-width:1.2;fill:none;opacity:.45}
+.yeni-harita .sus circle{fill:#7a6446;stroke:none}
+.yeni-harita .dip{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:1 5;opacity:.5}
+.yeni-harita .yedinci{font:700 12px Cinzel,serif;fill:#5a4630;text-anchor:middle}
+.yeni-harita .muhur ellipse{fill:#7c1d12}.yeni-harita .muhur .ic{fill:none;stroke:#b4503c;stroke-width:1}
+.yeni-harita .muhur text{font:italic 700 13px Alegreya,serif;fill:#f3dcc4;text-anchor:middle;dominant-baseline:middle}
+
 @media (max-width:860px){
   .oyun{grid-template-columns:minmax(0,1fr)}
   .yan{position:static;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -582,6 +616,9 @@ body.canta-acik{overflow:hidden}
         return { tamam: false, neden: ad + ' gerekir' };
       }
     }
+    // Eşya sayısı (ör. Halvard'ın üç sayfası): tutmazsa gizlenir.
+    for (const [e, n] of Object.entries(k.esyaEnAz || {})) if (!((s.esyalar[e] || 0) >= n)) return { tamam: false, gizli: true };
+    for (const [e, n] of Object.entries(k.esyaEnFazla || {})) if ((s.esyalar[e] || 0) > n) return { tamam: false, gizli: true };
     if (k.altin && s.altin < k.altin) return { tamam: false, neden: k.altin + ' altın gerekir' };
     if (k.buyu && s.buyuHakki < k.buyu) return { tamam: false, neden: 'Büyü hakkın kalmadı' };
     // Sayaç koşulları (ör. Mürekkep): tutmazsa gizlenir; "neden" yazılıysa kilitli görünür.
@@ -1108,7 +1145,7 @@ body.canta-acik{overflow:hidden}
 
 </script>
 <script>
-/* Yedinci Kat — kitabın kendisi. Şu an: Kat 1–5 (Kat 6 girişinde geçici bir son).
+/* Yedinci Kat — kitabın kendisi. Kitap tamam: Kat 1–7 ve finaldeki sonlar.
  * Bütün adlar, canavarlar ve büyüler özgündür.
  *
  * Düğüm alanları:
@@ -1160,6 +1197,7 @@ body.canta-acik{overflow:hidden}
   const MUREKKEP_EN_AZ = (n) => ({ murekkep: n });
   const ISLAK = { sayacEnFazla: { murekkep: 1 } };
   const KURUMUS = { sayacEnAz: { murekkep: 6 } };
+  const KURUMUS_VE = (k) => Object.assign({ sayacEnAz: { murekkep: 6 } }, k);
   /** Merdivenlerde rulodaki adın durumu, Mürekkep seviyesine göre. */
   function adDurumu(islak, kuruyor, kurumus) {
     return [
@@ -1193,12 +1231,30 @@ body.canta-acik{overflow:hidden}
   // Kat 5 kapağı: Corin'le hiç tanışmadıysan ya da yalnız indiyse (akıntıdan sağ çıkan Corin orada).
   const CORIN_HIC = { bayrakYok: 'corin_kayip', degil: { bayrak: 'corin_birlikte' } };
 
+  /** Kat 7: Kül'le dövüş. Islak adı göremez (daha zayıf); kuruyan adı görür. */
+  function kulDovusu(metin, kosulEk, hatirla, ek, not) {
+    return [
+      { ad: 'Kör Kül', can: 22, zirh: 12, kosul: { sayacEnFazla: { murekkep: 1 } } },
+      { ad: 'Kül', can: 28, zirh: 13, kosul: { sayacEnAz: { murekkep: 2 } } },
+    ].map((v) => {
+      const c = { metin, kosul: Object.assign({}, kosulEk || {}, v.kosul) };
+      if (hatirla) c.hatirla = hatirla;
+      if (not) c.not = not;
+      c.dovus = {
+        dusman: { ad: v.ad, can: v.can - (ek.canEksi || 0), zirh: v.zirh - (ek.zirhEksi || 0), saldiri: 5, silah: 'Kül ateşi ve pençe', hasarZari: '1d10', hasarEki: v.ad === 'Kül' ? 2 : 1 },
+        zafer: 'son_kul_yenildi', zaferNot: 'Kül’ün başı son kez kuyunun ağzına düştü.',
+      };
+      if (ek.pusu) { c.dovus.pusu = true; c.dovus.pusuHerkes = !!ek.pusuHerkes; }
+      return c;
+    });
+  }
+
   const kitap = {
     id: 'yedinci-kat',
     baslik: 'Yedinci Kat',
     baslangic: 'giris',
     olumDugumu: 'son_olum',
-    katAdlari: { 1: 'Muhafız Katı', 2: 'Mürekkep Kütüphanesi', 3: 'Su Basmış Sarnıç', 4: 'Aynalar Galerisi', 5: 'Cüruf Ocakları' },
+    katAdlari: { 1: 'Muhafız Katı', 2: 'Mürekkep Kütüphanesi', 3: 'Su Basmış Sarnıç', 4: 'Aynalar Galerisi', 5: 'Cüruf Ocakları', 6: 'Kül Tapınağı', 7: 'Yedinci Oda' },
 
     // Mürekkep: rulo adını yazdıkça mürekkep kurur. Zindanın yardımını (rulonun yol göstermesi, pazarlıklar)
     // kabul ettikçe artar. Yedinci kat bunu hatırlar: yüksekse bazı sonlar kapanır, Bekçi sonu yaklaşır.
@@ -1289,6 +1345,11 @@ body.canta-acik{overflow:hidden}
       { bayrak: 'halvard_ogut', baslik: 'Halvard’ın son sözü', metin: '“Aynada kendine güvenme. Ve rulo sana yol gösterirse… her seferinde adından bir parça alır. Ben çok sordum.”' },
       { bayrak: 'kalem_okundu', baslik: 'Kalemin yazdığı', metin: 'Rulo, aynadaki kalemin yazdığını kopyaladı: senin adın. Ama senin el yazınla değil. Harflerin kuyrukları uzun, kıvrık, bir pençenin ucu gibi.' },
       { bayrak: 'tuccar_corin', baslik: 'Kör Tüccar: Corin', metin: '“Kırmızı atkılı mı? Üç gün önce buradaydı. Rulosunu kokladım: mürekkep kupkuruydu. İçinde hiçbir isim yoktu.”' },
+      { bayrak: 'sayfa3', baslik: 'Halvard’ın sayfası 3', metin: '“Yedinci odada bir masa, masada bir kalem. Kalemi elime aldım; el benim elim değildi. Bıraktım ve kaçtım. Kalemi bırakan kaçar, yazan kalır. Üçüncü bir yol var, biliyorum, ama tek başıma bulamadım. Sayfalarımı kim bulursa yan yana koysun. — H.”' },
+      { bayrak: 'rahibe_corin', baslik: 'Kül Rahibesi: Corin', metin: '“Rulo senden önce kırmızı atkılı bir çocuğun adını yazdı. Ona söz verdik: yeni bekçiyi buraya getirirse adını rulodan sileriz.”' },
+      { bayrak: 'rahibe_halvard', baslik: 'Kül Rahibesi: Halvard', metin: '“Kalemi eline aldı ve yazmadı; kalemi tutan elin kendi eli olmadığını gördü. Buradan hiçbir ad silinmedi. Kazınan ad kabında bekler.”' },
+      { bayrak: 'gercek_okundu', baslik: 'İkiz rulo', metin: 'Sunaktaki ikiz ruloda bütün bekçilerin adları var; hepsi aynı elden, uzun kuyruklu, pençe ucu harflerle. En altta bir imza: Kül. Rulo adları yazmıyor. Kül yazıyor; rulo yalnızca onun mektubu.' },
+      { bayrak: 'corin_not', baslik: 'Corin’in notu', metin: '“Kalemi tutan el senin değil. Tutma. Rahibe yalan söylüyor; hiçbir ad silinmez. — C.”' },
     ],
 
     dugumler: {
@@ -3365,19 +3426,1087 @@ body.canta-acik{overflow:hidden}
             akil: 'Halkalar ve adlar: zinciri okumayı öğrendin',
             can: 'Ateşten geçtin: daha dayanıklısın',
           }),
-          { metin: 'Altıncı kata in', kosul: { bayrak: 'gelisim_k5', neden: 'Önce bu katta ne öğrendiğini seç' }, git: 'son_kat5' },
+          { metin: 'Altıncı kata in', kosul: { bayrak: 'gelisim_k5', neden: 'Önce bu katta ne öğrendiğini seç' }, git: 'k6_giris' },
           { metin: 'Ruloyu basamağa bırak ve yukarı dön', git: 'son_yukari' },
         ],
       },
 
-      // ═════════════════════════ SONLAR ═════════════════════════
-      son_kat5: {
-        baslik: 'Külün Kokusu',
-        gorsel: 'k5_merdiven',
-        son: { tur: 'notr', baslik: 'Bu sürüm burada bitiyor' },
+
+      // ═════════════════════════ KAT 6 — KÜL TAPINAĞI ═════════════════════════
+      k6_giris: {
+        baslik: 'Kül Basamakları',
+        gorsel: 'k6_giris',
+        harita: { kat: 6, x: 0, y: 0, etiket: 'Basamaklar' },
         metin: [
-          'Merdivenin dibinden ılık bir kül kokusu yükseliyor. Bir yerde, çok aşağıda, biri ilahi söylüyor; kelimeleri seçemiyorsun ama adının hecelerini tanıyorsun.',
-          'Altıncı kat, Kül Tapınağı, yazılıyor. Rulo bekliyor.',
+          'Merdiven bittiğinde gökyüzü olmayan bir yerde kar yağıyor. Kar değil: kül. Ilık, yumuşak, sessiz. Basamaklar aşağı, sütunlu bir tapınağa iniyor; sütunların her biri insan boyunda kül heykellerden örülmüş.',
+          'İlahi artık uzakta değil. Onlarca ses, hiç nefes almadan, aynı heceleri tekrarlıyor. Heceleri tanıyorsun: {ad}. Senin adın, ağır ağır, bir dua gibi.',
+          'Rulo altıncı katı ne çiziyor ne yakıyor. Sayfaya kül yağıyor ve kül, kendi kendine, bir tapınağın planına diziliyor.',
+        ],
+        kosulluMetin: [
+          ...adDurumu(
+            'Kül tenine değdiği yerde çamura dönüyor; ıslak adın onu tutmuyor. Basamakların dibinde kül grisi mızraklı karaltılar başlarını kaldırıyor. Kül Muhafızları. Yabancı bir koku almışlar: mızraklarını sana çeviriyorlar.',
+            'İlahi adının ortasında bir an duraksıyor, sonra devam ediyor. Basamakların dibindeki mızraklı karaltılar sana bakıyor ama kıpırdamıyor: yarı yarıya onlardan birisin.',
+            'Basamakların dibinde başlıklı rahipler sıraya girmiş. Sen indikçe başlarını eğiyorlar. “Bekçi geldi,” diyor biri. “Tören hazır.” Ayakların, sen istemeden, onlara doğru yürümek istiyor.'),
+          { kosul: { bayrak: 'corin_birlikte', bayrakYok: ['corin_kayip', 'corin_ihanet'] }, metin: 'Corin olduğu yerde kalakalıyor. Yüzündeki kül, benzi atmış gibi gösteriyor onu. “Burayı biliyorum,” diyor. “Üç gün önce buradaydım.”' },
+          { kosul: { bayrak: 'golge_anlasma' }, metin: 'Gölgen kül yağmurunda kaybolmuyor; kül onun içinden geçiyor. “Bu kat beni sevmez,” diyor bir an geç.' },
+        ],
+        secenekler: [
+          // Islak: muhafızlar yolu keser
+          {
+            metin: 'Kül Muhafızlarıyla dövüş', kosul: ISLAK, hatirla: 'Mürekkep: ıslak ad yabancıdır',
+            dovus: {
+              dusman: { ad: 'Kül Muhafızı', can: 13, zirh: 12, saldiri: 4, silah: 'Kül mızrağı', hasarZari: '1d8', hasarEki: 1 },
+              zafer: 'k6_avlu', zaferNot: 'Mızrak elinden düştü; muhafız dağılıp yere kül olarak yağdı. Ötekiler geri çekildi.',
+              kacis: 'k6_avlu', kacisZorlugu: 13, kacisNot: 'Mızrakların arasından sıyrılıp avluya kaçtın.',
+            },
+          },
+          {
+            metin: 'Mızrakların arasından koş', kosul: ISLAK, hatirla: 'Mürekkep: ıslak ad yabancıdır',
+            sinama: {
+              ozellik: 'ceviklik', zorluk: 13,
+              basari: 'k6_avlu', basariNot: 'Bir mızrak ucu kulağının yanından geçti. Sonra avlunun kemerinin altındaydın.',
+              basarisizlik: 'k6_avlu', basarisizlikEtki: { can: -4 }, basarisizlikNot: 'İki mızrak seni yakaladı; birini kolundan, birini böğründen. Kanın kül üstüne kara damlalar halinde düştü. (−4 Can)',
+            },
+          },
+          {
+            metin: 'Kül yağmurunun içinde gizlen',
+            kosul: { sinif: 'hirsiz', sayacEnFazla: { murekkep: 1 }, bayrakYok: 'k6_gizlen' },
+            hatirla: 'Mürekkep: ıslak ad yabancıdır',
+            etki: { bayrak: 'k6_gizlen' },
+            sinama: {
+              beceri: 'hirsizlik', ozellik: 'ceviklik', zorluk: 13,
+              basari: 'k6_avlu', basariNot: 'Külle örtündün. Muhafızlar senin bir heykel olduğunu sandı; yanlarından adım adım geçtin.',
+              basarisizlik: 'k6_giris', basarisizlikNot: 'Islak adın külü çamura çevirdi; arkanda koyu izler bıraktın. Muhafızlar izleri gördü.',
+            },
+          },
+          {
+            metin: 'Kül Hecesi: muhafızları yeniden küle çevir (1 büyü hakkı)',
+            kosul: { sinif: 'buyucu', buyu: 1, sayacEnFazla: { murekkep: 5 } },
+            etki: { buyu: -1 },
+            not: 'Heceyi söyler söylemez muhafızlar, yapıldıkları şeyi hatırladı. Dağıldılar; mızrakları basamaklara tıkırdayarak düştü.',
+            git: 'k6_avlu',
+          },
+          {
+            metin: 'Ruloyu kaldır: adını okusunlar', kosul: ISLAK,
+            hatirla: 'Mürekkep: ıslak ad yabancıdır',
+            etki: { sayac: { murekkep: 1 } },
+            not: 'Ruloyu başının üstüne kaldırdın. Muhafızlar adını okudu ve mızraklarını indirdi. Rulodaki adın, kül değdiği yerden, bir harf kurudu. (+1 Mürekkep)',
+            git: 'k6_avlu',
+          },
+          // Kuruyor: yarı yarıya onlardansın; muhafızlar seni sınar
+          {
+            metin: 'Muhafızlara adını onların ilahisiyle söyle',
+            kosul: { sayacEnAz: { murekkep: 2 }, sayacEnFazla: { murekkep: 5 }, bayrakYok: 'k6_ad_soylendi' },
+            hatirla: 'Mürekkep: adın kuruyor',
+            etki: { bayrak: 'k6_ad_soylendi' },
+            sinama: {
+              ozellik: 'akil', zorluk: 12, ustalikBayrak: 'halvard_ogut',
+              basari: 'k6_avlu', basariNot: 'İlahinin ritmini yakaladın ve adını onların söylediği gibi söyledin. Mızraklar ayrıldı; biri, sen geçerken, bir parmak indi.',
+              basarisizlik: 'k6_giris', basarisizlikNot: 'Adının ikinci hecesinde sesin titredi. Muhafızlar mızraklarını çaprazladı: yarı yarıya onlardan birisin; yarısı yetmiyor.',
+            },
+          },
+          {
+            metin: 'Mızrakları it ve geç',
+            kosul: { sayacEnAz: { murekkep: 2 }, sayacEnFazla: { murekkep: 5 } },
+            hatirla: 'Mürekkep: adın kuruyor',
+            not: 'Muhafızlardan biri önüne çıktı. Ötekiler yalnızca izledi.',
+            dovus: {
+              dusman: { ad: 'Kül Muhafızı', can: 10, zirh: 12, saldiri: 3, silah: 'Kül mızrağı', hasarZari: '1d8', hasarEki: 0 },
+              zafer: 'k6_avlu', zaferNot: 'Muhafız dağılıp kül olarak yağdı. Ötekiler yolunu açtı; birinin mızrağı sen geçerken bir parmak indi.',
+              kacis: 'k6_avlu', kacisZorlugu: 13, kacisNot: 'Mızrağın altından sıyrılıp avluya kaçtın.',
+            },
+          },
+          {
+            metin: 'Ruloyu göster: adının kuruyan yarısını okusunlar',
+            kosul: { sayacEnAz: { murekkep: 2 }, sayacEnFazla: { murekkep: 5 } },
+            etki: { sayac: { murekkep: 1 } },
+            not: 'Muhafızlar ruloya eğildi. Okudukça adının bir harfi daha kurudu; mızraklar ayrıldı. (+1 Mürekkep)',
+            git: 'k6_avlu',
+          },
+          // Kurumuş: rahipler seni törene götürmek ister
+          {
+            metin: 'Rahiplerin peşinden git', kosul: KURUMUS,
+            hatirla: 'Mürekkep: zindan seni kendinden sayıyor',
+            not: 'Rahipler seni ortalarına aldı. Kimse sana dokunmadı; dokunmalarına gerek yoktu. Ayakların yolu biliyordu.',
+            git: 'k6_rahibe',
+          },
+          {
+            metin: 'Alaydan sıyrıl, yan avluya sap', kosul: KURUMUS,
+            hatirla: 'Mürekkep: zindan seni kendinden sayıyor',
+            sinama: {
+              ozellik: 'akil', zorluk: 13, ustalikBayrak: 'halvard_ogut',
+              basari: 'k6_avlu', basariNot: 'Adının hecelerini kafanda tersinden saydın, ilahinin ritmi bozuldu. Ayakların yeniden senin oldu; yan kemerden avluya saptın.',
+              basarisizlik: 'k6_rahibe', basarisizlikEtki: { sayac: { murekkep: 1 } },
+              basarisizlikNot: 'Sapmak istedin. Ayakların istemedi. İlahi seni bir akıntı gibi taşıdı; rulodaki adın yürüdükçe kurudu. (+1 Mürekkep)',
+            },
+          },
+        ],
+      },
+
+      k6_avlu: {
+        baslik: 'Küllük Avlusu',
+        gorsel: 'k6_avlu',
+        harita: { kat: 6, x: -1, y: 1, etiket: 'Avlu' },
+        metin: [
+          'Avlu, sıra sıra dizilmiş kapaklı kül kaplarıyla dolu. Yüzlerce. Her birinin kapağına bir ad kazınmış. Muhafızın sikkelerindeki ad, Kör Tüccarın defterindeki ad, aynalardaki bekçinin yüzü. Bekçiler. Hepsi burada.',
+          'Bir kabın kapağı aralık. Kazınmış adı okuyorsun: Halvard. Kap boş; külü yok. Yalnızca dibinde, katlanmış, sararmış bir sayfa.',
+          'Avlunun ortasında, kaplardan yükselen bir kül yığını oturuyor. Bir insanın biçiminde; dizleri karnına çekili, gözleri kapalı. Bütün kaplardan ince kül çizgileri ona akıyor.',
+        ],
+        kosulluMetin: [
+          { kosul: { esya: 'halvard_halkasi' }, metin: 'Çantandaki kırık halka, Halvard’ın kabının yanından geçerken titremeye başlıyor. Yerine dönmek ister gibi.' },
+          { kosul: { bayrak: 'eldric_halvard' }, metin: 'Eldric’in kabını arıyorsun. Yok. Onun külü hâlâ ocakların başında, bir örse zincirli.' },
+          { kosul: KURUMUS, metin: 'Sıranın sonunda, kapağı açık, yeni bir kap. Henüz boş. Kapağında adın kazılı: {ad}. Kül yığını gözlerini açmadan başını o kaba doğru çeviriyor.' },
+          { kosul: ISLAK, metin: 'Islak adın kül tozunu çamura çeviriyor. Ayak izlerin avluda koyu, ıslak lekeler bırakıyor; kül yığınının kaşları çatılıyor.' },
+          { kosul: { bayrak: 'sayfa3' }, metin: 'Halvard’ın kabı artık gerçekten boş.' },
+        ],
+        secenekler: [
+          {
+            metin: 'Kül yığını seni tanıyor: sayfayı ondan iste',
+            kosul: { sayacEnAz: { murekkep: 6 }, bayrakYok: 'sayfa3' },
+            hatirla: 'Mürekkep: zindan seni kendinden sayıyor',
+            etki: { bayrak: 'sayfa3', esya: { halvard_sayfasi: 1 }, sayac: { murekkep: 1 } },
+            not: 'Kül yığını gözlerini açmadı. Bir eli kalktı, kabın içine uzandı ve sayfayı sana verdi; parmakları dağılıp yeniden toplandı. “Kardeşimin sözleri,” dedi bin sesle. “Sende dursun. Nasılsa burada kalacaksın.” (+1 Halvard’ın sayfası, +1 Mürekkep)',
+            git: 'k6_rahibe',
+          },
+          {
+            metin: 'Halvard’ın kabındaki sayfayı al',
+            kosul: { bayrakYok: 'sayfa3' },
+            etki: { bayrak: ['sayfa3', 'bekci_uyandi'], esya: { halvard_sayfasi: 1 } },
+            not: 'Sayfayı çektiğin an kaplardaki kül çizgileri gerildi. Avlunun ortasındaki yığın gözlerini açtı. (+1 Halvard’ın sayfası)',
+            git: 'k6_bekci',
+          },
+          { metin: 'Kaplara dokunmadan geç', git: 'k6_rahibe' },
+        ],
+      },
+
+      k6_bekci: {
+        baslik: 'Kül Bekçisi',
+        gorsel: 'k6_bekci',
+        harita: { kat: 6, x: -1, y: 2, etiket: 'Bekçi' },
+        metin: [
+          'Kül yığını ayağa kalkıyor. İnsan biçiminde ama insandan büyük; göğsünden, kollarından, yüzünden durmadan kül dökülüyor ve kaplardan gelen çizgiler onu durmadan yeniden dolduruyor.',
+          'Konuştuğunda tek bir ses değil, yüzlercesi konuşuyor. “Kaçanın sözleri bizimdir. Kabına geri koy.”',
+        ],
+        kosulluMetin: [
+          { kosul: { esya: 'halvard_halkasi' }, metin: 'Çantandaki kırık halka sıcacık oldu. Bekçinin gözleri bir an halkanın durduğu yere kaydı.' },
+        ],
+        secenekler: [
+          {
+            metin: 'Halvard’ın kırık halkasını onun boş kabına koy',
+            kosul: { esya: 'halvard_halkasi' },
+            etki: { esya: { halvard_halkasi: -1 }, bayrak: 'halka_kaba', can: -3 },
+            not: 'Kaba uzandığın an Bekçinin pençesi sırtını yaladı. Yine de halkayı kabın dibine bıraktın. Kül yığını durdu. Yüzlerce ses aynı anda fısıldadı: “Kaçan döndü.” Bekçi yeniden çöktü, dizlerini karnına çekti, gözlerini kapadı. Sayfa sende kaldı; halka artık onların. (−1 Halvard’ın kırık halkası, −3 Can)',
+            git: 'k6_rahibe',
+          },
+          {
+            metin: 'Ruloyu aç: Bekçi adını okusun',
+            etki: { sayac: { murekkep: 2 } },
+            not: 'Rulodaki adına baktı. Uzun uzun. “Bir kardeş daha,” dedi bin ses, ve yere çöktü. Ruloyu kapattığında adının iki harfi daha kurumuştu. (+2 Mürekkep)',
+            git: 'k6_rahibe',
+          },
+          {
+            metin: 'Kaplardan gelen çizgilerin arasından sıvış',
+            kosul: { sinif: 'hirsiz', bayrakYok: 'bekci_gizlen' },
+            etki: { bayrak: 'bekci_gizlen' },
+            sinama: {
+              beceri: 'hirsizlik', ozellik: 'ceviklik', zorluk: 13,
+              basari: 'k6_rahibe', basariNot: 'Kül çizgileri birer ip gibiydi; hiçbirine değmeden aralarından kaydın. Bekçi seni avlunun öbür ucunda aradı.',
+              basarisizlik: 'k6_bekci', basarisizlikEtki: { can: -2 }, basarisizlikNot: 'Bir çizgiye omzun değdi; kül tenini yaktı ve Bekçinin başı sana döndü. (−2 Can)',
+            },
+          },
+          {
+            metin: 'Rüzgâr Hecesi: külünü dağıt (1 büyü hakkı)',
+            kosul: { sinif: 'buyucu', buyu: 1 },
+            etki: { buyu: -1 },
+            not: 'Hecen avluda bir kasırga kaldırdı. Bekçinin yarısı havaya savruldu; kalanı yeniden toplanmaya çalışırken üstüne yürüdün.',
+            dovus: {
+              dusman: { ad: 'Dağılmış Kül Bekçisi', can: 11, zirh: 11, saldiri: 4, silah: 'Kül pençesi', hasarZari: '1d8', hasarEki: 1 },
+              zafer: 'k6_rahibe', zaferNot: 'Bekçi son kez dağıldı ve kaplarına geri aktı. Avlu sessizleşti.',
+              kacis: 'k6_rahibe', kacisZorlugu: 13, kacisNot: 'Kül bulutunun içinden kaçtın.',
+            },
+          },
+          {
+            metin: 'Sayfayı göğsüne bastır ve kapıya koş',
+            sinama: {
+              ozellik: 'ceviklik', zorluk: 15,
+              basari: 'k6_rahibe', basariNot: 'Bekçinin eli arkandan uzandı ve yalnızca sırtındaki tozu kaptı.',
+              basarisizlik: 'k6_rahibe', basarisizlikEtki: { can: -7 }, basarisizlikNot: 'Bekçinin eli sırtına indi. Kül tenine işledi, ciğerlerine doldu; avludan öksürerek, sürünerek çıktın. Sayfa hâlâ göğsündeydi. (−7 Can)',
+            },
+          },
+          {
+            metin: 'Silahını çek ve dövüş',
+            dovus: {
+              dusman: { ad: 'Kül Bekçisi', can: 20, zirh: 12, saldiri: 5, silah: 'Kül pençesi', hasarZari: '1d10', hasarEki: 1 },
+              zafer: 'k6_rahibe', zaferNot: 'Bekçi bir kez daha toplanmaya çalıştı, sonra vazgeçti. Kül kaplarına geri aktı; avluda yalnızca kaplar kaldı.',
+              kacis: 'k6_rahibe', kacisZorlugu: 13, kacisNot: 'Kül pençesinin altından sıyrılıp avludan kaçtın. Sayfa göğsündeydi.',
+            },
+          },
+        ],
+      },
+
+      k6_rahibe: {
+        baslik: 'Kül Rahibesi',
+        gorsel: 'k6_rahibe',
+        harita: { kat: 6, x: 0, y: 2, etiket: 'Rahibe' },
+        giris: { bayrak: 'rahibe_corin' },
+        metin: [
+          'Tapınağın ortasında, kül tozundan bir perdenin önünde, gri cüppeli bir kadın diz çökmüş. Yüzü külle sıvanmış. Alnında bir zamanlar bir ad varmış; kazınmış, yerinde açık renk bir yara izi kalmış.',
+        ],
+        kosulluMetin: [
+          { kosul: { bayrakYok: 'rahibe_secim' }, metin: '“Bekçi,” diyor, gözlerini açmadan. “Yorgunsun. Herkes buraya yorgun gelir.” Sesi ilahinin içinden konuşuyor. “Halvard kaçtığında zincir gevşedi ve aşağıdaki uyandı. Kırk yıl yeni bir ad bekledik. Sonra rulo seninkini yazdı.”' },
+          { kosul: { bayrakYok: 'rahibe_secim' }, metin: '“Ama rulo senden önce bir ad daha yazdı. Kırmızı atkılı bir çocuğun adını. Üç gün önce buradaydı; ağlıyordu. Ona söz verdik: yeni bekçiyi buraya getirirse adını rulodan sileriz.” Rahibe gülümsüyor. “Getirdi.”' },
+          { kosul: { bayrak: 'corin_birlikte', bayrakYok: ['corin_kayip', 'corin_ihanet', 'rahibe_secim'] }, metin: 'Yanında Corin taş kesilmiş. Sana bakmıyor. “Doğru,” diyor sonunda, çok alçak sesle. “Hepsi doğru.”' },
+          { kosul: { bayrak: 'corin_ihanet', bayrakYok: 'rahibe_secim' }, metin: '“Seni ocaklarda bize yolladı bile,” diyor rahibe. “Ödülünü bekliyor. Sütunların ardında.”' },
+          { kosul: { bayrak: 'corin_kayip', bayrakYok: 'rahibe_secim' }, metin: '“Akıntı onu sana geri getirmedi, değil mi?” diyor rahibe. “Bize getirdi.”' },
+          { kosul: { bayrakYok: ['corin_birlikte', 'corin_kayip', 'rahibe_secim'] }, metin: 'Kırmızı atkılı bir çocuk. Yolda kapağın kolunda takılı kalan kırmızı ipliği hatırlıyorsun.' },
+          { kosul: { bayrakYok: 'rahibe_secim' }, metin: '“Sana bir tören sunuyorum,” diyor. “Kül yaralarını kapatsın. Adın biraz daha kurusun. Ya da hepsini bırak: adını, yorgunluğunu, yedinci odayı. Benim gibi.”' },
+          { kosul: { bayrakYok: 'rahibe_secim', sayacEnAz: { murekkep: 6 } }, metin: 'Rahipler arkanda halka olmuş. Adının heceleri ağzından, senin sesinle, kendiliğinden dökülmeye başlıyor.' },
+          { kosul: { bayrakYok: 'rahibe_secim', sayacEnFazla: { murekkep: 1 } }, metin: 'Rahibe burnunu kırıştırıyor. “Senin adın hâlâ ıslak,” diyor. “Halvard’ınki gibi.”' },
+          { kosul: { bayrak: 'toren_kabul' }, metin: 'Alnında rahibenin parmak izi; kül, yarası olmayan bir yerde bile sızlıyor. Rahibe ilahisine dönmüş.' },
+          { kosul: { bayrak: 'rahibe_red' }, metin: 'Rahibe başını eğdi. “Yedinci oda,” diyor, “bundan daha az nazik.” Sonra ilahisine dönüyor.' },
+        ],
+        secenekler: [
+          {
+            metin: 'Halvard’ı sor',
+            kosul: { bayrakYok: 'rahibe_halvard' },
+            etki: { bayrak: 'rahibe_halvard' },
+            not: '“Yedinci odaya kadar indi,” dedi rahibe. “Kalemi eline aldı. Sonra yazmadı. Kalemi tutan elin kendi eli olmadığını gördü, dediler.” Yüzündeki kül çatladı. “Bir şeyi de bil: buradan hiçbir ad silinmedi. Kazınan ad kabında bekler. Çocuğa verdiğimiz söz… bir sözdü yalnızca.”',
+            git: 'k6_rahibe',
+          },
+          {
+            metin: 'Ad Törenine katıl: yaralarını kül kapatsın',
+            kosul: { bayrakYok: 'rahibe_secim' },
+            etki: { bayrak: ['rahibe_secim', 'toren_kabul'], can: 99, sayac: { murekkep: 3 } },
+            not: 'Rahibe başparmağını külle kararttı ve alnına adını çizdi. Yaraların, birer birer, gri bir kabukla kapandı. Rulodaki adın üç harf birden kurudu. (Can tamamen doldu, +3 Mürekkep)',
+            git: 'k6_rahibe',
+          },
+          {
+            metin: 'Reddet ve ayağa kalk',
+            kosul: { bayrakYok: 'rahibe_secim', sayacEnFazla: { murekkep: 5 } },
+            etki: { bayrak: ['rahibe_secim', 'rahibe_red'] },
+            not: 'Ayağa kalktın. Rahipler yol verdi.',
+            git: 'k6_rahibe',
+          },
+          {
+            metin: 'Reddet: ilahinin çekimine diren',
+            kosul: KURUMUS_VE({ bayrakYok: 'rahibe_secim' }),
+            hatirla: 'Mürekkep: kurumuş ad törene çekilir',
+            sinama: {
+              ozellik: 'akil', zorluk: 13, ustalikBayrak: 'halvard_ogut',
+              basari: 'k6_rahibe', basariEtki: { bayrak: ['rahibe_secim', 'rahibe_red'] },
+              basariNot: 'Ağzından dökülen heceleri dişlerinle kestin. Kendi sesin yeniden senin oldu. Ayağa kalktın.',
+              basarisizlik: 'k6_rahibe', basarisizlikEtki: { bayrak: ['rahibe_secim', 'toren_kabul'], can: 99, sayac: { murekkep: 3 } },
+              basarisizlikNot: 'Diz çöktüğünü fark ettiğinde rahibenin başparmağı alnındaydı. Yaraların kapandı; adın üç harf birden kurudu. Kabul etmemiştin. Önemi yoktu. (Can tamamen doldu, +3 Mürekkep)',
+            },
+          },
+          {
+            metin: 'Adını tamamen teslim et',
+            kosul: { bayrakYok: 'rahibe_secim' },
+            not: 'Rulonu rahibenin önüne bıraktın.',
+            git: 'son_kul_rahibi',
+          },
+          { metin: 'Avluya geri sıvış', kosul: { bayrak: 'rahibe_secim', bayrakYok: '_giris_k6_avlu' }, git: 'k6_avlu' },
+          { metin: 'Perdenin ardından tapınağın derinine yürü', kosul: { bayrak: 'rahibe_red' }, git: 'k6_takip' },
+          { metin: 'Perdenin ardından tapınağın derinine yürü', kosul: { bayrak: 'toren_kabul', bayrakYok: 'corin_dusman' }, git: 'k6_corin' },
+          {
+            metin: 'Perdenin ardından tapınağın derinine yürü', kosul: { bayrak: ['toren_kabul', 'corin_dusman'] },
+            hatirla: 'Corin’in atkısını sakladın',
+            etki: { can: -3 },
+            not: 'Perdeyi araladığın an karanlıktan bir ok geldi; omzunu yalayıp bir sütuna saplandı. Okun tüyleri kırmızıydı. (−3 Can)',
+            git: 'k6_corin',
+          },
+        ],
+      },
+
+      k6_takip: {
+        baslik: 'Rahiplerin Öfkesi',
+        gorsel: 'k6_takip',
+        harita: { kat: 6, x: 1, y: 3, etiket: 'Takip' },
+        metin: [
+          'Perdenin ardında ilahi değişiyor. Artık adını dua gibi söylemiyorlar; emir gibi bağırıyorlar. Sütunların arasından kül grisi mızraklar beliriyor.',
+          '“Töreni reddeden bekçi,” diyor muhafızlardan biri, “törene taşınır.”',
+        ],
+        kosulluMetin: [
+          { kosul: { bayrak: 'corin_birlikte', bayrakYok: ['corin_kayip', 'corin_ihanet'] }, metin: 'Corin arbaletini kuruyor. “Bu kez,” diyor, “sırt sırta.”' },
+          { kosul: ISLAK, metin: 'Islak adın onları daha da öfkelendiriyor. Yabancı bir ad tapınaklarında, ve hâlâ ayakta.' },
+        ],
+        secenekler: [
+          {
+            metin: 'Corin’le sırt sırta dövüş',
+            kosul: { bayrak: 'corin_birlikte', bayrakYok: ['corin_kayip', 'corin_ihanet'] },
+            hatirla: 'Corin seninle',
+            not: 'Corin’in ilk oku öndeki muhafızı dağıttı.',
+            dovus: {
+              dusman: { ad: 'Kül Muhafızları', can: 10, zirh: 12, saldiri: 5, silah: 'Kül mızrakları', hasarZari: '1d8', hasarEki: 0 },
+              zafer: 'k6_corin', zaferNot: 'Son muhafız da kül olup yere yağdı. Corin arbaletini indirdi.',
+              kacis: 'k6_corin', kacisZorlugu: 13, kacisNot: 'Corin’in okları arkanı kollarken sütunların arasına daldın.',
+            },
+          },
+          {
+            metin: 'Kül Hecesi: muhafızları yeniden küle çevir (1 büyü hakkı)',
+            kosul: { sinif: 'buyucu', buyu: 1 },
+            etki: { buyu: -1 },
+            not: 'Hece öndekileri dağıttı ama arkadan yenileri geldi; daha azdı, daha yavaştı.',
+            dovus: {
+              dusman: { ad: 'Kül Muhafızları', can: 9, zirh: 12, saldiri: 4, silah: 'Kül mızrakları', hasarZari: '1d8', hasarEki: 0 },
+              zafer: 'k6_corin', zaferNot: 'Son muhafız da dağıldı. İlahi bir an sustu.',
+              kacis: 'k6_corin', kacisZorlugu: 13, kacisNot: 'Kül bulutunun içinden sütunlara kaçtın.',
+            },
+          },
+          {
+            metin: 'Sütunların gölgesine karış',
+            kosul: { sinif: 'hirsiz', bayrakYok: 'takip_gizlen' },
+            etki: { bayrak: 'takip_gizlen' },
+            sinama: {
+              beceri: 'hirsizlik', ozellik: 'ceviklik', zorluk: 13,
+              basari: 'k6_corin', basariNot: 'Bir sütunun dibinde külle örtülüp bekledin. Mızraklar yanından geçip gitti.',
+              basarisizlik: 'k6_takip', basarisizlikEtki: { can: -2 }, basarisizlikNot: 'Bir mızrak, rastgele, gölgene saplandı; sonra sana. Bulundun. (−2 Can)',
+            },
+          },
+          {
+            metin: 'Sütunların arasından koş',
+            sinama: {
+              ozellik: 'ceviklik', zorluk: 14,
+              basari: 'k6_corin', basariNot: 'Mızraklar arkanda sütunlara saplandı. Ses kesildiğinde sunağın ışığına varmıştın.',
+              basarisizlik: 'k6_corin', basarisizlikEtki: { can: -5 }, basarisizlikNot: 'İki mızrak sırtını buldu. Sütunların arasında yere kapaklandın, sonra kalkıp koşmaya devam ettin. (−5 Can)',
+            },
+          },
+          {
+            metin: 'Silahını çek ve dövüş',
+            dovus: {
+              dusman: { ad: 'Kül Muhafızları', can: 14, zirh: 12, saldiri: 5, silah: 'Kül mızrakları', hasarZari: '1d8', hasarEki: 1 },
+              zafer: 'k6_corin', zaferNot: 'Son muhafız da kül olup yere yağdı. Mızrakları sütunların dibinde bir yığın odun gibi kaldı.',
+              kacis: 'k6_corin', kacisZorlugu: 13, kacisNot: 'Mızrakların arasından sıyrılıp sütunlara daldın.',
+            },
+          },
+        ],
+      },
+
+      k6_corin: {
+        baslik: 'Sütunların Ardı',
+        gorsel: 'k6_corin',
+        gorselKosullu: [
+          { kosul: { bayrak: 'corin_ihanet' }, gorsel: 'k6_corin_muhafiz', yedek: 'k6_corin' },
+          { kosul: { bayrak: 'atki_verildi' }, gorsel: 'k6_corin_not', yedek: 'k6_sunak' },
+          { kosul: { bayrakYok: ['corin_birlikte', 'corin_kayip'] }, gorsel: 'k6_corin_not', yedek: 'k6_sunak' },
+        ],
+        harita: { kat: 6, x: 0, y: 3, etiket: 'Sütunlar' },
+        metin: [
+          'Perdenin ardında kül heykellerden sütunlar, bir orman gibi sık. İlahi burada boğuklaşıyor. Sütunların arasından sunağın kızıl ışığı sızıyor.',
+        ],
+        kosulluMetin: [
+          { kosul: { bayrak: 'corin_ihanet' }, metin: 'Sunağın yolunda Corin bekliyor. İki yanında iki Kül Muhafızı. Arbaleti kurulu ama sana değil, yere dönük. “Seni bekliyordum,” diyor. “Bu kez kaçma. Rahibe söz verdi: sen yerini alırsan benim adım silinecek.”' },
+          { kosul: { bayrak: ['corin_birlikte', 'corin_uyari'], bayrakYok: ['corin_kayip', 'corin_ihanet'] }, metin: 'Corin sütunların arasında duruyor. “Seni getirecektim,” diyor. “Akıntıda kayışı kestiğin gün vazgeçtim. Ocaklarda da söyleyemedim.” Atkısını çözüp eline alıyor. “Yedinci odaya inersen ben de inmek istiyorum. Adım da orada yazılı. Ya ikimiz birden ya hiçbirimiz.”' },
+          { kosul: { bayrak: 'corin_birlikte', bayrakYok: ['corin_kayip', 'corin_ihanet', 'corin_uyari'] }, metin: 'Corin sütunların arasında, arbaletini yere bırakıyor. “Seni buraya getirmem gerekiyordu,” diyor. “Getirdim de. Ama ne istediklerini bilmiyordum.” Ellerine bakıyor. “Artık biliyorum. Ne istersen onu yaparım.”' },
+          { kosul: { bayrak: 'corin_dusman' }, metin: 'Sütunların arasında, karanlıkta, bir arbaletin gıcırtısı. Corin görünmüyor. Sesi her yerden geliyor. “Atkım,” diyor. “Yedinci katta geri alırım demiştim. Fikrimi değiştirdim.”' },
+          { kosul: { bayrak: 'atki_verildi' }, metin: 'Sunağın yolunda bir sütuna kırmızı tüylü bir ok saplanmış. Okun ucuna bir kâğıt iliştirilmiş. El yazısı titrek: “Kalemi tutan el senin değil. Tutma. Rahibe yalan söylüyor; hiçbir ad silinmez. Ben yukarı çıkıyorum. — C.”' },
+          { kosul: { bayrak: 'corin_kayip', bayrakYok: 'corin_karsilasma' }, metin: 'Sütunların arasında biri duruyor. Sırılsıklam değil artık; kupkuru, kül grisi. Corin. Akıntı onu buraya getirmiş. Kemerindeki kırmızı atkıya bakıyor. “Atkım,” diyor. “Bırakıp gittiğin gün kemerine bağlamışsın. Neden?”' },
+          { kosul: { bayrakYok: ['corin_birlikte', 'corin_kayip'] }, metin: 'Bir sütuna kırmızı tüylü bir ok saplanmış; ucunda bir kâğıt. “Yeni bekçiye. Üzgünüm. Seni hiç tanımadım; belki iyi bir insandın. — C.” Kâğıdın arkasına, daha sonra eklenmiş gibi: “Kalemi tutma.”' },
+        ],
+        secenekler: [
+          // İhanet
+          {
+            metin: 'Ona gerçeği söyle: tapınak hiçbir adı silmez',
+            kosul: { bayrak: 'corin_ihanet', bayrakYok: 'corin_ikna_denendi' },
+            hatirla: 'Haritanı Corin’e gösterdin',
+            etki: { bayrak: 'corin_ikna_denendi' },
+            sinama: {
+              ozellik: 'akil', zorluk: 16, ustalikBayrak: 'rahibe_halvard',
+              basari: 'k6_sunak', basariEtki: { bayrak: 'corin_dondu' },
+              basariNot: 'Rahibenin sözlerini ona tekrarladın: kazınan ad kabında bekler. Corin’in yüzü çöktü. Arbaletini muhafızlara çevirdi. “Git,” dedi sana, sesi kırılarak. “Bunlar benim.” Sütunların arasından geçerken arkanda bir okun boşaldığını duydun.',
+              basarisizlik: 'k6_corin', basarisizlikEtki: { can: -3 },
+              basarisizlikNot: '“Yalan,” dedi Corin. “Hepsi yalan söylüyor; sen de.” Muhafızlardan birinin mızrağı böğrünü sıyırdı. (−3 Can)',
+            },
+          },
+          {
+            metin: 'Muhafızlara emret: Corin’i tutsunlar',
+            kosul: { bayrak: 'corin_ihanet', sayacEnAz: { murekkep: 6 } },
+            hatirla: 'Mürekkep: zindan seni kendinden sayıyor',
+            etki: { bayrak: 'corin_tutuldu', sayac: { murekkep: 1 } },
+            not: 'Tek bir söz yetti. Muhafızlar döndü ve Corin’in kollarını yakaladı. “Hayır,” dedi Corin, “o değil, o değil…” Onu sütunların arasına sürüklediler. Senin sesin artık onların sesiydi. (+1 Mürekkep)',
+            git: 'k6_sunak',
+          },
+          {
+            metin: 'Corin’le ve muhafızlarla dövüş',
+            kosul: { bayrak: 'corin_ihanet' },
+            dovus: {
+              dusman: { ad: 'Corin ve Kül Muhafızları', can: 18, zirh: 13, saldiri: 5, silah: 'Arbalet ve mızraklar', hasarZari: '1d8', hasarEki: 2 },
+              zafer: 'k6_sunak', zaferEtki: { bayrak: 'corin_yenildi' },
+              zaferNot: 'Muhafızlar kül olup dağıldı. Corin dizlerinin üstüne çöktü; arbaleti kırıktı. Onu öldürmedin. Sunağa yürürken arkandan ağladığını duydun.',
+              kacis: 'k6_sunak', kacisZorlugu: 13, kacisNot: 'Sütunların arasına daldın ve sunağın ışığına doğru koştun.',
+            },
+          },
+          // Uyardı: müttefik
+          {
+            metin: '“Yedinci odaya birlikte ineceğiz.”',
+            kosul: { bayrak: ['corin_birlikte', 'corin_uyari'], bayrakYok: ['corin_kayip', 'corin_ihanet'] },
+            hatirla: 'Corin’i akıntıdan kurtardın',
+            etki: { bayrak: 'corin_muttefik' },
+            not: 'Corin atkısını yeniden boynuna doladı. “İkimizin adı aynı odada olamaz, demiştim,” dedi. “Belki olabilir.”',
+            git: 'k6_sunak',
+          },
+          {
+            metin: '“Burada ayrılıyoruz, Corin.”',
+            kosul: { bayrak: 'corin_birlikte', bayrakYok: ['corin_kayip', 'corin_ihanet'] },
+            etki: { bayrak: 'corin_ayrildi' },
+            not: 'Corin uzun uzun baktı, sonra başını salladı. “Haklısın,” dedi. Yukarı giden basamaklara doğru yürüdü. Atkısının kırmızısı kül yağmurunda bir süre daha göründü.',
+            git: 'k6_sunak',
+          },
+          // Sessiz Corin
+          {
+            metin: 'Ona güven: “Birlikte ineceğiz.”',
+            kosul: { bayrak: 'corin_birlikte', bayrakYok: ['corin_kayip', 'corin_ihanet', 'corin_uyari'] },
+            etki: { bayrak: ['corin_muttefik', 'corin_supheli'] },
+            not: 'Corin arbaletini yerden aldı. Sana teşekkür etmedi. Bir adım arkanda yürümeye başladı.',
+            git: 'k6_sunak',
+          },
+          // Atkıyı sakladın: pusu
+          {
+            metin: 'Atkıyı karanlığa fırlat',
+            kosul: { bayrak: 'corin_dusman', bayrakYok: 'corin_gitti' },
+            hatirla: 'Corin’in atkısını sakladın',
+            etki: { bayrak: 'corin_gitti' },
+            not: 'Kırmızı atkı havada süzüldü ve karanlıkta bir el onu yakaladı. Ok gelmedi. Uzun bir sessizlikten sonra ayak sesleri yukarı doğru uzaklaştı.',
+            git: 'k6_sunak',
+          },
+          {
+            metin: 'Sütunların gölgesinden arkasına dolan',
+            kosul: { sinif: 'hirsiz', bayrak: 'corin_dusman', bayrakYok: 'corin_gitti' },
+            not: 'Gölgeden gölgeye geçtin. Arbaletin gıcırtısı tam önündeydi.',
+            dovus: {
+              dusman: { ad: 'Corin', can: 15, zirh: 13, saldiri: 5, silah: 'Arbalet', hasarZari: '1d8', hasarEki: 1 },
+              pusu: true,
+              zafer: 'k6_sunak', zaferEtki: { bayrak: 'corin_yenildi' },
+              zaferNot: 'Arbalet elinden düştü. Corin sırtını sütuna verdi ve kaydı. Atkısını boynuna bıraktın; ikiniz de bir şey demediniz.',
+              kacis: 'k6_sunak', kacisZorlugu: 13, kacisNot: 'Gölgelerin içinden sunağa kaçtın.',
+            },
+          },
+          {
+            metin: 'Sesin geldiği yere saldır',
+            kosul: { bayrak: 'corin_dusman', bayrakYok: 'corin_gitti' },
+            dovus: {
+              dusman: { ad: 'Corin', can: 15, zirh: 13, saldiri: 5, silah: 'Arbalet', hasarZari: '1d8', hasarEki: 1 },
+              zafer: 'k6_sunak', zaferEtki: { bayrak: 'corin_yenildi' },
+              zaferNot: 'Arbalet elinden düştü. Corin sırtını sütuna verdi ve kaydı. Atkısını boynuna bıraktın; ikiniz de bir şey demediniz.',
+              kacis: 'k6_sunak', kacisZorlugu: 13, kacisNot: 'Okların arasından sunağa kaçtın.',
+            },
+          },
+          // Atkıyı geri verdin: not
+          {
+            metin: 'Notu al ve sunağa yürü',
+            kosul: { bayrak: 'atki_verildi' },
+            hatirla: 'Atkısını geri verdin',
+            etki: { bayrak: 'corin_not' },
+            git: 'k6_sunak',
+          },
+          // Akıntıda bıraktın, ilk kez karşılaşıyorsun
+          {
+            metin: 'Atkısını ona geri ver',
+            kosul: { bayrak: 'corin_kayip', bayrakYok: 'corin_karsilasma' },
+            hatirla: 'Corin’i akıntıda bıraktın',
+            etki: { bayrak: ['corin_karsilasma', 'atki_verildi', 'corin_not'] },
+            not: 'Atkıyı uzattın. Aldı. “Kalemi tutan el senin değil,” dedi. “Tutma. Rahibe yalan söylüyor; hiçbir ad silinmez.” Arkasını döndü ve yukarı giden basamaklara yürüdü.',
+            git: 'k6_sunak',
+          },
+          {
+            metin: 'Atkıyı sende tut',
+            kosul: { bayrak: 'corin_kayip', bayrakYok: 'corin_karsilasma' },
+            hatirla: 'Corin’i akıntıda bıraktın',
+            etki: { bayrak: ['corin_karsilasma', 'corin_dusman'] },
+            not: '“Öyle olsun,” dedi Corin ve arbaletini kaldırdı.',
+            dovus: {
+              dusman: { ad: 'Corin', can: 15, zirh: 13, saldiri: 5, silah: 'Arbalet', hasarZari: '1d8', hasarEki: 1 },
+              zafer: 'k6_sunak', zaferEtki: { bayrak: 'corin_yenildi' },
+              zaferNot: 'Arbalet elinden düştü. Corin sırtını sütuna verdi ve kaydı. Atkısı hâlâ senin kemerindeydi.',
+              kacis: 'k6_sunak', kacisZorlugu: 13, kacisNot: 'Okların arasından sunağa kaçtın.',
+            },
+          },
+          // Hiç tanışmadın
+          {
+            metin: 'Kâğıdı al ve sunağa yürü',
+            kosul: { bayrakYok: ['corin_birlikte', 'corin_kayip'] },
+            etki: { bayrak: 'corin_iz' },
+            git: 'k6_sunak',
+          },
+        ],
+      },
+
+      k6_sunak: {
+        baslik: 'Kül Sunağı',
+        gorsel: 'k6_sunak',
+        harita: { kat: 6, x: 0, y: 4, etiket: 'Sunak' },
+        metin: [
+          'Sütunlar bir sunağın çevresinde halka oluyor. Sunağın üstünde, kızıl bir ateşin ortasında, yanmayan bir rulo duruyor. Seninkinin ikizi: aynı deri, aynı kenar. Ama parşömeni kül rengi ve satır satır adlarla dolu. Halvard. Eldric. Yüzlercesi. En altta, mürekkebi henüz parlayan: {ad}.',
+          'Ateş senin rulona doğru eğiliyor. İkisi birbirini tanıyor.',
+        ],
+        kosulluMetin: [
+          { kosul: { bayrak: 'sayfa_verildi', bayrakYok: 'sayfa_denendi' }, metin: 'Sunağın önündeki bakır kâsede bir avuç kül. Eldric’in ateşine attığın sayfanın külü; harfler hâlâ külün içinde, gri üstüne gri, okunmayı bekliyor.' },
+          { kosul: { bayrakYok: 'gercek_okundu', esya: 'ayna_parcasi' }, metin: 'Bezindeki ayna parçası titriyor. İkiz rulonun yazısı bir aynada okunmak ister gibi ters.' },
+          { kosul: { bayrakYok: 'gercek_okundu', esya: 'halvard_halkasi' }, metin: 'Çantandaki kırık halka sıcacık. İkiz ruloda Halvard’ın adına doğru çekiliyor.' },
+          { kosul: { bayrak: 'rulo_yakildi' }, metin: 'Ellerin boş. Sunakta, ikiz rulonun üstünde, seninkinin külü.' },
+          { kosul: { bayrak: 'corin_muttefik' }, metin: 'Corin ikiz rulodaki satırları parmağıyla izliyor. Bir adın üstünde duruyor: kendi adı. Hemen seninkinin üstünde.' },
+        ],
+        secenekler: [
+          {
+            metin: 'Ayna parçasını ikiz rulonun üstüne tut',
+            kosul: { esya: 'ayna_parcasi', bayrakYok: 'gercek_okundu' },
+            etki: { bayrak: 'gercek_okundu' },
+            not: 'Aynada yazı tersine döndü ve ilk kez okunur oldu. Bütün adlar aynı elden: uzun, kıvrık kuyruklu harfler. Bir pençenin ucu. Adların en altında, seninkinin de altında, bir imza: Kül. Rulo adları yazmıyor. Kül yazıyor; rulo yalnızca onun mektubu.',
+            git: 'k6_sunak',
+          },
+          {
+            metin: 'Halvard’ın kırık halkasını ikiz rulonun üstüne koy',
+            kosul: { esya: 'halvard_halkasi', bayrakYok: 'gercek_okundu' },
+            etki: { bayrak: 'gercek_okundu' },
+            not: 'Halka parşömene değince ısındı ve bir ses, Halvard’ın sesi, satırları okudu: “Hepsi aynı elden. Uzun kuyruklu harfler, bir pençenin ucu. En altta bir imza var: Kül. Rulo adları yazmıyor. Kül yazıyor; rulo yalnızca onun mektubu.”',
+            git: 'k6_sunak',
+          },
+          {
+            metin: 'Kâsedeki külü oku: sayfayı yeniden yaz',
+            kosul: { sinif: 'buyucu', bayrak: 'sayfa_verildi', bayrakYok: 'sayfa_denendi' },
+            etki: { bayrak: 'sayfa_denendi' },
+            sinama: {
+              beceri: 'bilgi', ozellik: 'akil', zorluk: 16,
+              basari: 'k6_sunak', basariEtki: { esya: { halvard_sayfasi: 1 }, bayrak: 'sayfa_geri' },
+              basariNot: 'Külün içindeki harfleri birer birer okudun ve boş bir yaprağa yeniden yazdın. Halvard’ın el yazısı değil, seninki; ama sözler onun. (+1 Halvard’ın sayfası)',
+              basarisizlik: 'k6_sunak', basarisizlikNot: 'Harflerin yarısını okudun. Sonra bir nefesin külü dağıttı. Sayfa artık gerçekten yok.',
+            },
+          },
+          {
+            metin: 'Külü rulona bastır: adın sayfayı hatırlasın',
+            kosul: { bayrak: 'sayfa_verildi', bayrakYok: ['sayfa_denendi', 'rulo_yakildi'] },
+            etki: { bayrak: ['sayfa_denendi', 'sayfa_geri'], esya: { halvard_sayfasi: 1 }, sayac: { murekkep: 2 } },
+            not: 'Külü parşömene bastırdın. Rulo onu emdi, sonra boş bir sayfasına Halvard’ın sözlerini yeniden yazdı. Bedelini senin adından aldı. (+1 Halvard’ın sayfası, +2 Mürekkep)',
+            git: 'k6_sunak',
+          },
+          {
+            metin: 'Rulonu sunağın ateşine at',
+            kosul: { bayrakYok: 'rulo_yakildi' },
+            etki: { bayrak: 'rulo_yakildi', sayac: { murekkep: -10 }, can: -2 },
+            not: 'Rulonu ateşe attın. Yanmak istemedi; sen bastırdın. Parmakların yandı. Parşömen kıvrıldı, adın bir an parladı ve kül oldu. İkiz ruloda, en alttaki adın mürekkebi bir anda ıslandı ve aktı. Haritan artık yok. Yedinci kata haritasız ineceksin. (Mürekkep sıfırlandı, −2 Can)',
+            git: 'k6_sunak',
+          },
+          { metin: 'Sunağın ardındaki kapıyı aç', git: 'k6_firtina' },
+        ],
+      },
+
+      k6_firtina: {
+        baslik: 'Kül Fırtınası',
+        gorsel: 'k6_firtina',
+        harita: { kat: 6, x: 0, y: 5, etiket: 'Fırtına' },
+        metin: [
+          'Kapı, tavanı yitip giden uzun bir salona açılıyor. Salonun içinde kül, kar fırtınası gibi dönüyor. İlahi burada bir rüzgâr; sözleri yüzüne vuruyor.',
+          'Salonun öbür ucunda, fırtınanın ardında, aşağı inen son merdivenin karartısı.',
+        ],
+        kosulluMetin: [
+          { kosul: ISLAK, metin: 'Kül yüzüne değdiği yerde çamura dönüyor. Islak adın fırtınayı tutmuyor; içinden bir yağmur gibi geçiyor.' },
+          { kosul: KURUMUS, metin: 'Fırtına seni görünce yön değiştiriyor ve üstüne geliyor. Kurumuş adın külü çekiyor; ilk nefeste ciğerlerin doluyor.' },
+          { kosul: { bayrak: 'corin_muttefik' }, metin: 'Corin atkısını ağzına bağlıyor. “Üç gün önce bu salondan geçtim,” diyor. “Sütunları say. Yedinci sütunda rüzgâr durur.”' },
+        ],
+        secenekler: [
+          {
+            metin: 'Islak adına güven ve fırtınaya yürü', kosul: ISLAK, hatirla: 'Mürekkep: ıslak ad külü tutmaz',
+            not: 'Kül her adımında çamura döndü ve ayaklarının dibine aktı. Merdivene vardığında üstün başın gri bir çamur, ama ciğerlerin temizdi.',
+            git: 'k6_merdiven',
+          },
+          {
+            metin: 'Corin’in ardından sütunları sayarak yürü', kosul: { bayrak: 'corin_muttefik', degil: ISLAK },
+            hatirla: 'Corin seninle',
+            not: 'Yedinci sütunda rüzgâr gerçekten durdu. Oradan sonrası kolaydı.',
+            git: 'k6_merdiven',
+          },
+          {
+            metin: 'Gölgen önünden yürüsün', kosul: { bayrak: 'golge_anlasma', sayacEnAz: { murekkep: 2 } },
+            hatirla: 'Gölgeyle anlaştın',
+            etki: { sayac: { murekkep: 1 } },
+            not: 'Gölgen önüne geçti; fırtına onun içinden geçerken sen arkasında yürüdün. Rulodaki adın bir harf daha kurudu. (+1 Mürekkep)',
+            git: 'k6_merdiven',
+          },
+          {
+            metin: 'Ruloya fırtınanın gözünü sor',
+            kosul: { sayacEnAz: { murekkep: 2 }, sayacEnFazla: { murekkep: 5 }, bayrakYok: 'rulo_yakildi' },
+            etki: { sayac: { murekkep: 1 } },
+            not: 'Rulo salonu çizdi; fırtınanın dönmediği dar bir şerit beyaz kaldı. O şeritten yürüdün. (+1 Mürekkep)',
+            git: 'k6_merdiven',
+          },
+          {
+            metin: 'Rüzgâr Hecesi: fırtınayı ikiye yar (1 büyü hakkı)',
+            kosul: { sinif: 'buyucu', buyu: 1, degil: ISLAK },
+            etki: { buyu: -1 },
+            not: 'Hecen fırtınanın ortasında bir koridor açtı. Kül iki yanında duvar olup döndü; sen ortadan yürüdün.',
+            git: 'k6_merdiven',
+          },
+          {
+            metin: 'Kalkanını rüzgâra ver ve yürü', kosul: { sinif: 'savasci', degil: ISLAK },
+            etki: { can: -2 },
+            not: 'Kalkanın bir yelken gibi gerildi; kolların titredi ama ayakların durmadı. Kül kalkanın kenarından sızıp yüzünü yaktı. (−2 Can)',
+            git: 'k6_merdiven',
+          },
+          {
+            metin: 'Yüzünü ört ve fırtınaya yürü', kosul: { sayacEnAz: { murekkep: 2 }, sayacEnFazla: { murekkep: 5 } },
+            sinama: {
+              ozellik: 'guc', zorluk: 13,
+              basari: 'k6_merdiven', basariNot: 'Rüzgâr seni üç kez geri itti; üç kez yeniden yürüdün. Merdivenin başında öksürerek nefeslendin.',
+              basarisizlik: 'k6_merdiven', basarisizlikEtki: { can: -6 }, basarisizlikNot: 'Fırtına seni yere serdi. Kül ağzına, burnuna doldu; merdivene sürünerek vardın. (−6 Can)',
+            },
+          },
+          {
+            metin: 'Yüzünü ört ve fırtınaya yürü', kosul: KURUMUS, hatirla: 'Mürekkep: kurumuş ad külü çeker',
+            sinama: {
+              ozellik: 'guc', zorluk: 15,
+              basari: 'k6_merdiven', basariNot: 'Fırtına seni içine almak istedi; vermedin. Merdivenin başında, külden ağırlaşmış ciğerlerinle öksürdün.',
+              basarisizlik: 'k6_merdiven', basarisizlikEtki: { can: -7 }, basarisizlikNot: 'Fırtına seni bir kucak gibi sardı. Kül ciğerlerine doldu; bir an kendini bir sütun, bir heykel sandın. Merdivene nasıl vardığını hatırlamıyorsun. (−7 Can)',
+            },
+          },
+        ],
+      },
+
+      k6_merdiven: {
+        baslik: 'Son Merdiven',
+        gorsel: 'k6_merdiven',
+        harita: { kat: 6, x: 0, y: 6, etiket: 'Merdiven' },
+        metin: [
+          'Fırtına arkanda kapanıyor. Önünde, dar, sarmal bir merdiven aşağı iniyor. Basamaklar kül değil; taş. Eski, aşınmış, binlerce ayağın düzlediği taş. Aşağıdan bir ses gelmiyor. İlahi bile burada susuyor.',
+          'Altı kat geride. Bir tane kaldı.',
+        ],
+        kosulluMetin: [
+          { kosul: { bayrakYok: 'gelisim_k6' }, metin: 'İnmeden önce durup bu katı düşünüyorsun. Burada ne öğrendin? (Kalıcı bir gelişim seç.)' },
+          { kosul: { bayrakYok: 'rulo_yakildi' }, metin: 'Ruloyu son kez açıyorsun. Kendiliğinden, sayfanın kenarına, yolculuğun yazılıyor:' },
+          { kosul: { bayrak: 'rulo_yakildi' }, metin: 'Elinde rulo yok. Yolculuğunu kendin hatırlamak zorundasın:' },
+          ...adDurumu(
+            'Adın ıslak. Yedinci odanın kapısı haritada kapalı çizili; seni beklemiyor.',
+            'Adın yarı yarıya kurumuş. Yedinci odanın kapısı aralık.',
+            'Adın kupkuru. Yedinci odanın kapısı ardına kadar açık; masadaki kalem senin elini bekliyor.'),
+          { kosul: { bayrak: 'rulo_yakildi' }, metin: 'Adın, rulosuz, sırılsıklam. Yedinci kat seni nasıl karşılayacak, bilmiyorsun.' },
+          { kosul: { esyaEnAz: { halvard_sayfasi: 3 } }, metin: 'Halvard’ın üç sayfası çantanda. Yan yana koyunca kenarları birbirine uyuyor; birlikte bir şey söylüyorlar gibi.' },
+          { kosul: { esyaEnAz: { halvard_sayfasi: 1 }, esyaEnFazla: { halvard_sayfasi: 2 } }, metin: 'Halvard’ın sayfalarından bazıları çantanda. Hepsi değil.' },
+          { kosul: { esyaEnFazla: { halvard_sayfasi: 0 } }, metin: 'Halvard’ın sayfalarından hiçbiri sende değil.' },
+          { kosul: { bayrak: 'corin_muttefik' }, metin: 'Corin bir basamak arkanda. Atkısı boynunda.' },
+          { kosul: { bayrak: ['corin_ihanet', 'corin_dondu'] }, metin: 'Corin’in sütunların arasında boşalan okunu düşünüyorsun. Ne oldu ona, bilmiyorsun.' },
+          { kosul: { bayrak: 'corin_tutuldu' }, metin: 'Corin’i muhafızlara sen verdin. Sesin onların sesiydi.' },
+          { kosul: { bayrak: 'corin_yenildi' }, metin: 'Corin bir sütunun dibinde kaldı. Sağ.' },
+          { kosul: { bayrak: ['corin_ayrildi'] }, metin: 'Corin yukarı çıktı. Belki kurtulur; belki Halvard gibi yalnızca kaçar.' },
+          { kosul: { bayrak: 'corin_not' }, metin: 'Corin’in notu cebinde: “Kalemi tutma.”' },
+          { kosul: { bayrak: 'golge_anlasma' }, metin: 'Gölgen hâlâ bir adım geride. Aşağı baktıkça bir adım daha geride kalıyor.' },
+          { kosul: { bayrak: 'gercek_okundu' }, metin: 'Adları kimin yazdığını biliyorsun artık.' },
+          { kosul: { bayrak: 'toren_kabul' }, metin: 'Alnındaki kül izi hâlâ sızlıyor.' },
+        ],
+        secenekler: [
+          {
+            metin: 'Basamağa otur, nefesini topla',
+            kosul: { bayrakYok: 'dinlen_k6', sayacEnFazla: { murekkep: 5 } },
+            etki: { bayrak: 'dinlen_k6', can: 4, buyuYenile: true },
+            sinifNot: { buyucu: 'Hecelerini baştan saydın; hepsi yerinde. (Büyü hakların yenilendi)' },
+            not: 'Taşın serinliği sırtına iyi geldi. Burada ilahi yoktu; yalnızca kendi nefesin. (+4 Can)',
+            git: 'k6_merdiven',
+          },
+          {
+            metin: 'Basamağa otur, nefesini topla',
+            kosul: { bayrakYok: 'dinlen_k6', sayacEnAz: { murekkep: 6 } },
+            hatirla: 'Mürekkep: kurumuş ad dinlendirmez',
+            etki: { bayrak: 'dinlen_k6', can: 1, buyuYenile: true },
+            sinifNot: { buyucu: 'Hecelerini baştan saydın; hepsi yerinde. (Büyü hakların yenilendi)' },
+            not: 'Gözlerini kapattın. İlahi burada susmuştu ama kafanın içinde, senin sesinle, sürüyordu. (+1 Can)',
+            git: 'k6_merdiven',
+          },
+          ...gelisim(6, 'k6_merdiven', {
+            guc: 'Kül ve fırtına: rüzgâra karşı yürümeyi öğrendin',
+            ceviklik: 'Sütunlar ve gölgeler: aralarından geçmeyi öğrendin',
+            akil: 'Adlar ve ilahiler: kendi sesini korumayı öğrendin',
+            can: 'Külün içinden geçtin: daha dayanıklısın',
+          }),
+          { metin: 'Yedinci kata in', kosul: { bayrak: 'gelisim_k6', neden: 'Önce bu katta ne öğrendiğini seç' }, git: 'k7_kapi' },
+          { metin: 'Ruloyu basamağa bırak ve yukarı dön', kosul: { bayrakYok: 'rulo_yakildi' }, git: 'son_yukari' },
+          { metin: 'Arkanı dön ve yukarı tırman', kosul: { bayrak: 'rulo_yakildi' }, git: 'son_yukari' },
+        ],
+      },
+
+
+      // ═════════════════════════ KAT 7 — YEDİNCİ ODA ═════════════════════════
+      k7_kapi: {
+        baslik: 'Ahşap Kapı',
+        gorsel: 'k7_kapi',
+        harita: { kat: 7, x: 0, y: 0, etiket: 'Kapı' },
+        metin: [
+          'Merdivenin dibinde tek bir kapı. Ahşap, sade, eski; kolu binlerce elin dokunuşuyla parlamış. Arkasından bir kalemin kâğıda sürtünme sesi geliyor. Durmadan, sabırla.',
+          'Kapının tahtasına, göz hizasına, adlar kazınmış. Satır satır. En altta, kazıntısı taze: {ad}.',
+        ],
+        kosulluMetin: [
+          { kosul: ISLAK, metin: 'Elini kola koyuyorsun. Kol dönmüyor. Kapıdaki adın, ıslak bir harf gibi, tahtanın üstünde akıyor; kapı seni tanımıyor.' },
+          { kosul: { sayacEnAz: { murekkep: 2 }, sayacEnFazla: { murekkep: 5 } }, metin: 'Kapı aralık. Seni bekliyor ama ardına kadar açılmıyor; yarı yarıya tanıyor.' },
+          { kosul: KURUMUS, metin: 'Kapı sen dokunmadan ardına kadar açılıyor. İçeriden ılık bir hava, mürekkep ve kül kokusu. Bir ev gibi.' },
+          { kosul: { bayrak: 'corin_muttefik' }, metin: 'Corin bir basamak arkanda durmuş, kapıdaki adlara bakıyor. Seninkinin hemen üstünde, onunki.' },
+          { kosul: { bayrak: 'rulo_yakildi' }, metin: 'Elinde rulo yok. Yolu ezbere indin. Yine de buradasın.' },
+        ],
+        secenekler: [
+          {
+            metin: 'Corin kapıyı açsın: onun adı yarı kuru', kosul: Object.assign({ bayrak: 'corin_muttefik' }, ISLAK),
+            hatirla: 'Corin seninle',
+            not: 'Corin elini kola koydu; kol, kısa bir duraksamadan sonra döndü. “Beni tanıyor,” dedi. Sesi hiç sevinçli değildi.',
+            git: 'k7_oda',
+          },
+          {
+            metin: 'Kapıyı omzunla kır', kosul: ISLAK, hatirla: 'Mürekkep: ıslak ad yabancıdır',
+            sinama: {
+              beceri: 'kuvvet', ozellik: 'guc', zorluk: 13,
+              basari: 'k7_oda', basariNot: 'Tahta bir kemik gibi çatırdadı ve içe devrildi. Kapıdaki adların yarısı kırıklarla birlikte yere döküldü.',
+              basarisizlik: 'k7_oda', basarisizlikEtki: { can: -4 }, basarisizlikNot: 'Üç kez yüklendin; dördüncüde menteşe koptu, omzun da neredeyse. İçeri sendeleyerek girdin. (−4 Can)',
+            },
+          },
+          {
+            metin: 'Maymuncukla kilidi aç', kosul: Object.assign({ sinif: 'hirsiz', esya: 'maymuncuk' }, ISLAK), hatirla: 'Mürekkep: ıslak ad yabancıdır',
+            sinama: {
+              beceri: 'hirsizlik', ozellik: 'ceviklik', zorluk: 12,
+              basari: 'k7_oda', basariNot: 'Kilidin içinde tek bir dişli vardı; adı olan birini bekliyordu. Onu adsız bir maymuncukla kandırdın.',
+              basarisizlik: 'k7_oda', basarisizlikEtki: { can: -2 }, basarisizlikNot: 'Maymuncuk kırıldı ve ucu parmağına battı. Kapı yine de bir parmak aralandı; gerisini tırnaklarınla açtın. (−2 Can)',
+            },
+          },
+          {
+            metin: 'Açılma Hecesi (1 büyü hakkı)', kosul: Object.assign({ sinif: 'buyucu', buyu: 1 }, ISLAK), hatirla: 'Mürekkep: ıslak ad yabancıdır',
+            etki: { buyu: -1 },
+            not: 'Hecen kilidin içinde döndü. Kapı ağır ağır açıldı; sanki itiraz ederek.',
+            git: 'k7_oda',
+          },
+          { metin: 'Kapıyı it ve içeri gir', kosul: { sayacEnAz: { murekkep: 2 }, sayacEnFazla: { murekkep: 5 } }, git: 'k7_oda' },
+          {
+            metin: 'İçeri gir', kosul: KURUMUS, hatirla: 'Mürekkep: zindan seni kendinden sayıyor',
+            etki: { bayrak: 'kapi_kilitlendi' },
+            not: 'Eşikten geçtiğin an kapı arkandan, yumuşak bir tıkırtıyla kapandı. Kolunu denedin. Kilitliydi.',
+            git: 'k7_oda',
+          },
+        ],
+      },
+
+      k7_oda: {
+        baslik: 'Yedinci Oda',
+        gorsel: 'k7_oda',
+        harita: { kat: 7, x: 0, y: 1, etiket: 'Oda' },
+        metin: [
+          'Küçük bir oda. Taş duvarlar, tek bir masa, masada boş bir sayfa ve bir kalem. Kalem kimsenin elinde değil; havada, sayfanın bir parmak üstünde, durmadan aynı harfleri çiziyor ama kâğıda değmiyor. Senin adının harflerini.',
+          'Masanın önünde bir sandalye. Boş. Kolçaklarına tırnak izleri kazınmış.',
+          'Zeminin ortasında demir bir ızgara. Zincir, bütün katlardan inerek, ızgaranın arasından aşağı, karanlığa gidiyor. Karanlıkta bir şey nefes alıyor; her nefeste ızgaranın arasından ılık kül yükseliyor.',
+        ],
+        kosulluMetin: [
+          { kosul: { bayrak: 'kalem_goruldu' }, metin: 'Aynadaki odaydı bu. Ayna parçasında gördüğün kalem.' },
+          { kosul: { bayrak: 'rulo_yakildi' }, metin: 'Kalem bir an duruyor. Adının harflerini unutmuş gibi; sonra yeniden başlıyor, ama harfler bu kez titrek.' },
+          { kosul: { esyaEnAz: { halvard_sayfasi: 3 } }, metin: 'Çantandaki üç sayfa ısınıyor. Sandalyenin arkasındaki duvara doğru, bir pusula iğnesi gibi çekiliyorlar.' },
+          { kosul: { bayrak: 'golge_anlasma' }, metin: 'Gölgen ilk kez senden önce yürüyor. Masaya senden önce varıyor.' },
+        ],
+        secenekler: [
+          {
+            metin: 'Halvard’ın sandalyesine bak',
+            kosul: { bayrakYok: 'sandalye_bakildi' },
+            etki: { bayrak: 'sandalye_bakildi' },
+            not: 'Kolçaktaki tırnak izleri harf. Biri kalemi tutarken kendi eliyle başka bir şey yazmaya çalışmış: “EL BENİM DEĞİL.” Altında, daha derin: “H.”',
+            git: 'k7_oda',
+          },
+          { metin: 'Izgaranın üstünden geç ve masaya yaklaş', git: 'k7_kul' },
+        ],
+      },
+
+      k7_kul: {
+        baslik: 'Kül',
+        gorsel: 'k7_kul',
+        harita: { kat: 7, x: 0, y: 2, etiket: 'Kül' },
+        metin: [
+          'Masaya bir adım kala ızgara aşağı çöküyor. Altında bir kuyu; kuyunun dibinde, kül ve közden bir yığın kıpırdıyor. Yığın bir baş kaldırıyor. Bir ejderhanın başı: pulları sönmüş kömür, gözleri iki ocak ağzı. Boynunda, derisine gömülmüş, bütün katlardan inen zincirin son halkası.',
+          'Konuştuğunda sesi senin sesin. Sonra Halvard’ın, sonra Eldric’in, sonra rahibenin. “Bir ad,” diyor Kül. “Yalnızca bir ad. Kimin olduğu umurumda değil. Ad yazılırsa uyurum. Yazılmazsa uyanırım.”',
+        ],
+        kosulluMetin: [
+          ...adDurumu(
+            'Kül başını iki yana sallıyor, kokluyor. “Seni göremiyorum,” diyor. “Adın ıslak. Kimsin sen?” Kalem havada duraksıyor; ıslak adın kâğıda tutunmaz.',
+            'Kül seni süzüyor. “Yarı yarıya yazılmışsın,” diyor. “Gerisini sen yaz.” Kalem sana doğru eğiliyor.',
+            '“Kardeşim,” diyor Kül, neredeyse şefkatle. “Elin zaten benim elim. Al kalemi.” Parmakların, sen istemeden, kaleme doğru kıpırdıyor. Arkanda kapı kilitli.'),
+          { kosul: { bayrak: 'gercek_okundu' }, metin: 'İkiz ruloda gördüğün imzayı hatırlıyorsun. Bütün adları yazan el bu. Boynundaki halkanın altında, derisinde aynı kıvrık harfler kazılı: kendi adı.' },
+          { kosul: { bayrak: 'corin_muttefik' }, metin: 'Kül’ün gözleri Corin’e kayıyor. “Onun adı da iyi,” diyor. “Onu yaz; sen gidersin. Kimse bilmez.” Corin arbaletini sıkıyor ama kaldırmıyor.' },
+          { kosul: { bayrak: 'golge_anlasma' }, metin: 'Gölgen masanın başında, kalemin altında duruyor. Bir an geç konuşuyor: “Ben yazabilirim. Senin adınla. Senin elinle değil.”' },
+          { kosul: { bayrak: 'halka_tamam' }, metin: 'Ocaklarda kendi halkanı tamamladın. Kül bunu biliyor: zincir senin adınla zaten gergin.' },
+          { kosul: { esyaEnAz: { halvard_sayfasi: 3 } }, metin: 'Üç sayfa çantandan dışarı çıkmak istiyor. Sandalyenin arkasındaki duvarda, ancak şimdi fark ettiğin bir çatlak var.' },
+        ],
+        secenekler: [
+          // Gizli son
+          {
+            metin: 'Halvard’ın üç sayfasını yan yana koy',
+            kosul: { esyaEnAz: { halvard_sayfasi: 3 }, sayacEnFazla: { murekkep: 5 } },
+            hatirla: 'Halvard’ın üç sayfası',
+            not: 'Sayfaları masaya yan yana koydun. Yırtık kenarları birbirine uydu ve üçü birlikte bir harita oldu: rulonun hiç çizmediği bir kapı, sandalyenin arkasındaki duvarda. Duvardaki çatlak genişledi.',
+            git: 'k7_sekizinci',
+          },
+          // Sınıf finalleri
+          {
+            metin: 'Zinciri kendi kollarınla ger: adını yazmadan tut',
+            kosul: { sinif: 'savasci', sayacEnFazla: { murekkep: 5 }, bayrakYok: 'final_denendi' },
+            hatirla: 'Savaşçı: kırık bir yemin, eğilmeyen bir kalkan',
+            etki: { bayrak: 'final_denendi' },
+            sinama: {
+              beceri: 'kuvvet', ozellik: 'guc', zorluk: 15,
+              basari: 'son_zincir',
+              basarisizlik: 'k7_kul', basarisizlikEtki: { can: -5 },
+              basarisizlikNot: 'Zinciri yakaladın; Kül başını bir kez salladı ve seni duvara fırlattı. Zincir elinden kaydı; bu yol kapandı. (−5 Can)',
+            },
+          },
+          {
+            metin: 'Kül sana bakarken kalemi çal',
+            kosul: { sinif: 'hirsiz', sayacEnFazla: { murekkep: 5 }, bayrakYok: 'final_denendi' },
+            hatirla: 'Hırsız: her kilidin bir şarkısı var',
+            etki: { bayrak: 'final_denendi' },
+            sinama: {
+              beceri: 'hirsizlik', ozellik: 'ceviklik', zorluk: 15,
+              basari: 'son_kalemsiz',
+              basarisizlik: 'k7_kul', basarisizlikEtki: { can: -4 },
+              basarisizlikNot: 'Parmakların kalemin bir tüy uzağındaydı. Kül’ün nefesi elini yaladı; kalem havada kaçtı. İkinci bir şans vermeyecek. (−4 Can)',
+            },
+          },
+          {
+            metin: 'Kül’ün kendi adını yaz',
+            kosul: { sinif: 'buyucu', degil: KURUMUS, bayrakYok: 'final_denendi', bayrak: 'gercek_okundu', neden: 'Kül’ün adını bilmiyorsun (Kat 6 sunağında okunur)' },
+            hatirla: 'Sunakta gerçeği okudun',
+            etki: { bayrak: 'final_denendi' },
+            sinama: {
+              beceri: 'bilgi', ozellik: 'akil', zorluk: 15,
+              basari: 'son_adini_bilen',
+              basarisizlik: 'k7_kul', basarisizlikEtki: { can: -4 },
+              basarisizlikNot: 'Kalemi aldın ve imzanın ilk kıvrımını çizdin. Ama kıvrımın kuyruğu kaçtı; ad tamamlanmadı. Kül acıyla kükredi; yarım ad derisinde kanadı ve kapandı. (−4 Can)',
+            },
+          },
+          // Corin
+          {
+            metin: '“Corin, kalemi birlikte tutalım.” Adlarınızı yarı yarıya yazın',
+            kosul: { bayrak: 'corin_muttefik', sayacEnAz: { murekkep: 2 }, sayacEnFazla: { murekkep: 5 } },
+            hatirla: 'Corin seninle',
+            git: 'son_iki_ad',
+          },
+          {
+            metin: 'Kül’ün teklifini kabul et: Corin’in adını yaz',
+            kosul: { bayrak: 'corin_muttefik' },
+            hatirla: 'Corin seninle',
+            git: 'son_baskasi',
+          },
+          // Gölge
+          {
+            metin: 'Gölgen yazsın: senin adınla, senin elinle değil',
+            kosul: { bayrak: 'golge_anlasma' },
+            hatirla: 'Gölgeyle anlaştın',
+            git: 'son_golge',
+          },
+          // Bekçi
+          {
+            metin: 'Kalemi al ve adını kendi elinle yaz',
+            kosul: { degil: KURUMUS, sayacEnAz: { murekkep: 2 }, neden: 'Islak adın mürekkep tutmaz' },
+            git: 'son_bekci',
+          },
+          {
+            metin: 'Kalemi al ve adını kendi elinle yaz',
+            kosul: KURUMUS, hatirla: 'Mürekkep: kurumuş ad kendini yazmaz',
+            sinama: {
+              ozellik: 'akil', zorluk: 14, ustalikBayrak: ['halvard_ogut', 'corin_not'],
+              basari: 'son_bekci', basariNot: 'Kalem elinde ağırlaştı ve kendi yolunu çizmek istedi. Bırakmadın. Harfleri, birer birer, kendi el yazınla yazdın.',
+              basarisizlik: 'son_kul_eli',
+            },
+          },
+          // Kaçış
+          {
+            metin: 'Kalemi bırak ve kaç',
+            kosul: { sayacEnFazla: { murekkep: 5 }, neden: 'Kapı arkandan kilitlendi' },
+            git: 'son_kacis',
+          },
+          // Dövüş
+          {
+            metin: 'Silahını çek: Kül’le dövüş',
+            kosul: { sayacEnFazla: { murekkep: 5 }, neden: 'Kurumuş adın elini tutmuyor' },
+            not: 'Kül kuyudan yükseldi. Zincir gerildi; bütün katlar, yukarıda, bir kez sarsıldı.',
+            git: 'k7_dovus',
+          },
+        ],
+      },
+
+      k7_dovus: {
+        baslik: 'Zincirli Ejderha',
+        gorsel: 'k7_dovus',
+        harita: { kat: 7, x: 1, y: 2, etiket: 'Dövüş' },
+        metin: [
+          'Kül kuyunun ağzına kadar yükseliyor. Zincir boynunu çekiyor; daha fazla çıkamıyor. Ama başı odayı dolduruyor ve ağzında bütün ocakların ateşi.',
+          'Kaçacak yer yok. Kapı arkanda; kalem havada, bekliyor.',
+        ],
+        kosulluMetin: [
+          { kosul: ISLAK, metin: 'Kül seni göremiyor. Islak adının kokusunu arıyor; başı bir sağa bir sola dönüyor.' },
+          { kosul: { bayrak: 'gercek_okundu' }, metin: 'Boynundaki halkanın altında, derisine kazınmış imza parlıyor. Orası yumuşak. Orası onun adı.' },
+          { kosul: { bayrak: 'corin_muttefik' }, metin: 'Corin arbaletini kuruyor. “Son kez,” diyor. “Sırt sırta.”' },
+          { kosul: { bayrak: 'silah_dovuldu' }, metin: 'Eldric’in dövdüğü silah elinde ısınıyor. Ocakların çeliği ocakların efendisini tanıyor.' },
+        ],
+        secenekler: [
+          ...kulDovusu('Boynundaki imzaya vur', { bayrak: 'gercek_okundu' }, 'Sunakta gerçeği okudun', { pusu: true, pusuHerkes: true }, 'İmzanın ilk kıvrımına silahını gömdün; Kül’ün çığlığı yukarıdaki bütün katlarda yankılandı.'),
+          ...kulDovusu('Corin’le birlikte saldır', { bayrak: 'corin_muttefik' }, 'Corin seninle', { pusu: true, pusuHerkes: true, canEksi: 4 }, 'Corin’in oku Kül’ün gözüne saplandı; sen o dönerken saldırdın.'),
+          ...kulDovusu('Ayna parçasıyla ateşini gözlerine yansıt', { esya: 'ayna_parcasi' }, null, { zirhEksi: 2 }, 'Ayna parçası Kül’ün kendi ateşini gözlerine geri fırlattı. Bir an kör oldu.'),
+          ...kulDovusu('Silahını çek ve dövüş', null, null, {}, null),
+        ],
+      },
+
+      k7_sekizinci: {
+        baslik: 'Sekizinci Oda',
+        gorsel: 'k7_sekizinci',
+        harita: { kat: 7, x: -1, y: 2, etiket: '?' },
+        metin: [
+          'Çatlak bir kapı oldu. Ardında dar, alçak bir oda; hiçbir haritada yok. Duvarlarında yazı yok, ad yok. Yalnızca odanın ortasında, yerden çıkan zincirin öbür ucu: Kül’ün boynuna değil, buraya, bir taşa kilitli.',
+          'Kilidin üstünde Halvard’ın el yazısı: “Buraya kadar geldim. Açacak eli bulamadım. Bekçi zinciri tutar; zincir bekçiyi tutar. Biri tutmayı bırakmalı. Ama yalnız değil.”',
+          'Kilit bir anahtar istemiyor. Bir ad istemiyor. Üç sayfanın yırtık kenarları, kilidin ağzına tam oturuyor.',
+        ],
+        kosulluMetin: [
+          { kosul: { bayrak: 'corin_muttefik' }, metin: 'Corin arkandan eğilip giriyor. Kilide bakıyor, sonra sana. “İkimiz,” diyor. “Halvard’ın bulamadığı ikinci el.”' },
+          { kosul: { bayrakYok: 'corin_muttefik', bayrak: 'golge_anlasma' }, metin: 'Gölgen yanında duruyor. “İkinci bir el,” diyor bir an geç. “Benimki olur mu?”' },
+          { kosul: { bayrakYok: ['corin_muttefik', 'golge_anlasma'] }, metin: 'Yalnızsın. Ama sayfalar elinde; Halvard’ın eli de seninkiyle birlikte.' },
+        ],
+        secenekler: [
+          { metin: 'Sayfaları kilide yerleştir ve zinciri bırak', git: 'son_ucuncu_yol' },
+        ],
+      },
+
+      // ═════════════════════════ SONLAR ═════════════════════════
+      son_bekci: {
+        baslik: 'Bekçi',
+        gorsel: 'son_bekci',
+        son: { tur: 'notr', baslik: 'Bekçi oldun' },
+        metin: [
+          'Kalemi aldın. Ağırdı; sonra değildi. Adını kendi el yazınla, harf harf, yazdın. Son harfte mürekkep kurudu ve zincir bir kez, uzun uzun gerildi.',
+          'Kül başını kuyuya indirdi. “İyi uykular,” dedi senin sesinle, ve uyudu.',
+          'Sandalyeye oturdun. Kolçaklar ellerine uydu. Yukarıda, çok yukarıda, yağmur dinmişti; zindanın ağzında kimse yoktu. Bir gün olacaktı. O gün rulo yeni bir ad arayacaktı. O güne kadar zincir senin adınla gergin kalacaktı.',
+        ],
+        kosulluMetin: [
+          { kosul: { bayrak: 'corin_muttefik' }, metin: 'Corin kapıda durdu. “Yukarıda adını söyleyeceğim,” dedi. “Birilerine. Her gün.” Sonra merdivenleri çıktı.' },
+          { kosul: { bayrak: 'halka_tamam' }, metin: 'Ocaklarda yarım bıraktığın halkayı zaten kendin tamamlamıştın. Şimdi anlıyorsun: o gün yazmaya başlamıştın.' },
+        ],
+      },
+
+      son_kul_eli: {
+        baslik: 'Kül’ün Eli',
+        gorsel: 'son_kul_eli',
+        son: { tur: 'olum', baslik: 'Kalemi Kül tuttu' },
+        metin: [
+          'Kalemi aldın ve elin artık senin değildi. Parmakların uzadı, kıvrıldı; tırnakların pençe oldu. Yazdığın harflerin kuyrukları uzun, kıvrık, kızgın.',
+          'Yazdığın ad senin adın değildi. Kül’ün adıydı. Zincirin son halkası boynundan düştü.',
+          'Kül kuyudan yükseldi ve bütün katları birer birer yaktı. Sen, masanın başında, yazmaya devam ettin. Durmadın. Duramadın. Ad yazılmalıydı; kimin adı olduğunun önemi yoktu.',
+        ],
+      },
+
+      son_kacis: {
+        baslik: 'Kaçış',
+        gorsel: 'son_kacis',
+        son: { tur: 'notr', baslik: 'Halvard gibi kaçtın' },
+        metin: [
+          'Kalemi bıraktın. Havada bir an asılı kaldı, sonra masaya düştü. Arkanı döndün ve koştun.',
+          'Merdivenler, fırtına, ocaklar, aynalar, sarnıç, kütüphane. Her katta zincir biraz daha gevşiyor, aşağıda bir şey biraz daha uyanıyordu. Zindanın ağzına çıktığında yağmur dinmişti.',
+          'Kırk yıl sonra, belki elli, biri bu basamaklardan inecek. Elinde boş bir rulo olacak. Rulonun en dibinde, yedinci katta, bir oda. Odanın kapısında, kazınmış bir ad: seninki. Ve hemen altında, ıslak mürekkeple, onun adı.',
+        ],
+        kosulluMetin: [
+          { kosul: { bayrak: 'corin_muttefik' }, metin: 'Corin seninle koştu. Yukarıda, yağmurun altında, ikiniz de bir şey demediniz. Söyleyecek bir şey yoktu.' },
+        ],
+      },
+
+      son_baskasi: {
+        baslik: 'Başkasının Adı',
+        gorsel: 'son_baskasi',
+        son: { tur: 'notr', baslik: 'Corin’in adını yazdın' },
+        metin: [
+          'Kalemi aldın. Corin bir şey söylemedi. Belki bekliyordu; belki ilk günden beri.',
+          'Onun adını yazdın. Harf harf. Son harfte Corin dizlerinin üstüne çöktü; atkısı boynundan kaydı ve sandalyenin kolçağına takıldı. Kül memnun bir nefes verdi ve uyudu.',
+          'Merdivenleri tek başına çıktın. Zindanın ağzında yağmur dinmişti. Elini cebine soktuğunda kırmızı bir iplik buldun. Onu hiç atamadın.',
+        ],
+      },
+
+      son_iki_ad: {
+        baslik: 'İki Ad',
+        gorsel: 'son_iki_ad',
+        son: { tur: 'zafer', baslik: 'Adlarınızı birlikte yazdınız' },
+        metin: [
+          'Corin’in eli kalemin üstünde, seninki onunkinin üstünde. Kalem kimin eli olduğunu seçemedi. Bir harf senin, bir harf onun. Sayfada ne senin adın kaldı ne onunki: ikisinin arasında, kimsenin olmayan yeni bir ad.',
+          'Zincir gerildi ama yarı yarıya. Kül uyudu; derin değil, hafif, bir kedi gibi. Yarım bir ad yarım bir uyku getirdi.',
+          'Sırayla bekliyorsunuz. Biri yedinci odada otururken öbürü yukarı çıkıyor, yağmuru görüyor, ekmek alıyor, geri iniyor. Yarım bir hayat. İkiniz için de. Ama ikinizin.',
+        ],
+      },
+
+      son_golge: {
+        baslik: 'Gölge Bekçi',
+        gorsel: 'son_golge',
+        son: { tur: 'notr', baslik: 'Gölgen yerine kaldı' },
+        metin: [
+          'Gölgen kalemi aldı. Senin adını, senin el yazınla, bir an geç yazdı. Zincir gerildi; Kül, bir şeylerin yanlış olduğunu sezer gibi homurdandı ve sonra uyudu.',
+          'Gölgen sandalyeye oturdu. “Git,” dedi bir an geç. “Ben burada iyiyim. Hep bir adım geride olmaya alışığım.”',
+          'Zindanın ağzında güneş vardı. Yürüdün. Arkana baktığında yerde hiçbir şey yoktu. Ne o gün ne sonra. Aynalara baktığında yüzünü görüyorsun; ama yüzün sana hep bir an geç gülümsüyor.',
+        ],
+      },
+
+      son_zincir: {
+        baslik: 'Zinciri Tutan',
+        gorsel: 'son_zincir',
+        son: { tur: 'zafer', baslik: 'Adını yazmadan bekçi oldun' },
+        metin: [
+          'Zinciri iki kolunla kavradın ve gerdin. Kül başını kaldırdı, çekti, kükredi. Kalkanını zincire dayadın; bir kez daha çekti. Bırakmadın.',
+          'Kül sonunda gözlerini kıstı. “Adın yok burada,” dedi. “Seni bağlayan hiçbir şey yok. Neden tutuyorsun?”',
+          '“Çünkü yemin ettim,” dedin. Kırık yeminin, yıllar sonra, ilk kez yerine geldi. Kalem masaya düştü ve bir daha kalkmadı. Zincir artık bir ad tutmuyor; bir el tutuyor. Senin elin. Ve adın, yukarıda, hâlâ senin.',
+        ],
+      },
+
+      son_kalemsiz: {
+        baslik: 'Kalemsiz Zindan',
+        gorsel: 'son_kalemsiz',
+        son: { tur: 'zafer', baslik: 'Kalemi çaldın' },
+        metin: [
+          'Kül sana bakarken, gözünün içine bakarak, kalemi havadan aldın. Kül baktı; görmedi. Gölgede doğanlar böyledir.',
+          'Kalem elinde bir an kıpırdadı, sonra durdu. Masadaki sayfa boş kaldı. Kül kükredi, çekti, çırpındı; ama ad yazılmadan zincir ne gevşedi ne gerildi. Öylece kaldı. Kül, sonunda, yorulup uyudu.',
+          'Kalem şimdi kemerinde. Zindanda artık hiçbir ad yazılmayacak. Kimse bekçi olmayacak. Zincir, adsız, olduğu yerde kalacak; sen bir yerlerde, kalemi saklayarak, yaşadığın sürece.',
+        ],
+      },
+
+      son_adini_bilen: {
+        baslik: 'Adını Bilen',
+        gorsel: 'son_adini_bilen',
+        son: { tur: 'zafer', baslik: 'Kül’ün adını yazdın' },
+        metin: [
+          'İkiz rulodaki imzayı gözünün önüne getirdin ve kalemi aldın. Kıvrık, uzun kuyruklu harfler; bir pençenin ucu. Ama bu kez kalemi tutan el senindi.',
+          'Kül’ün adını yazdın. Son harfte kuyudan bir çığlık yükseldi, sonra sessizlik. Zincirin son halkası, boynunda, Kül’ün kendi adıyla kapandı.',
+          'Artık kimse bekçi olmak zorunda değil. Kül kendi adıyla bağlı; kendi adını kendisi tutuyor. Merdivenleri çıkarken yedinci odaya son bir kez baktın: masa bomboş. Kapısındaki adların en altında yeni bir ad var; seninki değil.',
+        ],
+      },
+
+      son_ucuncu_yol: {
+        baslik: 'Üçüncü Yol',
+        gorsel: 'son_ucuncu_yol',
+        son: { tur: 'zafer', baslik: 'Gizli son: Zinciri bıraktın' },
+        metin: [
+          'Sayfaları kilide yerleştirdin. Halvard’ın sözleri, yan yana, bir anahtar oldu. Kilit açıldı ve zincir taştan kaydı.',
+          'Aşağıda, kuyuda, Kül başını kaldırdı. Zincir boynundan değil, öbür ucundan çözülmüştü; yukarıdaki bütün halkalar, bütün adlar, birer birer gevşedi. Kül bir an hareketsiz durdu. Sonra, ilk kez, kendi sesiyle konuştu: “Kimse yazmadı.”',
+          'Ve kanatlarını açtı. Kül, kül olarak dağıldı; yüzlerce yıl önce ölmüş bir ateşin son közü gibi söndü. Onu tutan adlar olmayınca tutulacak bir şey de kalmamıştı.',
+        ],
+        kosulluMetin: [
+          { kosul: { bayrakYok: 'rulo_yakildi' }, metin: 'Zindanın ağzında yağmur dinmişti. Rulona baktın: yedi kat, yedi oda, hepsi çizili. Yedinci odada ad yok. Kapısında yalnızca Halvard’ın el yazısıyla tek kelime: “Bitti.”' },
+          { kosul: { bayrak: 'rulo_yakildi' }, metin: 'Zindanın ağzında yağmur dinmişti. Rulon yoktu; sunakta yakmıştın. Gerek de yoktu. Halvard’ın sayfalarından birinin arkasında, senin görmediğin bir anda, tek kelime belirmişti: “Bitti.”' },
+          { kosul: { bayrak: 'corin_muttefik' }, metin: 'Corin yanında. Rulosunu açıyor; adının yazılı olduğu satır boş. Gülüyor; sonra ağlıyor; sonra ikisi birden.' },
+          { kosul: { bayrak: 'golge_anlasma' }, metin: 'Gölgen ayaklarının dibine geri döndü. Artık bir an geç değil; tam zamanında.' },
+        ],
+      },
+
+      son_kul_yenildi: {
+        baslik: 'Ejderhanın Sonu',
+        gorsel: 'son_kul_yenildi',
+        son: { tur: 'zafer', baslik: 'Kül’ü yendin' },
+        metin: [
+          'Kül son bir kez kükredi ve kuyusuna çöktü. Gözlerindeki ateş söndü; pulları birer birer kül oldu. Zincir, boşalan halkasından kayıp kuyuya düştü.',
+          'Zindan sarsıldı. Yukarıda katlar çöküyordu: fırtına, ocaklar, aynalar. Koştun. Basamaklar ayaklarının altında ufalanırken koştun.',
+        ],
+        kosulluMetin: [
+          { kosul: { bayrakYok: 'rulo_yakildi' }, metin: 'Zindanın ağzından çıktığında arkanda yalnızca bir toz bulutu vardı. Rulona baktın. Yedi kat silinmişti. Geriye boş bir parşömen kaldı; en dipte, kurumamış, hiç kurumayacak bir ad: seninki. Bu kez kimsenin odasında değil.' },
+          { kosul: { bayrak: 'rulo_yakildi' }, metin: 'Zindanın ağzından çıktığında arkanda yalnızca bir toz bulutu vardı. Elinde rulo yoktu; adını hiçbir yere yazdırmadan inmiş, adını hiçbir yere yazdırmadan çıkmıştın.' },
+        ],
+      },
+
+      son_kul_rahibi: {
+        baslik: 'Kül Rahibi',
+        gorsel: 'son_kul_rahibi',
+        son: { tur: 'notr', baslik: 'Kül Rahibi oldun' },
+        metin: [
+          'Rahibe rulonu açtı ve başparmağını adının üstünde gezdirdi. Mürekkep, son harfine kadar, kül oldu. Sonra aynı başparmak alnına dokundu.',
+          'Önce yorgunluğun gitti. Sonra yedinci oda. Sonra Halvard, Corin, aynalar, ocaklar. En son adın gitti. Acımadı. Bir yük gibi omuzlarından kaydı.',
+          'Yıllar sonra, kül yağan basamaklarda, yeni biri indi. Elinde ıslak mürekkepli bir rulo vardı; yüzünde korku. Sen, gri cüppenin içinde, onun adını ilahi gibi söylemeye başladın. Kendi adını hatırlamıyordun. Hiç hatırlamadın.',
         ],
       },
 
@@ -3416,12 +4545,13 @@ body.canta-acik{overflow:hidden}
         baslik: 'Yukarı',
         gorsel: 'son_yukari',
         son: { tur: 'notr', baslik: 'Yukarı döndün' },
-        metin: [
-          'Ruloyu basamağa bıraktın ve bir daha arkana bakmadan tırmandın. Kütüphane, koridor, muhafızın dağılmış kemikleri. Zindanın ağzında yağmur dinmişti.',
-          'Halvard’ın bedeni oradaydı. Yanından geçerken onun da bir gün aynı basamaklardan böyle çıktığını düşündün.',
-          'Aşağıda, kimsenin görmediği bir merdivende, rulodaki adın yavaş yavaş soldu. Yerine başka bir el, başka bir ad yazmaya başladı.',
-        ],
+        metin: [],
         kosulluMetin: [
+          { kosul: { bayrakYok: 'rulo_yakildi' }, metin: 'Ruloyu basamağa bıraktın ve bir daha arkana bakmadan tırmandın. Kütüphane, koridor, muhafızın dağılmış kemikleri. Zindanın ağzında yağmur dinmişti.' },
+          { kosul: { bayrak: 'rulo_yakildi' }, metin: 'Arkanı döndün ve bir daha bakmadan tırmandın. Fırtına, ocaklar, aynalar, kütüphane, koridor. Zindanın ağzında yağmur dinmişti.' },
+          { kosul: {}, metin: 'Halvard’ın bedeni oradaydı. Yanından geçerken onun da bir gün aynı basamaklardan böyle çıktığını düşündün.' },
+          { kosul: { bayrakYok: 'rulo_yakildi' }, metin: 'Aşağıda, kimsenin görmediği bir merdivende, rulodaki adın yavaş yavaş soldu. Yerine başka bir el, başka bir ad yazmaya başladı.' },
+          { kosul: { bayrak: 'rulo_yakildi' }, metin: 'Aşağıda, sunağın ikiz rulosunda, adının yerinde bir boşluk kaldı. Kül bir süre bekledi. Sonra başka bir el, başka bir ad yazmaya başladı.' },
           { kosul: { bayrak: '_giris_k2_okuma' }, metin: 'Yazılan ilk harf bir “C” idi.' },
         ],
       },
@@ -3453,7 +4583,7 @@ body.canta-acik{overflow:hidden}
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
 </script>
-<script>window.YK_GORSELLER = ["giris","haritaci","hazine","k2_giris","k2_kamp","k2_koridor","k2_merdiven","k2_muhafiz","k2_okuma","k2_salon","k3_akinti","k3_akinti_yalniz","k3_giris","k3_kapak","k3_merdiven","k3_su","k3_sutunlar","k3_tuccar","k3_yilan","k3_yuva","k4_galeri","k4_galeri_yalniz","k4_giris","k4_giris_yalniz","k4_kirik","k4_labirent","k4_merdiven","k4_salon","k4_salon_yalniz","k4_teklif","k4_yansima","k4_yansima_yalniz","k5_atolye","k5_corin","k5_corin_yalniz","k5_demirci","k5_dev","k5_giris","k5_merdiven","k5_sel","kapak","kapak_yazisiz","kapi","koridor","magara","muhafiz","sinif_buyucu_erkek","sinif_buyucu_kadin","sinif_hirsiz_erkek","sinif_hirsiz_kadin","sinif_savasci_erkek","sinif_savasci_kadin","son_ayna","son_bogulma","son_cukur","son_kat1","son_kul","son_olum","son_yukari"];</script>
+<script>window.YK_GORSELLER = ["giris","haritaci","hazine","k2_giris","k2_kamp","k2_koridor","k2_merdiven","k2_muhafiz","k2_okuma","k2_salon","k3_akinti","k3_akinti_yalniz","k3_giris","k3_kapak","k3_merdiven","k3_su","k3_sutunlar","k3_tuccar","k3_yilan","k3_yuva","k4_galeri","k4_galeri_yalniz","k4_giris","k4_giris_yalniz","k4_kirik","k4_labirent","k4_merdiven","k4_salon","k4_salon_yalniz","k4_teklif","k4_yansima","k4_yansima_yalniz","k5_atolye","k5_corin","k5_corin_yalniz","k5_demirci","k5_dev","k5_giris","k5_merdiven","k5_sel","k6_avlu","k6_bekci","k6_corin","k6_corin_muhafiz","k6_corin_not","k6_firtina","k6_giris","k6_merdiven","k6_rahibe","k6_sunak","k6_takip","k7_dovus","k7_kapi","k7_kul","k7_oda","k7_sekizinci","kapak","kapak_yazisiz","kapi","koridor","magara","muhafiz","sinif_buyucu_erkek","sinif_buyucu_kadin","sinif_hirsiz_erkek","sinif_hirsiz_kadin","sinif_savasci_erkek","sinif_savasci_kadin","son_adini_bilen","son_ayna","son_baskasi","son_bekci","son_bogulma","son_cukur","son_golge","son_iki_ad","son_kacis","son_kalemsiz","son_kat1","son_kul","son_kul_eli","son_kul_rahibi","son_kul_yenildi","son_olum","son_ucuncu_yol","son_yukari","son_zincir"];</script>
 <script>
 /* Yedinci Kat — tarayıcı arayüzü. Motorun üstünde ince bir katman:
  * durumu çizer, düğmeleri motora bağlar, zarları canlandırır. Kural bilmez. */
@@ -3703,47 +4833,138 @@ body.canta-acik{overflow:hidden}
   }
 
   // ───────── harita ─────────
-  const HUCRE = 78, OFS = 1; // x: -1..1
-  function konum(h) { return { x: (h.x + OFS) * HUCRE + HUCRE / 2, y: h.y * 62 + 28 }; }
+  // Halvard'ın rulosu: elle çizilmiş odalar, kıvrımlı mürekkep yollar, kat basamakları ve mühür.
+  const HUCRE = 84, OFS = 1, SOL = 34; // x: -1..1; solda kat basamakları için yer
+  function konum(h) { return { x: SOL + (h.x + OFS) * HUCRE + HUCRE / 2, y: h.y * 62 + 56 }; }
   // Son düğümlerin haritası yok: oyuncunun son bulunduğu katı göster.
   let sonKat = 1;
   function katNo(id) { const h = kitap.dugumler[id].harita; if (h) sonKat = h.kat || 1; return sonKat; }
   function haritaBoyu(kat) {
     const yMax = Math.max(...Object.values(kitap.dugumler).filter((d) => d.harita && (d.harita.kat || 1) === kat).map((d) => d.harita.y));
-    return { w: HUCRE * 3, h: (yMax + 1) * 62 + 74 };
+    return { w: SOL + HUCRE * 3 + 6, h: Math.max((yMax + 1) * 62 + 120, 7 * 26 + 90) };
   }
-
-  function bosHarita() {
-    // Kapaktaki rulo: boş, yalnızca en dipte ıslak ad.
-    return '<svg viewBox="0 0 234 150"><path d="M117 8v70" stroke="#2b2118" stroke-width="1.5" stroke-dasharray="1 6" opacity=".45"/>' +
-      '<text class="yedinci" x="117" y="104">VII. KAT</text><text class="islak" id="kapakAd" x="117" y="128">' + esc(oyuncuAdi || 'adın') + '</text></svg>';
+  const ROMA = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+  // Basit, kararlı bir sayı üreteci: aynı oda her çizimde aynı titreklikte çizilsin.
+  function tohum(str) { let h = 2166136261; for (const c of String(str)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return () => ((h = Math.imul(h ^ (h >>> 13), 1274126177)) >>> 0) / 4294967296; }
+  // Odanın simgesi: düğümün içeriğinden çıkarılır (harita.ikon ile elle de verilebilir).
+  function odaIkonu(id) {
+    const d = kitap.dugumler[id];
+    if (d.harita && d.harita.ikon) return d.harita.ikon;
+    if (/merdiven/.test(id)) return 'merdiven';
+    if ((d.secenekler || []).some((c) => c.dovus)) return 'dovus';
+    if (/tuccar|demirci|rahibe|haritaci|corin|okuma/.test(id)) return 'kisi';
+    if (/ayna|yansima|galeri|kirik|labirent|teklif/.test(id)) return 'ayna';
+    if (/sunak|atolye|ocak|firtina|sel|takip|k7_kul/.test(id)) return 'ates';
+    if (/_su|akinti|bogul|kapak|sarnic/.test(id)) return 'su';
+    if (/hazine|yuva|kamp|avlu|salon/.test(id)) return 'sandik';
+    if (/kapi|giris|sekizinci|oda$/.test(id)) return 'kapi';
+    return 'nokta';
+  }
+  const IKONLAR =
+    '<symbol id="hi-merdiven" viewBox="0 0 12 12"><path d="M1 11h3V8h3V5h3V2h1.5"/></symbol>' +
+    '<symbol id="hi-dovus" viewBox="0 0 12 12"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9M3 8.5L1.2 10.3M9 8.5l1.8 1.8"/></symbol>' +
+    '<symbol id="hi-kisi" viewBox="0 0 12 12"><circle cx="6" cy="3.6" r="2.2"/><path d="M1.8 11c.6-3 2.2-4.3 4.2-4.3s3.6 1.3 4.2 4.3"/></symbol>' +
+    '<symbol id="hi-ayna" viewBox="0 0 12 12"><path d="M6 .8L10.5 6 6 11.2 1.5 6z"/><path d="M6 3.5L4 6.5"/></symbol>' +
+    '<symbol id="hi-ates" viewBox="0 0 12 12"><path d="M6 11c-2.6 0-4-1.7-4-3.8C2 4.6 4.4 3.9 5 1c2.3 1.6 5 3.6 5 6.2C10 9.3 8.6 11 6 11z"/></symbol>' +
+    '<symbol id="hi-su" viewBox="0 0 12 12"><path d="M.8 4.5q1.3-1.4 2.6 0t2.6 0 2.6 0 2.6 0M.8 8.5q1.3-1.4 2.6 0t2.6 0 2.6 0 2.6 0"/></symbol>' +
+    '<symbol id="hi-sandik" viewBox="0 0 12 12"><path d="M1.2 5h9.6v5.6H1.2zM1.2 5q0-3.4 4.8-3.4T10.8 5M6 6.5v1.6"/></symbol>' +
+    '<symbol id="hi-kapi" viewBox="0 0 12 12"><path d="M2.5 11.2V5q0-3.8 3.5-3.8T9.5 5v6.2zM7.6 7.2v.1"/></symbol>' +
+    '<symbol id="hi-nokta" viewBox="0 0 12 12"><circle cx="6" cy="6" r="1.8"/></symbol>';
+  // Her katın kenar süsü (soluk): 1 iğneler, 2 satırlar, 3 dalgalar, 4 ayna kırıkları, 5 kıvılcımlar, 6 kül, 7 zincir.
+  function katSusu(kat, b) {
+    const x = b.w - 46, y = b.h - 108, g = (icerik) => '<g class="sus" transform="translate(' + x + ' ' + y + ')">' + icerik + '</g>';
+    switch (kat) {
+      case 1: return g('<path d="M0 22l4-14 4 14M10 22l4-18 4 18M20 22l4-12 4 12"/>');
+      case 2: return g('<path d="M0 4h30M0 10h24M0 16h28M0 22h18"/>');
+      case 3: return g('<path d="M0 6q4-4 8 0t8 0 8 0 8 0M0 14q4-4 8 0t8 0 8 0 8 0M0 22q4-4 8 0t8 0 8 0 8 0"/>');
+      case 4: return g('<path d="M2 20l8-16 4 10zM16 22l6-12 8 6zM20 4l6 2-3 5z"/>');
+      case 5: return g('<path d="M4 22l3-7M14 20l-2-9M22 22l4-10M9 8l1-4M26 8l2-3"/>');
+      case 6: return g('<circle cx="3" cy="6" r="1.2"/><circle cx="12" cy="3" r="1"/><circle cx="22" cy="8" r="1.4"/><circle cx="7" cy="15" r="1"/><circle cx="18" cy="18" r="1.2"/><circle cx="28" cy="20" r="1"/>');
+      default: return g('<ellipse cx="6" cy="12" rx="6" ry="4"/><ellipse cx="17" cy="12" rx="6" ry="4"/><ellipse cx="28" cy="12" rx="6" ry="4"/>');
+    }
+  }
+  // Elle çizilmiş oda kutusu: köşeleri biraz kayık bir dörtgen.
+  function odaYolu(cx, cy, w, h, r) {
+    const j = () => (r() - 0.5) * 2.4;
+    const x0 = cx - w / 2, x1 = cx + w / 2, y0 = cy - h / 2, y1 = cy + h / 2;
+    return 'M' + (x0 + j()) + ' ' + (y0 + j()) + 'L' + (x1 + j()) + ' ' + (y0 + j()) + 'L' + (x1 + j()) + ' ' + (y1 + j()) + 'L' + (x0 + j()) + ' ' + (y1 + j()) + 'Z';
+  }
+  // Kıvrımlı mürekkep yol: iki oda arasında hafif eğri.
+  function egri(p, q, r) {
+    const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2, dx = q.x - p.x, dy = q.y - p.y;
+    const b = (r() - 0.5) * 0.35;
+    return 'M' + p.x + ' ' + p.y + 'Q' + (mx - dy * b) + ' ' + (my + dx * b) + ' ' + q.x + ' ' + q.y;
   }
 
   function haritaHTML() {
     const kat = katNo(s.dugum);
     const ayniKat = (h) => h && (h.kat || 1) === kat;
     const b = haritaBoyu(kat);
-    let svg = '<svg viewBox="0 0 ' + b.w + ' ' + b.h + '" role="img" aria-label="Kendini çizen harita">';
+    const mur = (s.sayaclar && s.sayaclar.murekkep) || 0;
+    const murSinif = mur <= 1 ? 'm-islak' : mur <= 5 ? 'm-kuruyor' : 'm-kurumus';
+    let svg = '<svg viewBox="0 0 ' + b.w + ' ' + b.h + '" role="img" aria-label="Kendini çizen harita, ' + kat + '. kat"><defs>' + IKONLAR + '</defs>';
+    // Pusula ve kat süsü
+    svg += '<g class="pusula" transform="translate(' + (b.w - 22) + ' 22)"><circle r="12"/><path class="dolu" d="M0 -16L2.6 0 0 16-2.6 0z"/><path d="M-16 0H16"/><text y="-19">K</text></g>';
+    svg += katSusu(kat, b);
+    // Kat basamakları (I–VII)
+    for (let n = 1; n <= 7; n++) {
+      const y = 30 + (n - 1) * 26, sinif = n < kat ? 'gecti' : n === kat ? 'bu' : 'gelecek';
+      svg += '<g class="basamak ' + sinif + '">' + (n === kat ? '<rect x="4" y="' + (y - 10) + '" width="24" height="18" rx="4"/>' : '<path d="M5 ' + (y + 8) + 'H27"/>') +
+        '<text x="16" y="' + (y + 3) + '">' + ROMA[n] + '</text></g>';
+    }
     const yeniler = [];
+    // Yollar
     for (const g of s.gecisler) {
       const [a, c] = g.split('>').map((id) => kitap.dugumler[id].harita);
       if (!ayniKat(a) || !ayniKat(c) || (a.x === c.x && a.y === c.y)) continue;
-      const p = konum(a), q = konum(c);
       const k = 'y:' + g, yeni = !cizilmis.has(k); if (yeni) yeniler.push(k);
-      svg += '<line class="yol' + (yeni ? ' yeni' : '') + '" x1="' + p.x + '" y1="' + p.y + '" x2="' + q.x + '" y2="' + q.y + '"/>';
+      const anahtar = [a.x, a.y, c.x, c.y].sort().join();
+      svg += '<path class="yol' + (yeni ? ' yeni' : '') + '" pathLength="1" d="' + egri(konum(a), konum(c), tohum(anahtar)) + '"/>';
     }
+    // Gidilmemiş çıkışlar: bu odadan, bu katta, henüz görülmemiş odalara giden seçenekler (yalnızca yön, ad yok)
     const odalar = new Map();
     for (const id of s.ziyaret) { const h = kitap.dugumler[id].harita; if (ayniKat(h)) odalar.set(h.x + ',' + h.y, { h, id }); }
     const simdiki = kitap.dugumler[s.dugum].harita;
-    for (const [kk, { h }] of odalar) {
+    if (simdiki && !s.dovus && !s.son) {
+      const hedefler = new Set();
+      const d = kitap.dugumler[s.dugum];
+      for (const c of M.secenekler(kitap, s)) {
+        const sc = d.secenekler[c.indeks] || {};
+        [sc.git, sc.sinama && sc.sinama.basari, sc.dovus && sc.dovus.zafer].forEach((t) => { if (t) hedefler.add(t); });
+      }
+      const cizilen = new Set();
+      for (const t of hedefler) {
+        const h = kitap.dugumler[t] && kitap.dugumler[t].harita;
+        if (!ayniKat(h) || odalar.has(h.x + ',' + h.y) || cizilen.has(h.x + ',' + h.y)) continue;
+        cizilen.add(h.x + ',' + h.y);
+        const p = konum(simdiki), q = konum(h), u = { x: p.x + (q.x - p.x) * 0.62, y: p.y + (q.y - p.y) * 0.62 };
+        svg += '<g class="cikis"><path d="M' + p.x + ' ' + p.y + 'L' + u.x + ' ' + u.y + '"/><circle cx="' + u.x + '" cy="' + u.y + '" r="7"/><text x="' + u.x + '" y="' + (u.y + 0.5) + '">?</text></g>';
+      }
+    }
+    // Odalar
+    for (const [kk, { h, id }] of odalar) {
       const p = konum(h), k = 'o:' + kat + ':' + kk, yeni = !cizilmis.has(k); if (yeni) yeniler.push(k);
       const simdi = simdiki && simdiki.x === h.x && simdiki.y === h.y;
-      svg += '<g class="oda' + (simdi ? ' simdi' : '') + (yeni ? ' yeni' : '') + '"><rect x="' + (p.x - 32) + '" y="' + (p.y - 15) + '" width="64" height="30" rx="5"/><text x="' + p.x + '" y="' + (p.y + 1) + '">' + esc(h.etiket) + '</text></g>';
+      const ikon = simdi ? 'nokta' : odaIkonu(id);
+      svg += '<g class="oda' + (simdi ? ' simdi' : '') + (yeni ? ' yeni' : '') + '"><path class="kutu" d="' + odaYolu(p.x, p.y, 76, 28, tohum(kat + kk)) + '"/>' +
+        (simdi ? '<circle class="burada" cx="' + (p.x - 27) + '" cy="' + p.y + '" r="4.5"/>' : '<use href="#hi-' + ikon + '" x="' + (p.x - 33) + '" y="' + (p.y - 6) + '" width="12" height="12"/>') +
+        '<text x="' + (p.x + 6) + '" y="' + (p.y + 1) + '">' + esc(h.etiket) + '</text></g>';
     }
-    svg += '<line x1="' + b.w / 2 + '" y1="' + (b.h - 70) + '" x2="' + b.w / 2 + '" y2="' + (b.h - 46) + '" stroke="#2b2118" stroke-width="1.5" stroke-dasharray="1 5" opacity=".5"/>';
-    svg += '<text class="yedinci" x="' + b.w / 2 + '" y="' + (b.h - 30) + '">VII. KAT</text><text class="islak" x="' + b.w / 2 + '" y="' + (b.h - 10) + '">' + esc(s.ad) + '</text></svg>';
-    yeniler.forEach((k) => cizilmis.add(k));
-    return '<div class="harita"><h3>Harita · ' + kat + '. Kat</h3>' + svg + '</div>';
+    // Yedinci kat ve mühür
+    const cx = SOL + HUCRE * 1.5;
+    svg += '<path class="dip" d="M' + cx + ' ' + (b.h - 84) + 'V' + (b.h - 62) + '"/>';
+    svg += '<text class="yedinci" x="' + cx + '" y="' + (b.h - 48) + '">VII. KAT</text>';
+    svg += '<g class="muhur"><ellipse cx="' + cx + '" cy="' + (b.h - 22) + '" rx="48" ry="16"/><ellipse class="ic" cx="' + cx + '" cy="' + (b.h - 22) + '" rx="42" ry="12"/>' +
+      '<text x="' + cx + '" y="' + (b.h - 21) + '">' + esc(s.ad) + '</text></g></svg>';
+    yeniler.forEach((x) => cizilmis.add(x));
+    const ad = (kitap.katAdlari && kitap.katAdlari[kat]) || '';
+    return '<div class="harita yeni-harita ' + murSinif + '"><h3>' + ROMA[kat] + ' · ' + esc(ad) + '</h3><p class="harita-alt">Halvard’ın rulosu, senin elinle</p>' + svg + '</div>';
+  }
+
+  function bosHarita() {
+    // Kapaktaki rulo: boş, yalnızca en dipte ıslak ad.
+    return '<svg viewBox="0 0 234 150"><path d="M117 8v70" stroke="#2b2118" stroke-width="1.5" stroke-dasharray="1 6" opacity=".45"/>' +
+      '<text class="yedinci" x="117" y="104">VII. KAT</text><text class="islak" id="kapakAd" x="117" y="128">' + esc(oyuncuAdi || 'adın') + '</text></svg>';
   }
 
   // ───────── karakter kâğıdı ─────────
