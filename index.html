@@ -16,6 +16,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <script src="katalog.js"></script>
 <script src="begeni.js"></script>
+<link rel="stylesheet" href="hareket/hareket.css">
 <style>
 /* Macera Kütüphanesi: gece, ahşap raflar, tek bir lamba ışığı.
    Düzen: tam ekran ışıklı giriş → yeni gelen vitrini → lamba ışığında vitrin rafı ve kütüphane fişi → nasıl okunur → künye. */
@@ -757,5 +758,9 @@ footer .siradaki { display: block; width: max-content; margin-top: 18px; font-si
   if (reduce) tick(0); else requestAnimationFrame(tick);
 })();
 </script>
+<!-- Hareket katmanı (GSAP): kaydırma ve giriş animasyonları; "hareketi azalt" diyenlerde çalışmaz -->
+<script src="hareket/gsap.min.js" defer></script>
+<script src="hareket/ScrollTrigger.min.js" defer></script>
+<script src="hareket/hareket.js" defer></script>
 </body>
 </html>

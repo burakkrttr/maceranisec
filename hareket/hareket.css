@@ -1,0 +1,7 @@
+/* Hareket katmanı (GSAP demo): GSAP'ın yönettiği yerlerde CSS animasyonları devre dışı */
+.hk-kelime { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .08em; margin-bottom: -.08em; }
+.hk-ic { display: inline-block; will-change: transform; }
+.hareket .fis { animation: none !important; }
+.hareket .step svg .draw { transition: none !important; }
+.hareket .kt[aria-pressed="true"] { transform: none; }
+.hareket #title, .hareket .reel { will-change: transform; }

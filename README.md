@@ -8,6 +8,8 @@ Kendi Maceranı Seç kitaplarının yayınlandığı site. Tamamen statik: HTML,
 index.html              Kütüphane (ana sayfa)
 katalog.js              Kitap listesi: raflar, vitrin ve sayılar buradan oluşur
 begeni.js               Raftaki beğeni sayaçları
+hareket/                Ana sayfanın hareket katmanı: GSAP (gsap.min.js, ScrollTrigger.min.js),
+                        hareket.js ve hareket.css. Silinirse site hareketsiz ama eksiksiz çalışır
 .nojekyll               GitHub Pages'in dosyaları işlemeden yayınlaması için
 kitaplar/
   fener/
