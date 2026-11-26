@@ -631,6 +631,8 @@ body.canta-acik{overflow:hidden}
     const sayacDegeri = (ad) => (s.sayaclar && s.sayaclar[ad]) || 0;
     for (const [ad, n] of Object.entries(k.sayacEnAz || {})) if (sayacDegeri(ad) < n) return k.neden ? { tamam: false, neden: k.neden } : { tamam: false, gizli: true };
     for (const [ad, n] of Object.entries(k.sayacEnFazla || {})) if (sayacDegeri(ad) > n) return k.neden ? { tamam: false, neden: k.neden } : { tamam: false, gizli: true };
+    // ozellikEnAz: tutmazsa gizlenir (ör. gelişimin "Çeviklik 4'e çıkınca Zırh +1" sürümü)
+    for (const [oz, n] of Object.entries(k.ozellikEnAz || {})) if ((s.ozellik[oz] || 0) < n) return { tamam: false, gizli: true };
     for (const [oz, enFazla] of Object.entries(k.ozellikEnFazla || {})) {
       if (s.ozellik[oz] > enFazla) return { tamam: false, neden: OZELLIK_ADLARI[oz] + ' en üst seviyede (' + s.ozellik[oz] + ')' };
     }
@@ -658,6 +660,8 @@ body.canta-acik{overflow:hidden}
     if (e.buyu) s.buyuHakki = Math.max(0, s.buyuHakki + e.buyu);
     // Dinlenme: büyü hakları sınıfın başlangıç sayısına döner (büyüsü olmayan sınıfta etkisiz).
     if (e.buyuYenile && s.buyuHakkiEnFazla) s.buyuHakki = s.buyuHakkiEnFazla;
+    // Kalıcı fazladan büyü hakkı (ör. Akıl 5'e çıkan Büyücü)
+    if (e.buyuEnFazla) { s.buyuHakkiEnFazla += e.buyuEnFazla; s.buyuHakki += e.buyuEnFazla; }
     // Kalıcı gelişimler
     for (const [oz, n] of Object.entries(e.ozellik || {})) s.ozellik[oz] = Math.min(KURAL.ozellikSiniri, s.ozellik[oz] + n);
     if (e.zirh) s.zirh += e.zirh;
@@ -1206,14 +1210,22 @@ body.canta-acik{overflow:hidden}
   'use strict';
 
   /** Kat sonu gelişimi: dört seçenek, kat başına bir kez. Seçilince merdivende kalırsın. */
+  // Kat sonu gelişimi. Özellikler dövüş dışında da işe yarar:
+  //  Güç: her +1 Güç en yüksek Can'ı da +2 artırır (dayanıklılık).
+  //  Çeviklik: 4'e ve 5'e çıkarken Zırh +1 (sıyrılma).
+  //  Akıl: Ateş Oku'nun hasarına eklenir; Büyücü 5'e çıkarken +1 büyü hakkı kazanır.
   function gelisim(kat, dugumId, metinler) {
     const bayrak = 'gelisim_k' + kat;
     const not = (n) => 'Bu katın izi üstünde kaldı. (' + n + ', kalıcı)';
+    const g = (metin, kosul, etki, etiket) => ({ metin: metin + ' (' + etiket + ')', kosul: Object.assign({ bayrakYok: bayrak }, kosul), etki: Object.assign({ bayrak }, etki), not: not(etiket), git: dugumId, gelisim: true });
     return [
-      { metin: metinler.guc + ' (+1 Güç)', kosul: { bayrakYok: bayrak, ozellikEnFazla: { guc: 4 } }, etki: { bayrak, ozellik: { guc: 1 } }, not: not('+1 Güç'), git: dugumId, gelisim: true },
-      { metin: metinler.ceviklik + ' (+1 Çeviklik)', kosul: { bayrakYok: bayrak, ozellikEnFazla: { ceviklik: 4 } }, etki: { bayrak, ozellik: { ceviklik: 1 } }, not: not('+1 Çeviklik'), git: dugumId, gelisim: true },
-      { metin: metinler.akil + ' (+1 Akıl)', kosul: { bayrakYok: bayrak, ozellikEnFazla: { akil: 4 } }, etki: { bayrak, ozellik: { akil: 1 } }, not: not('+1 Akıl'), git: dugumId, gelisim: true },
-      { metin: metinler.can + ' (+3 en yüksek Can)', kosul: { bayrakYok: bayrak }, etki: { bayrak, maxCan: 3 }, not: not('+3 en yüksek Can'), git: dugumId, gelisim: true },
+      g(metinler.guc, { ozellikEnFazla: { guc: 4 } }, { ozellik: { guc: 1 }, maxCan: 2 }, '+1 Güç, +2 en yüksek Can'),
+      g(metinler.ceviklik, { ozellikEnFazla: { ceviklik: 4 }, degil: { ozellikEnAz: { ceviklik: 3 } } }, { ozellik: { ceviklik: 1 } }, '+1 Çeviklik'),
+      g(metinler.ceviklik, { ozellikEnFazla: { ceviklik: 4 }, ozellikEnAz: { ceviklik: 3 } }, { ozellik: { ceviklik: 1 }, zirh: 1 }, '+1 Çeviklik, +1 Zırh'),
+      g(metinler.akil, { ozellikEnFazla: { akil: 4 }, degil: { sinif: 'buyucu', ozellikEnAz: { akil: 4 } } }, { ozellik: { akil: 1 } }, '+1 Akıl'),
+      // Büyücü 3 Akıl'la başlar: ilk merdivende Akıl 4 olamaz, bu sürüm 2. kattan itibaren var.
+      ...(kat > 1 ? [g(metinler.akil, { sinif: 'buyucu', ozellikEnFazla: { akil: 4 }, ozellikEnAz: { akil: 4 } }, { ozellik: { akil: 1 }, buyuEnFazla: 1 }, '+1 Akıl, +1 büyü hakkı')] : []),
+      g(metinler.can, {}, { maxCan: 3 }, '+3 en yüksek Can'),
     ];
   }
 
@@ -5036,7 +5048,7 @@ body.canta-acik{overflow:hidden}
       '<div class="satir"><span>Zırh</span><span>' + s.zirh + arti(s.zirh, c.zirh) + '</span></div>' +
       '<div class="satir"><span>' + esc(c.silah) + (s.silahEki ? ' <em class="arti">dövülmüş</em>' : '') + '</span><span>' + esc(M.Zar.ifadeAdi(c.hasarZari)) + ' + ' + (s.ozellik[c.saldiriOzelligi] + (s.silahEki || 0)) + ' hasar</span></div>' +
       '<div class="satir"><span>Şans</span><span>' + (s.sans > 0 ? 'Bir kez yeniden atabilirsin' : 'Kullanıldı') + '</span></div>' +
-      (c.buyuHakki ? '<div class="satir"><span>Büyü hakkı</span>' + hak(s.buyuHakki, c.buyuHakki) + '</div>' : '') +
+      (c.buyuHakki ? '<div class="satir"><span>Büyü hakkı</span>' + hak(s.buyuHakki, s.buyuHakkiEnFazla || c.buyuHakki) + '</div>' : '') +
       (c.kalkan ? '<div class="satir"><span>Kalkan</span><span>' + (s.dovus ? (s.dovus.kalkan ? 'Hazır' : 'Bu dövüşte kullanıldı') : 'Her dövüşte 1 darbe') + '</span></div>' : '') +
       '<div class="satir"><span>Altın</span><span>' + s.altin + '</span></div>' +
       Object.entries(kitap.sayaclar || {}).map(([ad, tanim]) => {
