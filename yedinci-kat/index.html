@@ -523,8 +523,15 @@ body.canta-acik{overflow:hidden}
     zorluk: { kolay: 10, orta: 13, zor: 16 },
     kacisZorlugu: 13,
     iksirZari: '2d4+2',  // 4–10 Can
-    buyuZari: '2d6',     // Ateş Oku: kesin isabet
+    buyuZari: '2d6',     // Ateş Oku: kesin isabet, hasar 2 zar + Akıl
     heceZirhi: 3,        // Kalkan Hecesi: dövüş boyunca Zırh +3 (1 büyü hakkı)
+    // Akıl'la açılan büyüler (büyü hakkı olan sınıf): Akıl 4 → Bağlama ve Şifa; Akıl 5 → Şimşek ve Zayıflatma
+    ileriBuyuler: {
+      baglama: { akil: 4, hak: 1 },                    // rakip bu tur saldıramaz
+      sifa: { akil: 4, hak: 1, zar: '1d6+2' },         // 1 zar + 2 Can (iksirden az; büyü hakkı da harcar)
+      simsek: { akil: 5, hak: 2, zar: '3d6' },         // 3 zar + Akıl hasar, kesin isabet
+      zayiflatma: { akil: 5, hak: 1, zirh: 2 },        // rakibin Zırhı dövüş boyunca −2
+    },
     kritikEsigi: 20,     // sınıf kendi eşiğini verebilir (Hırsız 19)
     ozellikSiniri: 5,    // kalıcı gelişimlerle bir özellik en fazla bu kadar olur
   };
@@ -868,6 +875,17 @@ body.canta-acik{overflow:hidden}
         aktif: s.buyuHakki > 0 && !s.dovus.ekZirh,
         neden: s.dovus.ekZirh ? 'Hece zaten etkin' : s.buyuHakki > 0 ? null : 'Büyü hakkın kalmadı',
       });
+      // Akıl'la açılan büyüler: eşiğin altındayken kilitli görünür ("Akıl 4'te açılır")
+      const akil = s.ozellik.akil || 0, IB = KURAL.ileriBuyuler;
+      const ileri = (id, ad, ek) => {
+        const t = IB[id], acik = akil >= t.akil, hakVar = s.buyuHakki >= t.hak;
+        const engel = !acik ? 'Akıl ' + t.akil + '’te açılır' : !hakVar ? (t.hak > 1 ? t.hak + ' büyü hakkı gerekir' : 'Büyü hakkın kalmadı') : ek ? ek() : null;
+        e.push({ id, ad: ad + (t.hak > 1 ? ' · ' + t.hak + ' büyü hakkı' : ''), aktif: !engel, neden: engel, ileri: true });
+      };
+      ileri('baglama', 'Bağlama Hecesi (rakip bu tur saldıramaz)');
+      ileri('sifa', 'Şifa Hecesi (' + Zar.ifadeAdi(IB.sifa.zar) + ' Can)', () => (s.can >= s.maxCan ? 'Canın dolu' : null));
+      ileri('simsek', 'Şimşek (' + Zar.ifadeAdi(IB.simsek.zar) + ' + Akıl ' + akil + ', kesin isabet)');
+      ileri('zayiflatma', 'Zayıflatma (rakibin Zırhı bu dövüşte −' + IB.zayiflatma.zirh + ')', () => (s.dovus.zayif ? 'Rakip zaten zayıf' : null));
     }
     if (s.dovus.kacis) {
       e.push({ id: 'kac', ad: 'Kaç', aktif: true, olasilik: basariOlasiligi(s.ozellik.ceviklik, s.dovus.kacisZorlugu) });
@@ -953,6 +971,27 @@ body.canta-acik{overflow:hidden}
       s.buyuHakki--;
       s.dovus.ekZirh = KURAL.heceZirhi;
       b.hece = KURAL.heceZirhi;
+    } else if (eylem === 'baglama') {
+      s.buyuHakki -= KURAL.ileriBuyuler.baglama.hak;
+      b.baglama = true;
+    } else if (eylem === 'sifa') {
+      s.buyuHakki -= KURAL.ileriBuyuler.sifa.hak;
+      const atis = Zar.ifadeAt(zar, KURAL.ileriBuyuler.sifa.zar, 'sifa');
+      const once = s.can;
+      s.can = Math.min(s.maxCan, s.can + atis.toplam);
+      b.sifa = { atis, iyilesme: s.can - once };
+    } else if (eylem === 'simsek') {
+      s.buyuHakki -= KURAL.ileriBuyuler.simsek.hak;
+      const a = Zar.ifadeAt(zar, KURAL.ileriBuyuler.simsek.zar, 'simsek');
+      a.ozellikEki = s.ozellik.akil || 0;
+      a.hasar = a.toplam + a.ozellikEki;
+      b.simsek = a;
+      verilen = a.hasar;
+    } else if (eylem === 'zayiflatma') {
+      s.buyuHakki -= KURAL.ileriBuyuler.zayiflatma.hak;
+      s.dovus.zayif = KURAL.ileriBuyuler.zayiflatma.zirh;
+      s.dovus.dusman.zirh -= s.dovus.zayif;
+      b.zayiflatma = s.dovus.zayif;
     } else if (eylem === 'iksir') {
       s.esyalar.iksir--;
       const atis = Zar.ifadeAt(zar, KURAL.iksirZari, 'iksir');
@@ -972,7 +1011,7 @@ body.canta-acik{overflow:hidden}
     }
     // Rakip, düşmediyse ve sen kaçmadıysan saldırır.
     const dustu = verilen >= s.dovus.dusmanCan;
-    const sasirdi = b.pusu; // pusuya düşen rakip o tur saldıramaz
+    const sasirdi = b.pusu || b.baglama; // pusuya düşen ya da bağlanan rakip o tur saldıramaz
     if (!dustu && !kacti && !sasirdi) b.dusman = dusmanSaldirisi(s, zar);
     s.bekleyen = b;
     return s;
@@ -989,6 +1028,10 @@ body.canta-acik{overflow:hidden}
     const p = [];
     if (b.oyuncu) p.push(b.oyuncu.isabet ? (b.oyuncu.sinsi ? 'Sinsi ilk vuruş! ' : b.oyuncu.kritik ? 'Kritik! ' : '') + 'Rakibine ' + b.oyuncu.hasar + ' hasar verdin.' : 'Iskaladın.');
     if (b.buyu) p.push('Ateş Oku ' + b.buyu.hasar + ' hasar verdi.');
+    if (b.simsek) p.push('Şimşek ' + b.simsek.hasar + ' hasar verdi.');
+    if (b.baglama) p.push('Bağlama Hecesi: ' + dm.ad + ' bu tur kıpırdayamadı.');
+    if (b.sifa) p.push('Şifa Hecesi ' + b.sifa.iyilesme + ' Can verdi.');
+    if (b.zayiflatma) p.push('Zayıflatma: rakibin Zırhı −' + b.zayiflatma + '.');
     if (b.muttefik) p.push(b.muttefik.isabet ? (b.muttefik.kritik ? 'Kritik! ' : '') + mAd(b) + ' ' + b.muttefik.hasar + ' hasar verdi.' : mAd(b) + ' ıskaladı.');
     if (b.iksir) p.push('İksirle ' + b.iksir.iyilesme + ' Can kazandın.');
     if (b.hece) p.push('Kalkan Hecesi: Zırhın bu dövüşte +' + b.hece + '.');
@@ -1018,6 +1061,7 @@ body.canta-acik{overflow:hidden}
     const dv = s.dovus;
     if (b.oyuncu) dv.dusmanCan -= b.oyuncu.hasar;
     if (b.buyu) dv.dusmanCan -= b.buyu.hasar;
+    if (b.simsek) dv.dusmanCan -= b.simsek.hasar;
     if (b.muttefik) dv.dusmanCan -= b.muttefik.hasar;
     if (b.dusman && b.dusman.isabet) {
       if (b.dusman.kalkanla) dv.kalkan--;
@@ -1222,9 +1266,11 @@ body.canta-acik{overflow:hidden}
       g(metinler.guc, { ozellikEnFazla: { guc: 4 } }, { ozellik: { guc: 1 }, maxCan: 2 }, '+1 Güç, +2 en yüksek Can'),
       g(metinler.ceviklik, { ozellikEnFazla: { ceviklik: 4 }, degil: { ozellikEnAz: { ceviklik: 3 } } }, { ozellik: { ceviklik: 1 } }, '+1 Çeviklik'),
       g(metinler.ceviklik, { ozellikEnFazla: { ceviklik: 4 }, ozellikEnAz: { ceviklik: 3 } }, { ozellik: { ceviklik: 1 }, zirh: 1 }, '+1 Çeviklik, +1 Zırh'),
-      g(metinler.akil, { ozellikEnFazla: { akil: 4 }, degil: { sinif: 'buyucu', ozellikEnAz: { akil: 4 } } }, { ozellik: { akil: 1 } }, '+1 Akıl'),
-      // Büyücü 3 Akıl'la başlar: ilk merdivende Akıl 4 olamaz, bu sürüm 2. kattan itibaren var.
-      ...(kat > 1 ? [g(metinler.akil, { sinif: 'buyucu', ozellikEnFazla: { akil: 4 }, ozellikEnAz: { akil: 4 } }, { ozellik: { akil: 1 }, buyuEnFazla: 1 }, '+1 Akıl, +1 büyü hakkı')] : []),
+      g(metinler.akil, { ozellikEnFazla: { akil: 4 }, degil: { sinif: 'buyucu', ozellikEnAz: { akil: 3 } } }, { ozellik: { akil: 1 } }, '+1 Akıl'),
+      // Büyücü Akıl 4'te Bağlama ve Şifa Hecesi'ni, 5'te Şimşek ve Zayıflatma'yı öğrenir (motor: KURAL.ileriBuyuler)
+      // Büyücü 2 Akıl'la başlar: Akıl 3 en erken 2. katın, Akıl 4 en erken 3. katın merdiveninde olur.
+      ...(kat > 1 ? [g(metinler.akil, { sinif: 'buyucu', ozellikEnAz: { akil: 3 }, degil: { ozellikEnAz: { akil: 4 } } }, { ozellik: { akil: 1 } }, '+1 Akıl; yeni büyüler: Bağlama ve Şifa Hecesi')] : []),
+      ...(kat > 2 ? [g(metinler.akil, { sinif: 'buyucu', ozellikEnFazla: { akil: 4 }, ozellikEnAz: { akil: 4 } }, { ozellik: { akil: 1 }, buyuEnFazla: 1 }, '+1 Akıl, +1 büyü hakkı; yeni büyüler: Şimşek ve Zayıflatma')] : []),
       g(metinler.can, {}, { maxCan: 3 }, '+3 en yüksek Can'),
     ];
   }
@@ -1355,13 +1401,13 @@ body.canta-acik{overflow:hidden}
         ad: 'Büyücü',
         aciklama: 'Kül rengi bir cüppe ve ezberden bilinen yasak heceler.',
         yetenek: 'Ustalık, bilgi: yazılar, rulolar, bitkiler, izler. 3 büyü hakkı: kesin isabetli Ateş Oku ve odaya göre başka büyüler.',
-        guc: 0, ceviklik: 1, akil: 3, can: 16, zorluk: 'Orta',
+        guc: 0, ceviklik: 1, akil: 2, can: 14, zorluk: 'Orta',
         zirh: 11, saldiriOzelligi: 'guc', buyuHakki: 3, ustalik: ['bilgi'],
         silah: 'Asa', hasarZari: '1d4',
         altin: 5, esyalar: { iksir: 2 },
         rozetler: [
           { ad: 'Ustalık: bilgi', acik: 'Yazılar, rulolar, bitkiler, izler: iki zar atar, yükseğini alır.' },
-          { ad: '3 büyü hakkı', acik: 'Kesin isabetli Ateş Oku, Kalkan Hecesi ve odaya göre başka büyüler.' },
+          { ad: '3 büyü hakkı', acik: 'Kesin isabetli Ateş Oku ve Kalkan Hecesi. Akıl 4’te Bağlama ve Şifa Hecesi, Akıl 5’te Şimşek ve Zayıflatma açılır.' },
           { ad: 'Dinlenince yenilenir', acik: 'Merdivenlerde büyü hakları tazelenir; 2 iksirle başlar.' },
         ],
       },
@@ -5304,6 +5350,16 @@ body.canta-acik{overflow:hidden}
       ilk += '<div class="atis"><span class="kim">Ateş Oku<small>kesin isabet</small></span>' + b.buyu.zarlar.map((v) => zarHTML(v, '', b.buyu.yuz)).join('') +
         (b.buyu.ozellikEki ? '<span class="ek">+ Akıl ' + b.buyu.ozellikEki + '</span>' : '') + '<span class="esit">= <b>' + b.buyu.hasar + '</b> hasar</span></div>';
     }
+    if (b.simsek) {
+      ilk += '<div class="atis"><span class="kim">Şimşek<small>kesin isabet</small></span>' + b.simsek.zarlar.map((v) => zarHTML(v, '', b.simsek.yuz)).join('') +
+        '<span class="ek">+ Akıl ' + b.simsek.ozellikEki + '</span><span class="esit">= <b>' + b.simsek.hasar + '</b> hasar</span></div>';
+    }
+    if (b.sifa) {
+      ilk += '<div class="atis"><span class="kim">Şifa Hecesi<small>' + esc(M.Zar.ifadeAdi(b.sifa.atis.ifade)) + '</small></span>' + b.sifa.atis.zarlar.map((v) => zarHTML(v, '', b.sifa.atis.yuz)).join('') +
+        '<span class="ek">+ ' + b.sifa.atis.ek + '</span><span class="esit">= <b>+' + b.sifa.iyilesme + '</b> Can</span></div>';
+    }
+    if (b.baglama) ilk += '<p class="hesap"><b>Bağlama Hecesi:</b> görünmez halkalar ' + esc(dm.ad) + ' üstüne kapandı. Bu tur saldıramaz.</p>';
+    if (b.zayiflatma) ilk += '<p class="hesap"><b>Zayıflatma:</b> ' + esc(dm.ad) + ' bu dövüşte Zırh <b>−' + b.zayiflatma + '</b> (şimdi ' + dm.zirh + ').</p>';
     if (b.muttefik) {
       const m = dv.muttefik || { ad: b.muttefikAd, silah: b.muttefik.silah };
       ilk += '<div class="taraf"><span class="kim">' + esc(m.ad) + '</span>' + zarHTML(b.muttefik.nat, 'muttefik', 20) + '</div>';
@@ -5325,6 +5381,8 @@ body.canta-acik{overflow:hidden}
     if (b.dusman) {
       ilk += '<div class="taraf"><span class="kim">' + esc(dm.ad) + '</span>' + zarHTML(b.dusman.nat, 'dusman', 20) + '</div>';
       gec += saldiriSonucu(b.dusman, dm.ad, 'Zırhın') + hasarHTML(dm.silah || dm.ad, b.dusman, 'dusman');
+    } else if (b.baglama) {
+      gec += '<p class="hesap">' + esc(dm.ad) + ' bağlı; bu tur karşılık veremedi.</p>';
     } else if (b.pusu && dv.dusmanCan > b.oyuncu.hasar) {
       gec += '<p class="hesap">' + esc(dm.ad) + ' şaşkın; bu tur karşılık veremedi.</p>';
     } else if (!b.kacis || !b.kacis.basari) {
