@@ -144,6 +144,8 @@ main{max-width:1240px;margin:0 auto;padding:clamp(16px,3vw,36px) max(4vw,16px) 6
 .zar.dusman{background:linear-gradient(145deg,#4d5a55,#2a3430);box-shadow:inset 0 -4px 0 #1a2220,0 6px 14px -4px #000}
 .zar i{border-radius:50%;background:var(--murekkep);opacity:0;transform:scale(.8)}
 .zar.dusman i{background:#e9e4d6}
+.zar.muttefik{background:linear-gradient(145deg,#b8473a,#7a231b);box-shadow:inset 0 -4px 0 #571610,0 6px 14px -4px #000}
+.zar.muttefik i{background:#f6e6d8}
 .zar i.a{opacity:1}
 .zar.yuvarlan{animation:yuvarlan .16s linear infinite}
 .zar.oturdu{animation:otur .35s ease-out}
@@ -155,6 +157,8 @@ main{max-width:1240px;margin:0 auto;padding:clamp(16px,3vw,36px) max(4vw,16px) 6
 .zar.cok span{position:relative;font:700 17px Cinzel,serif;color:var(--murekkep)}
 .zar.cok.dusman .zd-dis{fill:#3a4743;stroke:#1a2220}.zar.cok.dusman .zd-ic{fill:#4d5a55}.zar.cok.dusman .zd-kenar{stroke:#28322e}
 .zar.cok.dusman span{color:#e9e4d6}
+.zar.cok.muttefik .zd-dis{fill:#9b3a2e;stroke:#571610}.zar.cok.muttefik .zd-ic{fill:#b8473a}.zar.cok.muttefik .zd-kenar{stroke:#6e2018}
+.zar.cok.muttefik span{color:#f6e6d8}
 .atis{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px}
 .atis .kim{width:7.5em;color:var(--soluk);font-size:15px;line-height:1.25}
 .atis .kim small{display:block;font-size:13px;opacity:.85}
@@ -372,6 +376,7 @@ body.canta-acik{overflow:hidden}
 .zorluk-rozet{position:absolute;top:12px;right:12px;z-index:2;font:700 12px/1 Alegreya,serif;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px;background:#0b100ecc;border:1px solid #ffffff30;color:var(--yazi);backdrop-filter:blur(4px)}
 .zorluk-rozet.z-kolay{color:#a8e6b4;border-color:#4f8a5b}
 .zorluk-rozet.z-orta{color:#f2cf86;border-color:#8a6d3b}
+.ozet.yoldas b{color:#e07a6a;font-weight:600}
 
 </style>
 </head>
@@ -798,6 +803,13 @@ body.canta-acik{overflow:hidden}
     });
   }
 
+  /** Dövüşte yanında olan yoldaş (kitap.muttefikler): koşulu tutan ilki. dv.muttefikYok ile kapatılır (ör. yoldaşın kendisiyle dövüş). */
+  function muttefikBul(kitap, s, dv) {
+    if (dv.muttefikYok) return null;
+    const m = (kitap.muttefikler || []).find((x) => kosulSaglaniyor(kitap, s, x.kosul || {}).tamam);
+    return m ? { ad: m.ad, silah: m.silah, saldiri: m.saldiri, hasarZari: m.hasarZari, hasarEki: m.hasarEki || 0 } : null;
+  }
+
   function dovusBaslat(kitap, s, dv) {
     const sinif = kitap.siniflar[s.sinif];
     const dusman = dv.dusman.kopya ? kopyaDusman(kitap, s, dv.dusman) : Object.assign({}, dv.dusman);
@@ -817,6 +829,7 @@ body.canta-acik{overflow:hidden}
       // pusuHerkes: fırsat sınıfa özel değil (ör. rakibin zayıflığını fark ettiysen herkes yararlanır)
       pusu: !!(dv.pusu && (sinif.sinsiIlkVurus || dv.pusuHerkes)),
       ekZirh: 0, // Kalkan Hecesi gibi dövüşe özel Zırh artışı
+      muttefik: muttefikBul(kitap, s, dv), // yanındaki yoldaş: senden sonra, rakipten önce vurur
       kayit: [],
     };
   }
@@ -841,7 +854,7 @@ body.canta-acik{overflow:hidden}
     if (sinif.buyuHakki) {
       e.push({
         id: 'buyu',
-        ad: 'Ateş Oku (' + Zar.ifadeAdi(KURAL.buyuZari) + ', kesin isabet)',
+        ad: 'Ateş Oku (' + Zar.ifadeAdi(KURAL.buyuZari) + ' + Akıl ' + (s.ozellik.akil || 0) + ', kesin isabet)',
         aktif: s.buyuHakki > 0,
         neden: s.buyuHakki > 0 ? null : 'Büyü hakkın kalmadı',
       });
@@ -885,6 +898,22 @@ body.canta-acik{overflow:hidden}
     });
   }
 
+  function muttefikSaldirisi(s, zar) {
+    const m = s.dovus.muttefik;
+    return saldiriAt(zar, {
+      kim: 'muttefik', bonus: m.saldiri, zirh: s.dovus.dusman.zirh,
+      kritikEsigi: KURAL.kritikEsigi, hasarZari: m.hasarZari, hasarEki: m.hasarEki, silah: m.silah,
+    });
+  }
+
+  /** Ateş Oku: kesin isabet; hasar 2 zar + Akıl. */
+  function buyuAt(s, zar) {
+    const a = Zar.ifadeAt(zar, KURAL.buyuZari, 'buyu');
+    a.ozellikEki = s.ozellik.akil || 0;
+    a.hasar = a.toplam + a.ozellikEki;
+    return a;
+  }
+
   function dusmanSaldirisi(s, zar) {
     const dm = s.dovus.dusman;
     return saldiriAt(zar, {
@@ -914,8 +943,8 @@ body.canta-acik{overflow:hidden}
       b.sansUygun = !b.oyuncu.isabet && s.sans > 0;
     } else if (eylem === 'buyu') {
       s.buyuHakki--;
-      b.buyu = Zar.ifadeAt(zar, KURAL.buyuZari, 'buyu');
-      verilen = b.buyu.toplam;
+      b.buyu = buyuAt(s, zar);
+      verilen = b.buyu.hasar;
     } else if (eylem === 'hece') {
       s.buyuHakki--;
       s.dovus.ekZirh = KURAL.heceZirhi;
@@ -930,9 +959,15 @@ body.canta-acik{overflow:hidden}
       b.kacis = sinamaAt(s, 'ceviklik', s.dovus.kacisZorlugu, zar);
       b.sansUygun = b.kacis.sansUygun;
     }
+    const kacti = b.kacis && b.kacis.basari;
+    // Yoldaş: rakip hâlâ ayaktaysa ve kaçmadıysan o da vurur.
+    if (s.dovus.muttefik && !kacti && verilen < s.dovus.dusmanCan) {
+      b.muttefik = muttefikSaldirisi(s, zar);
+      b.muttefikAd = s.dovus.muttefik.ad;
+      verilen += b.muttefik.hasar;
+    }
     // Rakip, düşmediyse ve sen kaçmadıysan saldırır.
     const dustu = verilen >= s.dovus.dusmanCan;
-    const kacti = b.kacis && b.kacis.basari;
     const sasirdi = b.pusu; // pusuya düşen rakip o tur saldıramaz
     if (!dustu && !kacti && !sasirdi) b.dusman = dusmanSaldirisi(s, zar);
     s.bekleyen = b;
@@ -945,10 +980,12 @@ body.canta-acik{overflow:hidden}
     if (s.can <= 0) { s.dovus = null; git(kitap, s, kitap.olumDugumu, dv.dusman.ad + ' son darbeyi indirdi.'); }
   }
 
+  function mAd(b) { return b.muttefikAd || 'Yoldaşın'; }
   function turOzeti(b, dm) {
     const p = [];
     if (b.oyuncu) p.push(b.oyuncu.isabet ? (b.oyuncu.sinsi ? 'Sinsi ilk vuruş! ' : b.oyuncu.kritik ? 'Kritik! ' : '') + 'Rakibine ' + b.oyuncu.hasar + ' hasar verdin.' : 'Iskaladın.');
-    if (b.buyu) p.push('Ateş Oku ' + b.buyu.toplam + ' hasar verdi.');
+    if (b.buyu) p.push('Ateş Oku ' + b.buyu.hasar + ' hasar verdi.');
+    if (b.muttefik) p.push(b.muttefik.isabet ? (b.muttefik.kritik ? 'Kritik! ' : '') + mAd(b) + ' ' + b.muttefik.hasar + ' hasar verdi.' : mAd(b) + ' ıskaladı.');
     if (b.iksir) p.push('İksirle ' + b.iksir.iyilesme + ' Can kazandın.');
     if (b.hece) p.push('Kalkan Hecesi: Zırhın bu dövüşte +' + b.hece + '.');
     if (b.kacis) p.push(b.kacis.basari ? 'Kaçtın.' : 'Kaçamadın.');
@@ -976,7 +1013,8 @@ body.canta-acik{overflow:hidden}
 
     const dv = s.dovus;
     if (b.oyuncu) dv.dusmanCan -= b.oyuncu.hasar;
-    if (b.buyu) dv.dusmanCan -= b.buyu.toplam;
+    if (b.buyu) dv.dusmanCan -= b.buyu.hasar;
+    if (b.muttefik) dv.dusmanCan -= b.muttefik.hasar;
     if (b.dusman && b.dusman.isabet) {
       if (b.dusman.kalkanla) dv.kalkan--;
       else s.can -= b.dusman.hasar;
@@ -1005,8 +1043,9 @@ body.canta-acik{overflow:hidden}
     } else if (b.tip === 'tur' && b.oyuncu) {
       yeni = Object.assign({}, b, { oyuncu: oyuncuSaldirisi(kitap, s, zar) });
       yeni.onceki = { zar: b.oyuncu.nat };
-      // Yeni vuruş rakibi düşürüyorsa rakip saldıramaz.
-      if (yeni.oyuncu.hasar >= s.dovus.dusmanCan) yeni.dusman = null;
+      // Yeni vuruş rakibi düşürüyorsa yoldaş da rakip de vuramaz; yoldaşla birlikte düşürüyorsa rakip saldıramaz.
+      if (yeni.oyuncu.hasar >= s.dovus.dusmanCan) { yeni.dusman = null; yeni.muttefik = null; }
+      else if (yeni.muttefik && yeni.oyuncu.hasar + yeni.muttefik.hasar >= s.dovus.dusmanCan) yeni.dusman = null;
     } else if (b.tip === 'tur' && b.kacis) {
       yeni = Object.assign({}, b, { kacis: sinamaAt(s, 'ceviklik', b.kacis.zorluk, zar) });
       yeni.onceki = { zar: b.kacis.zar };
@@ -1235,14 +1274,14 @@ body.canta-acik{overflow:hidden}
   /** Kat 7: Kül'le dövüş. Islak adı göremez (daha zayıf); kuruyan adı görür. */
   function kulDovusu(metin, kosulEk, hatirla, ek, not) {
     return [
-      { ad: 'Kör Kül', can: 22, zirh: 12, kosul: { sayacEnFazla: { murekkep: 1 } } },
-      { ad: 'Kül', can: 28, zirh: 13, kosul: { sayacEnAz: { murekkep: 2 } } },
+      { ad: 'Kör Kül', can: 28, zirh: 13, kosul: { sayacEnFazla: { murekkep: 1 } } },
+      { ad: 'Kül', can: 34, zirh: 14, kosul: { sayacEnAz: { murekkep: 2 } } },
     ].map((v) => {
       const c = { metin, kosul: Object.assign({}, kosulEk || {}, v.kosul) };
       if (hatirla) c.hatirla = hatirla;
       if (not) c.not = not;
       c.dovus = {
-        dusman: { ad: v.ad, can: v.can - (ek.canEksi || 0), zirh: v.zirh - (ek.zirhEksi || 0), saldiri: 5, silah: 'Kül ateşi ve pençe', hasarZari: '1d10', hasarEki: v.ad === 'Kül' ? 2 : 1 },
+        dusman: { ad: v.ad, can: v.can - (ek.canEksi || 0), zirh: v.zirh - (ek.zirhEksi || 0), saldiri: 8, silah: 'Kül ateşi ve pençe', hasarZari: '1d12', hasarEki: 2 },
         zafer: 'son_kul_yenildi', zaferNot: 'Kül’ün başı son kez kuyunun ağzına düştü.',
       };
       if (ek.pusu) { c.dovus.pusu = true; c.dovus.pusuHerkes = !!ek.pusuHerkes; }
@@ -1316,9 +1355,15 @@ body.canta-acik{overflow:hidden}
       },
     },
 
+    // Dövüşte yanında olan yoldaşlar: koşulu tutan ilki her turda senden sonra vurur.
+    muttefikler: [
+      { ad: 'Corin', silah: 'Arbalet', saldiri: 4, hasarZari: '1d6', hasarEki: 1,
+        kosul: { bayrak: 'corin_birlikte', bayrakYok: ['corin_kayip', 'corin_ihanet', 'corin_ayrildi'] } },
+    ],
+
     esyalar: {
       iksir: { ad: 'Şifa iksiri', aciklama: 'Kırmızı, koyu, demir tadında. İçince 2 × 4 yüzlü + 2 Can verir. Dövüşte bir tur sürer; dövüş dışında çantadan içebilirsin.' },
-      mesale: { ad: 'Meşale', aciklama: 'Halvard’ın verdiği, katranlı bez sarılı bir meşale. Karanlık yarıkları aydınlatır; bazı yaratıklar ışıktan kaçar. Bir kez yakılınca söner.' },
+      mesale: { ad: 'Meşale', aciklama: 'Katranlı bez sarılı bir meşale. Karanlık yarıkları aydınlatır; bazı yaratıklar ışıktan kaçar. Bir kez yakılınca söner.' },
       maymuncuk: { ad: 'Maymuncuk', aciklama: 'İnce çelikten bir takım. Hırsızın elinde birçok kilidin şarkısını çalar.' },
       kemik_anahtar: { ad: 'Kemik anahtar', aciklama: 'Sapı bir omurdan oyulmuş. Kemik kilitlerin yanında hafifçe ısınır.' },
       halvard_sayfasi: { ad: 'Halvard’ın sayfası', aciklama: 'Haritacının günlüğünden kopmuş sayfalar. Üçü bulunabilir. Okumak için Belgeler bölümüne bak.' },
@@ -1968,7 +2013,7 @@ body.canta-acik{overflow:hidden}
             kosul: { bayrak: 'corin_birlikte', sayacEnAz: MUREKKEP_EN_AZ(3) },
             hatirla: 'Mürekkep: sürü seni tanıyor',
             dovus: {
-              dusman: { ad: 'Mürekkep Böcekleri', can: 5, zirh: 11, saldiri: 4, silah: 'Kalem çeneler', hasarZari: '1d4', hasarEki: 1 },
+              dusman: { ad: 'Mürekkep Böcekleri', can: 10, zirh: 12, saldiri: 5, silah: 'Kalem çeneler', hasarZari: '1d6', hasarEki: 1 },
               zafer: 'k2_merdiven',
               zaferNot: 'Sürünün yarısı sana hiç saldırmadı; Corin’e saldırdı. Son ok kalbine saplandı, böcekler mürekkebe dönüp aktı. Corin sana uzun uzun baktı.',
               kacis: 'k2_okuma',
@@ -1979,7 +2024,7 @@ body.canta-acik{overflow:hidden}
             metin: 'Corin’le sırt sırta dövüş',
             kosul: { bayrak: 'corin_birlikte', sayacEnFazla: { murekkep: 2 } },
             dovus: {
-              dusman: { ad: 'Mürekkep Böcekleri', can: 10, zirh: 11, saldiri: 4, silah: 'Kalem çeneler', hasarZari: '1d4', hasarEki: 1 },
+              dusman: { ad: 'Mürekkep Böcekleri', can: 20, zirh: 12, saldiri: 5, silah: 'Kalem çeneler', hasarZari: '1d6', hasarEki: 1 },
               zafer: 'k2_merdiven',
               zaferNot: 'Corin’in son oku sürünün kalbine saplandı. Böcekler yeniden mürekkebe dönüp yere aktı.',
               kacis: 'k2_okuma',
@@ -1991,7 +2036,7 @@ body.canta-acik{overflow:hidden}
             kosul: { bayrakYok: 'corin_birlikte', sayacEnAz: MUREKKEP_EN_AZ(3) },
             hatirla: 'Mürekkep: sürü seni tanıyor',
             dovus: {
-              dusman: { ad: 'Mürekkep Böcekleri', can: 10, zirh: 11, saldiri: 5, silah: 'Kalem çeneler', hasarZari: '1d4', hasarEki: 2 },
+              dusman: { ad: 'Mürekkep Böcekleri', can: 10, zirh: 12, saldiri: 5, silah: 'Kalem çeneler', hasarZari: '1d6', hasarEki: 1 },
               zafer: 'k2_merdiven',
               zaferNot: 'Sürünün yarısı sana dokunmadı bile; yanından akıp geçti. Ötekiler de son böcekle birlikte mürekkebe döndü.',
               kacis: 'k2_okuma',
@@ -2002,7 +2047,7 @@ body.canta-acik{overflow:hidden}
             metin: 'Silahını çek ve dövüş',
             kosul: { bayrakYok: 'corin_birlikte', sayacEnFazla: { murekkep: 2 } },
             dovus: {
-              dusman: { ad: 'Mürekkep Böcekleri', can: 20, zirh: 11, saldiri: 5, silah: 'Kalem çeneler', hasarZari: '1d4', hasarEki: 2 },
+              dusman: { ad: 'Mürekkep Böcekleri', can: 20, zirh: 12, saldiri: 5, silah: 'Kalem çeneler', hasarZari: '1d6', hasarEki: 1 },
               zafer: 'k2_merdiven',
               zaferNot: 'Son böcek de yere düşüp bir damla mürekkebe döndü. Botların kapkara.',
               kacis: 'k2_okuma',
@@ -2141,7 +2186,7 @@ body.canta-acik{overflow:hidden}
             kosul: { sinif: 'hirsiz' },
             not: 'Gölge yanından geçerken hançerini suya daldırdın.',
             dovus: {
-              dusman: { ad: 'Sarnıç Yılanı', can: 19, zirh: 13, saldiri: 5, silah: 'Zehirli dişler', hasarZari: '1d6', hasarEki: 3 },
+              dusman: { ad: 'Sarnıç Yılanı', can: 22, zirh: 13, saldiri: 6, silah: 'Zehirli dişler', hasarZari: '1d6', hasarEki: 3 },
               pusu: true,
               zafer: 'k3_yuva', zaferEtki: { bayrak: 'yilan_oldu', can: -2 }, zaferNot: 'Yılan son bir kez kıvrılıp suya gömüldü ve bir daha çıkmadı. Bir dişinin değdiği yer zonkluyor; zehir. (−2 Can)',
               kacis: 'k3_tuccar', kacisZorlugu: 13, kacisNot: 'Kuru bir oyuğa sıçradın. Yılan suyun kenarında durdu; kuruya çıkmıyor.',
@@ -2186,7 +2231,7 @@ body.canta-acik{overflow:hidden}
           {
             metin: 'Silahını çek, gelmesini bekle',
             dovus: {
-              dusman: { ad: 'Sarnıç Yılanı', can: 19, zirh: 13, saldiri: 5, silah: 'Zehirli dişler', hasarZari: '1d6', hasarEki: 3 },
+              dusman: { ad: 'Sarnıç Yılanı', can: 22, zirh: 13, saldiri: 6, silah: 'Zehirli dişler', hasarZari: '1d6', hasarEki: 3 },
               zafer: 'k3_yuva', zaferEtki: { bayrak: 'yilan_oldu', can: -2 }, zaferNot: 'Yılan son bir kez kıvrılıp suya gömüldü ve bir daha çıkmadı. Bir dişinin değdiği yer zonkluyor; zehir. (−2 Can)',
               kacis: 'k3_tuccar', kacisZorlugu: 13, kacisNot: 'Kuru bir oyuğa sıçradın. Yılan suyun kenarında durdu; kuruya çıkmıyor.',
             },
@@ -2218,7 +2263,7 @@ body.canta-acik{overflow:hidden}
             metin: 'Corin’le birlikte dövüş',
             kosul: { bayrak: 'corin_birlikte' },
             dovus: {
-              dusman: { ad: 'Sarnıç Yılanı', can: 14, zirh: 13, saldiri: 5, silah: 'Zehirli dişler', hasarZari: '1d6', hasarEki: 3 },
+              dusman: { ad: 'Sarnıç Yılanı', can: 22, zirh: 13, saldiri: 6, silah: 'Zehirli dişler', hasarZari: '1d6', hasarEki: 3 },
               zafer: 'k3_yuva', zaferEtki: { bayrak: 'yilan_oldu', can: -2 }, zaferNot: 'Corin’in oku yılanın damağına saplandı; senin darbenle birlikte dev gövde suya çöktü. Bir dişinin değdiği yer zonkluyor; zehir. (−2 Can)',
               kacis: 'k3_tuccar', kacisZorlugu: 13, kacisNot: 'Kuru bir oyuğa sıçradınız. Yılan suyun kenarında durdu; kuruya çıkmıyor.',
             },
@@ -2227,7 +2272,7 @@ body.canta-acik{overflow:hidden}
             metin: 'Silahını çek ve dövüş',
             kosul: { bayrakYok: 'corin_birlikte' },
             dovus: {
-              dusman: { ad: 'Sarnıç Yılanı', can: 19, zirh: 13, saldiri: 5, silah: 'Zehirli dişler', hasarZari: '1d6', hasarEki: 3 },
+              dusman: { ad: 'Sarnıç Yılanı', can: 22, zirh: 13, saldiri: 6, silah: 'Zehirli dişler', hasarZari: '1d6', hasarEki: 3 },
               zafer: 'k3_yuva', zaferEtki: { bayrak: 'yilan_oldu', can: -2 }, zaferNot: 'Yılan son bir kez kıvrılıp suya gömüldü ve bir daha çıkmadı. Bir dişinin değdiği yer zonkluyor; zehir. (−2 Can)',
               kacis: 'k3_tuccar', kacisZorlugu: 13, kacisNot: 'Kuru bir oyuğa sıçradın. Yılan suyun kenarında durdu; kuruya çıkmıyor.',
             },
@@ -2800,7 +2845,7 @@ body.canta-acik{overflow:hidden}
             hatirla: 'Corin’i akıntıdan kurtardın',
             not: 'Corin’in oku aynanın tam ortasına saplandı. Çatlak gölgenin göğsünde de açıldı; sendeledi, ilk kez senden önce değil, senden sonra.',
             dovus: {
-              dusman: { ad: 'Çatlak Gölge', kopya: { canOrani: 0.5, zirhFarki: -2 } },
+              dusman: { ad: 'Çatlak Gölge', kopya: { canOrani: 0.6, zirhFarki: -2 } },
               pusu: true, pusuHerkes: true,
               zafer: 'k4_kirik', zaferNot: 'Çatlak gölge cam tozuna dönüp dağıldı. Corin arbaletini indirdi. “Ödeştik,” dedi.',
               kacis: 'k4_labirent', kacisZorlugu: 13, kacisNot: 'Aynaların arasına daldın.',
@@ -2812,7 +2857,7 @@ body.canta-acik{overflow:hidden}
             kosul: { sayacEnFazla: { murekkep: 1 }, bayrak: 'gecikme_fark' },
             not: 'Kılıcını kaldırmayı düşündüğün an kaldırdın. Gölge bunu ancak bir an sonra öğrendi.',
             dovus: {
-              dusman: { ad: 'Ayna Gölgesi', kopya: { canOrani: 0.75, zirhFarki: -1 } },
+              dusman: { ad: 'Ayna Gölgesi', kopya: { canOrani: 0.85, zirhFarki: -1 } },
               pusu: true, pusuHerkes: true,
               zafer: 'k4_kirik', zaferNot: 'Gölge bir an daha senin hareketini taklit etti, düşüşünü bile. Sonra cam tozuna dönüp dağıldı.',
               kacis: 'k4_labirent', kacisZorlugu: 13, kacisNot: 'Aynaların arasına daldın. Gölge seni izleyemedi; yansımalar onu da şaşırttı.',
@@ -2823,7 +2868,7 @@ body.canta-acik{overflow:hidden}
             kosul: { sayacEnAz: { murekkep: 2 }, bayrak: 'gecikme_fark' },
             not: 'Kılıcını kaldırmayı düşündüğün an kaldırdın. Gölge bunu ancak bir an sonra öğrendi.',
             dovus: {
-              dusman: { ad: 'Ayna Gölgesi', kopya: { canOrani: 1, zirhFarki: 0 } },
+              dusman: { ad: 'Ayna Gölgesi', kopya: { canOrani: 1.15, zirhFarki: 0 } },
               pusu: true, pusuHerkes: true,
               zafer: 'k4_kirik', zaferNot: 'Gölge bir an daha senin hareketini taklit etti, düşüşünü bile. Sonra cam tozuna dönüp dağıldı.',
               kacis: 'k4_labirent', kacisZorlugu: 13, kacisNot: 'Aynaların arasına daldın. Gölge seni izleyemedi; yansımalar onu da şaşırttı.',
@@ -2851,7 +2896,7 @@ body.canta-acik{overflow:hidden}
             hatirla: 'Mürekkep: adın hâlâ ıslak',
             kosul: ISLAK,
             dovus: {
-              dusman: { ad: 'Ayna Gölgesi', kopya: { canOrani: 0.75, zirhFarki: -1 } },
+              dusman: { ad: 'Ayna Gölgesi', kopya: { canOrani: 0.85, zirhFarki: -1 } },
               zafer: 'k4_kirik', zaferNot: 'Gölge son darbeyi seninle aynı anda indirmeye çalıştı; ama sen bir kez olsun daha hızlıydın. Cam tozuna dönüp dağıldı.',
               kacis: 'k4_labirent', kacisZorlugu: 13, kacisNot: 'Aynaların arasına daldın. Gölge seni izleyemedi; yansımalar onu da şaşırttı.',
             },
@@ -2860,7 +2905,7 @@ body.canta-acik{overflow:hidden}
             metin: 'Yansımanla dövüş',
             kosul: { sayacEnAz: { murekkep: 2 } },
             dovus: {
-              dusman: { ad: 'Ayna Gölgesi', kopya: { canOrani: 1, zirhFarki: 0 } },
+              dusman: { ad: 'Ayna Gölgesi', kopya: { canOrani: 1.15, zirhFarki: 0 } },
               zafer: 'k4_kirik', zaferNot: 'Gölge son darbeyi seninle aynı anda indirmeye çalıştı; ama sen bir kez olsun daha hızlıydın. Cam tozuna dönüp dağıldı.',
               kacis: 'k4_labirent', kacisZorlugu: 13, kacisNot: 'Aynaların arasına daldın. Gölge seni izleyemedi; yansımalar onu da şaşırttı.',
             },
@@ -3220,7 +3265,7 @@ body.canta-acik{overflow:hidden}
             hatirla: 'Corin’in uyarısı',
             not: 'Soğuk çatlağa ilk darbeyi o daha dönmeden indirdin.',
             dovus: {
-              dusman: { ad: 'Cüruf Devi', can: 16, zirh: 12, saldiri: 3, silah: 'Cüruf yumruğu', hasarZari: '1d10', hasarEki: 1 },
+              dusman: { ad: 'Cüruf Devi', can: 25, zirh: 13, saldiri: 6, silah: 'Cüruf yumruğu', hasarZari: '1d10', hasarEki: 1 },
               pusu: true, pusuHerkes: true,
               zafer: 'k5_sel', zaferNot: 'Dev soğuk yanından çatladı ve bir yığın siyah taşa dönüştü. Göğsündeki halka yere düştü; üstünde ad yoktu.',
               kacis: 'k5_sel', kacisZorlugu: 13, kacisNot: 'Devin bacaklarının arasından kaçtın. Arkanda cüruf kabarmaya başladı.',
@@ -3231,7 +3276,7 @@ body.canta-acik{overflow:hidden}
             kosul: { esya: 'ayna_kalkani' },
             not: 'Kalkanındaki gümüş ocak ışığını devin çatlağına geri fırlattı; kendi ateşiyle kör oldu.',
             dovus: {
-              dusman: { ad: 'Kör Cüruf Devi', can: 18, zirh: 10, saldiri: 2, silah: 'Cüruf yumruğu', hasarZari: '1d10', hasarEki: 1 },
+              dusman: { ad: 'Kör Cüruf Devi', can: 27, zirh: 11, saldiri: 4, silah: 'Cüruf yumruğu', hasarZari: '1d10', hasarEki: 2 },
               zafer: 'k5_sel', zaferNot: 'Kör dev yönünü bulamadan yığıldı. Göğsündeki halka yere düştü; üstünde ad yoktu.',
               kacis: 'k5_sel', kacisZorlugu: 13, kacisNot: 'Kör devin yanından kaçtın.',
             },
@@ -3242,7 +3287,7 @@ body.canta-acik{overflow:hidden}
             etki: { buyu: -1 },
             not: 'Hecen havadaki bütün nemi topladı ve devin çatlaklarına doldurdu. Buhar fışkırdı; dev yarı yarıya soğudu.',
             dovus: {
-              dusman: { ad: 'Soğumuş Cüruf Devi', can: 10, zirh: 11, saldiri: 3, silah: 'Cüruf yumruğu', hasarZari: '1d10', hasarEki: 0 },
+              dusman: { ad: 'Soğumuş Cüruf Devi', can: 14, zirh: 12, saldiri: 5, silah: 'Cüruf yumruğu', hasarZari: '1d10', hasarEki: 0 },
               zafer: 'k5_sel', zaferNot: 'Soğumuş dev çatırdayarak dağıldı.',
               kacis: 'k5_sel', kacisZorlugu: 13, kacisNot: 'Buharın içinden kaçtın.',
             },
@@ -3250,7 +3295,7 @@ body.canta-acik{overflow:hidden}
           {
             metin: 'Silahını çek ve dövüş',
             dovus: {
-              dusman: { ad: 'Cüruf Devi', can: 16, zirh: 12, saldiri: 3, silah: 'Cüruf yumruğu', hasarZari: '1d10', hasarEki: 1 },
+              dusman: { ad: 'Cüruf Devi', can: 25, zirh: 13, saldiri: 6, silah: 'Cüruf yumruğu', hasarZari: '1d10', hasarEki: 1 },
               zafer: 'k5_sel', zaferNot: 'Dev son bir kez kızardı ve bir yığın siyah taşa dönüştü. Göğsündeki halka yere düştü; üstünde ad yoktu.',
               kacis: 'k5_sel', kacisZorlugu: 13, kacisNot: 'Devin bacaklarının arasından kaçtın. Arkanda cüruf kabarmaya başladı.',
             },
@@ -3621,7 +3666,7 @@ body.canta-acik{overflow:hidden}
             etki: { buyu: -1 },
             not: 'Hecen avluda bir kasırga kaldırdı. Bekçinin yarısı havaya savruldu; kalanı yeniden toplanmaya çalışırken üstüne yürüdün.',
             dovus: {
-              dusman: { ad: 'Dağılmış Kül Bekçisi', can: 11, zirh: 11, saldiri: 4, silah: 'Kül pençesi', hasarZari: '1d8', hasarEki: 1 },
+              dusman: { ad: 'Dağılmış Kül Bekçisi', can: 16, zirh: 12, saldiri: 6, silah: 'Kül pençesi', hasarZari: '1d8', hasarEki: 2 },
               zafer: 'k6_rahibe', zaferNot: 'Bekçi son kez dağıldı ve kaplarına geri aktı. Avlu sessizleşti.',
               kacis: 'k6_rahibe', kacisZorlugu: 13, kacisNot: 'Kül bulutunun içinden kaçtın.',
             },
@@ -3637,7 +3682,7 @@ body.canta-acik{overflow:hidden}
           {
             metin: 'Silahını çek ve dövüş',
             dovus: {
-              dusman: { ad: 'Kül Bekçisi', can: 20, zirh: 12, saldiri: 5, silah: 'Kül pençesi', hasarZari: '1d10', hasarEki: 1 },
+              dusman: { ad: 'Kül Bekçisi', can: 30, zirh: 14, saldiri: 7, silah: 'Kül pençesi', hasarZari: '1d10', hasarEki: 2 },
               zafer: 'k6_rahibe', zaferNot: 'Bekçi bir kez daha toplanmaya çalıştı, sonra vazgeçti. Kül kaplarına geri aktı; avluda yalnızca kaplar kaldı.',
               kacis: 'k6_rahibe', kacisZorlugu: 13, kacisNot: 'Kül pençesinin altından sıyrılıp avludan kaçtın. Sayfa göğsündeydi.',
             },
@@ -3738,7 +3783,7 @@ body.canta-acik{overflow:hidden}
             hatirla: 'Corin seninle',
             not: 'Corin’in ilk oku öndeki muhafızı dağıttı.',
             dovus: {
-              dusman: { ad: 'Kül Muhafızları', can: 10, zirh: 12, saldiri: 5, silah: 'Kül mızrakları', hasarZari: '1d8', hasarEki: 0 },
+              dusman: { ad: 'Kül Muhafızları', can: 14, zirh: 12, saldiri: 5, silah: 'Kül mızrakları', hasarZari: '1d8', hasarEki: 1 },
               zafer: 'k6_corin', zaferNot: 'Son muhafız da kül olup yere yağdı. Corin arbaletini indirdi.',
               kacis: 'k6_corin', kacisZorlugu: 13, kacisNot: 'Corin’in okları arkanı kollarken sütunların arasına daldın.',
             },
@@ -3831,7 +3876,7 @@ body.canta-acik{overflow:hidden}
             metin: 'Corin’le ve muhafızlarla dövüş',
             kosul: { bayrak: 'corin_ihanet' },
             dovus: {
-              dusman: { ad: 'Corin ve Kül Muhafızları', can: 18, zirh: 13, saldiri: 5, silah: 'Arbalet ve mızraklar', hasarZari: '1d8', hasarEki: 2 },
+              dusman: { ad: 'Corin ve Kül Muhafızları', can: 18, zirh: 13, saldiri: 5, silah: 'Arbalet ve mızraklar', hasarZari: '1d8', hasarEki: 2 }, muttefikYok: true,
               zafer: 'k6_sunak', zaferEtki: { bayrak: 'corin_yenildi' },
               zaferNot: 'Muhafızlar kül olup dağıldı. Corin dizlerinin üstüne çöktü; arbaleti kırıktı. Onu öldürmedin. Sunağa yürürken arkandan ağladığını duydun.',
               kacis: 'k6_sunak', kacisZorlugu: 13, kacisNot: 'Sütunların arasına daldın ve sunağın ışığına doğru koştun.',
@@ -3875,7 +3920,7 @@ body.canta-acik{overflow:hidden}
             kosul: { sinif: 'hirsiz', bayrak: 'corin_dusman', bayrakYok: 'corin_gitti' },
             not: 'Gölgeden gölgeye geçtin. Arbaletin gıcırtısı tam önündeydi.',
             dovus: {
-              dusman: { ad: 'Corin', can: 15, zirh: 13, saldiri: 5, silah: 'Arbalet', hasarZari: '1d8', hasarEki: 1 },
+              dusman: { ad: 'Corin', can: 15, zirh: 13, saldiri: 5, silah: 'Arbalet', hasarZari: '1d8', hasarEki: 1 }, muttefikYok: true,
               pusu: true,
               zafer: 'k6_sunak', zaferEtki: { bayrak: 'corin_yenildi' },
               zaferNot: 'Arbalet elinden düştü. Corin sırtını sütuna verdi ve kaydı. Atkısını boynuna bıraktın; ikiniz de bir şey demediniz.',
@@ -3886,7 +3931,7 @@ body.canta-acik{overflow:hidden}
             metin: 'Sesin geldiği yere saldır',
             kosul: { bayrak: 'corin_dusman', bayrakYok: 'corin_gitti' },
             dovus: {
-              dusman: { ad: 'Corin', can: 15, zirh: 13, saldiri: 5, silah: 'Arbalet', hasarZari: '1d8', hasarEki: 1 },
+              dusman: { ad: 'Corin', can: 15, zirh: 13, saldiri: 5, silah: 'Arbalet', hasarZari: '1d8', hasarEki: 1 }, muttefikYok: true,
               zafer: 'k6_sunak', zaferEtki: { bayrak: 'corin_yenildi' },
               zaferNot: 'Arbalet elinden düştü. Corin sırtını sütuna verdi ve kaydı. Atkısını boynuna bıraktın; ikiniz de bir şey demediniz.',
               kacis: 'k6_sunak', kacisZorlugu: 13, kacisNot: 'Okların arasından sunağa kaçtın.',
@@ -3916,7 +3961,7 @@ body.canta-acik{overflow:hidden}
             etki: { bayrak: ['corin_karsilasma', 'corin_dusman'] },
             not: '“Öyle olsun,” dedi Corin ve arbaletini kaldırdı.',
             dovus: {
-              dusman: { ad: 'Corin', can: 15, zirh: 13, saldiri: 5, silah: 'Arbalet', hasarZari: '1d8', hasarEki: 1 },
+              dusman: { ad: 'Corin', can: 15, zirh: 13, saldiri: 5, silah: 'Arbalet', hasarZari: '1d8', hasarEki: 1 }, muttefikYok: true,
               zafer: 'k6_sunak', zaferEtki: { bayrak: 'corin_yenildi' },
               zaferNot: 'Arbalet elinden düştü. Corin sırtını sütuna verdi ve kaydı. Atkısı hâlâ senin kemerindeydi.',
               kacis: 'k6_sunak', kacisZorlugu: 13, kacisNot: 'Okların arasından sunağa kaçtın.',
@@ -4337,7 +4382,7 @@ body.canta-acik{overflow:hidden}
         ],
         secenekler: [
           ...kulDovusu('Boynundaki imzaya vur', { bayrak: 'gercek_okundu' }, 'Sunakta gerçeği okudun', { pusu: true, pusuHerkes: true }, 'İmzanın ilk kıvrımına silahını gömdün; Kül’ün çığlığı yukarıdaki bütün katlarda yankılandı.'),
-          ...kulDovusu('Corin’le birlikte saldır', { bayrak: 'corin_muttefik' }, 'Corin seninle', { pusu: true, pusuHerkes: true, canEksi: 4 }, 'Corin’in oku Kül’ün gözüne saplandı; sen o dönerken saldırdın.'),
+          ...kulDovusu('Corin’le birlikte saldır', { bayrak: 'corin_muttefik' }, 'Corin seninle', { pusu: true, pusuHerkes: true }, 'Corin’in oku Kül’ün gözüne saplandı; sen o dönerken saldırdın.'),
           ...kulDovusu('Ayna parçasıyla ateşini gözlerine yansıt', { esya: 'ayna_parcasi' }, null, { zirhEksi: 2 }, 'Ayna parçası Kül’ün kendi ateşini gözlerine geri fırlattı. Bir an kör oldu.'),
           ...kulDovusu('Silahını çek ve dövüş', null, null, {}, null),
         ],
@@ -5205,7 +5250,8 @@ body.canta-acik{overflow:hidden}
     return '<div class="rakip"><div><div class="ad">' + esc(dm.ad) + ' <small>· tur ' + dv.tur + '</small></div>' + canBar(dv.dusmanCan, dm.can) +
       bilgi(dm.zirh, dm.saldiri, M.Zar.ifadeAdi(dm.hasarZari) + ek(dm.hasarEki)) + '</div>' +
       '<div><div class="ad">' + esc(s.ad) + '</div>' + canBar(s.can, s.maxCan) +
-      bilgi(s.zirh + (dv.ekZirh || 0) + (dv.ekZirh ? ' (hece +' + dv.ekZirh + ')' : ''), s.ozellik[c.saldiriOzelligi], M.Zar.ifadeAdi(c.hasarZari) + ek(s.ozellik[c.saldiriOzelligi] + (s.silahEki || 0))) + '</div></div>';
+      bilgi(s.zirh + (dv.ekZirh || 0) + (dv.ekZirh ? ' (hece +' + dv.ekZirh + ')' : ''), s.ozellik[c.saldiriOzelligi], M.Zar.ifadeAdi(c.hasarZari) + ek(s.ozellik[c.saldiriOzelligi] + (s.silahEki || 0))) +
+      (dv.muttefik ? '<p class="ozet yoldas" style="margin:4px 0 0">Yanında <b>' + esc(dv.muttefik.ad) + '</b> · ' + esc(dv.muttefik.silah) + ' · Saldırı +' + dv.muttefik.saldiri + ' · Hasar ' + esc(M.Zar.ifadeAdi(dv.muttefik.hasarZari)) + ek(dv.muttefik.hasarEki) + '</p>' : '') + '</div></div>';
   }
 
 
@@ -5228,7 +5274,8 @@ body.canta-acik{overflow:hidden}
   /** Bir saldırının sonuç satırı: zar + bonus = toplam · Zırh → isabet/ıska. */
   function saldiriSonucu(r, ad, hedefAdi) {
     const etiket = r.sinsi ? 'Sinsi ilk vuruş: kesin kritik' : r.kritik ? 'Kritik!' : r.nat === 1 ? 'Doğal 1: ıska' : r.isabet ? 'İsabet' : 'Iska';
-    const sinif = !r.isabet ? (r.kim === 'oyuncu' ? 'kotu' : 'iyi') : r.kalkanla ? 'ara' : r.kim === 'oyuncu' ? 'iyi' : 'kotu';
+    const bizden = r.kim !== 'dusman';
+    const sinif = !r.isabet ? (bizden ? 'kotu' : 'iyi') : r.kalkanla ? 'ara' : bizden ? 'iyi' : 'kotu';
     return '<p class="hesap"><b>' + esc(ad) + ':</b> ' + r.nat + ' + ' + r.bonus + ' = <b>' + r.toplam + '</b> · ' + esc(hedefAdi) + ' ' + r.zirh +
       ' <span class="sonuc kucuk ' + sinif + '">' + (r.kalkanla ? 'Kalkan savuşturdu' : etiket) + '</span></p>';
   }
@@ -5242,7 +5289,13 @@ body.canta-acik{overflow:hidden}
       gec += saldiriSonucu(b.oyuncu, 'Sen', 'Zırh') + hasarHTML(c.silah + (b.oyuncu.kritik ? ' · kritik' : ''), b.oyuncu, '');
     }
     if (b.buyu) {
-      ilk += '<div class="atis"><span class="kim">Ateş Oku<small>kesin isabet</small></span>' + b.buyu.zarlar.map((v) => zarHTML(v, '', b.buyu.yuz)).join('') + '<span class="esit">= <b>' + b.buyu.toplam + '</b> hasar</span></div>';
+      ilk += '<div class="atis"><span class="kim">Ateş Oku<small>kesin isabet</small></span>' + b.buyu.zarlar.map((v) => zarHTML(v, '', b.buyu.yuz)).join('') +
+        (b.buyu.ozellikEki ? '<span class="ek">+ Akıl ' + b.buyu.ozellikEki + '</span>' : '') + '<span class="esit">= <b>' + b.buyu.hasar + '</b> hasar</span></div>';
+    }
+    if (b.muttefik) {
+      const m = dv.muttefik || { ad: b.muttefikAd, silah: b.muttefik.silah };
+      ilk += '<div class="taraf"><span class="kim">' + esc(m.ad) + '</span>' + zarHTML(b.muttefik.nat, 'muttefik', 20) + '</div>';
+      gec += saldiriSonucu(b.muttefik, m.ad, 'Zırh') + hasarHTML((m.silah || m.ad) + (b.muttefik.kritik ? ' · kritik' : ''), b.muttefik, 'muttefik');
     }
     if (b.hece) {
       ilk += '<p class="hesap"><b>Kalkan Hecesi:</b> havada soluk bir kalkan belirdi. Bu dövüşte Zırhın <b>+' + b.hece + '</b>.</p>';
@@ -5275,7 +5328,7 @@ body.canta-acik{overflow:hidden}
   function dovusCiz(kap) {
     const eylemler = M.dovusEylemleri(kitap, s);
     kap.innerHTML = '<div class="panel"><h3>Dövüş: ' + esc(s.dovus.dusman.ad) + '</h3>' + rakipHTML() +
-      '<p class="ozet" style="margin:0 0 4px">Önce sen davranırsın, sonra rakip senin Zırh’ına saldırır.</p>' +
+      '<p class="ozet" style="margin:0 0 4px">' + (s.dovus.muttefik ? 'Önce sen davranırsın, sonra ' + esc(s.dovus.muttefik.ad) + ' ' + esc(s.dovus.muttefik.silah.toLocaleLowerCase('tr')) + 'iyle vurur, en son rakip senin Zırh’ına saldırır.' : 'Önce sen davranırsın, sonra rakip senin Zırh’ına saldırır.') + '</p>' +
       '<div class="secimler">' + eylemler.map((e, n) =>
         '<button class="secim" type="button" data-e="' + e.id + '"' + (e.aktif ? '' : ' disabled') + '><span class="no">' + (n + 1) + '</span><span class="ne">' + esc(e.ad) + '</span>' +
         (e.id === 'saldir' ? '<span class="rozet ' + (e.pusu ? 'ozel">kesin kritik' : 'zarli">isabet %' + Math.round(e.olasilik * 100)) + '</span>' : '') +
